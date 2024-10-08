@@ -1,0 +1,26 @@
+name: flutter_parental_control
+description: "A  Flutter plugin."
+version: 0.0.1
+
+environment:
+  sdk: ^3.5.0
+  flutter: '>=3.3.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.hao.flutter_parental_control
+        pluginClass: FlutterParentalControlPlugin
+      ios:
+        pluginClass: FlutterParentalControlPlugin

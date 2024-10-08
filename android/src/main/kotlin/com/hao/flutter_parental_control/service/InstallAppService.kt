@@ -1,0 +1,67 @@
+package com.hao.flutter_parental_control.service
+
+import android.app.Service
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.IBinder
+import com.hao.flutter_parental_control.FlutterParentalControlPlugin
+import com.hao.flutter_parental_control.model.AppInstalledInfo
+import com.hao.flutter_parental_control.utils.AppConstants
+import com.hao.flutter_parental_control.utils.Utils
+
+class InstallAppService : Service() {
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Bắt đầu service
+        return START_STICKY
+    }
+
+    override fun onBind(p0: Intent?): IBinder? {
+        return null
+    }
+
+    override fun onCreate() {
+        // khởi tạo dịch vụ lắng nghe ứng dụng được cài đặt hoặc gỡ bỏ
+        super.onCreate()
+        val filter = IntentFilter()
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED)
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
+        filter.addDataScheme(AppConstants.PACKAGE)
+        registerReceiver(appInstalledReceiver, filter)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(appInstalledReceiver)
+    }
+
+    private val appInstalledReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val action = intent?.action
+            val packageName = intent?.data?.schemeSpecificPart
+            if (packageName != null && context != null) {
+                when (action) {
+                    Intent.ACTION_PACKAGE_ADDED -> {
+                        val appName = context.packageManager.getApplicationLabel(
+                            context.packageManager.getApplicationInfo(packageName, 0)
+                        ).toString()
+                        val appIcon = context.packageManager.getApplicationIcon(
+                            context.packageManager.getApplicationInfo(packageName, 0)
+                        )
+                        val icon = Utils().drawableToByteArray(appIcon)
+                        val appInstalledInfo = AppInstalledInfo(true, packageName, appName, icon)
+                        FlutterParentalControlPlugin.eventSink?.success(appInstalledInfo.toMap())
+                    }
+
+                    Intent.ACTION_PACKAGE_REMOVED -> {
+                        val appInstalledInfo =
+                            AppInstalledInfo(false, packageName, AppConstants.EMPTY, byteArrayOf())
+                        FlutterParentalControlPlugin.eventSink?.success(appInstalledInfo.toMap())
+                    }
+                }
+            }
+        }
+    }
+}
