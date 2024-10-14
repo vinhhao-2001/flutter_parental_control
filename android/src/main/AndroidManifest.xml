@@ -41,5 +41,8 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
 
+<!--        <meta-data android:name="com.google.android.geo.API_KEY"-->
+<!--            android:value="AIzaSyCx10qvRhgY2575ZnLchGC2iTDfS5Airlc"/>-->
+
     </application>
 </manifest>

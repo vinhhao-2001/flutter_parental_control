@@ -2,15 +2,16 @@ group = "com.hao.flutter_parental_control"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.kotlin_version = "2.0.20"
+    ext.kotlin_version = "1.7.10"
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:7.3.1")
+        classpath("com.android.tools.build:gradle:8.5.2")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath "io.realm:realm-gradle-plugin:10.18.0"
     }
 }
 
@@ -23,13 +24,16 @@ allprojects {
 
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
+apply plugin: 'kotlin-kapt'
+apply plugin: "realm-android"
 
 android {
-    if (project.android.hasProperty("namespace")) {
-        namespace = "com.hao.flutter_parental_control"
-    }
+    namespace = "com.hao.flutter_parental_control"
+    compileSdk 34
+    //if (project.android.hasProperty("namespace")) {
 
-    compileSdk = 34
+   // }
+
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -48,6 +52,7 @@ android {
     defaultConfig {
         minSdk = 21
     }
+
 
     dependencies {
         testImplementation("org.jetbrains.kotlin:kotlin-test")

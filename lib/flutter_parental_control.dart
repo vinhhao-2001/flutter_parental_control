@@ -4,33 +4,49 @@ import 'dart:typed_data';
 import 'flutter_parental_control_platform_interface.dart';
 
 class ParentalControl {
-  /// Lấy thông tin thiết bị, có sự khác biệt giữa Android và Ios
+  /// Lấy thông tin thiết bị, có sự khác nhau giữa Android và Ios
   static Future<DeviceInfo> getDeviceInfo() async {
     final data = await FlutterParentalControlPlatform.instance.getDeviceInfo();
-    return DeviceInfo.fromJson(data);
+    return DeviceInfo.fromMap(data);
   }
 
   /// các phần chỉ dùng được trên [Android]
+  /// Lắng nghe khi có có sự kiện nhấn nút hỏi phụ huynh
+  /// [Error] Bị mất kết nối khi chạy ở nền
+  static Future<void> askParent() async {
+    await FlutterParentalControlPlatform.instance.askParent();
+  }
+
+  /// Kiểm tra các quyền trợ năng
+  static Future<bool> requestPermission(Permission type) async {
+    final result = await FlutterParentalControlPlatform.instance
+        .requestPermission(permissionInt(type));
+    return result;
+  }
+
   /// Lấy thời gian sử dụng trong thiết bị
   static Future<List<AppUsageInfo>> getAppUsageInfo() async {
     final data =
         await FlutterParentalControlPlatform.instance.getAppUsageInfo();
-
     return data.map((app) => AppUsageInfo.fromMap(app)).toList();
   }
 
+  /// Thiết lập danh sách ứng dụng bị giới hạn
   static Future<void> setListAppBlocked(List<String> listApp) async {
     await FlutterParentalControlPlatform.instance.setListAppBlocked(listApp);
   }
 
+  /// Thiết lập danh sách nội dung web bị giới hạn
   static Future<void> setListWebBlocked(List<String> listWeb) async {
     await FlutterParentalControlPlatform.instance.setListWebBlocked(listWeb);
   }
 
+  /// Khởi chạy dịch vụ lắng nghe ứng dụng được cài đặt hoặc gỡ bỏ
   static Future<void> startService() async {
     await FlutterParentalControlPlatform.instance.startService();
   }
 
+  /// Lắng nghe và lấy thông tin ứng dụng bị cài đặt hoặc gỡ bỏ
   static Stream<AppInstalledInfo> listenAppInstalledInfo() {
     final result = FlutterParentalControlPlatform.instance.listenAppInstalled();
     return result.map((data) => AppInstalledInfo.map(data));
@@ -128,20 +144,20 @@ class DeviceInfo {
     this.deviceId,
   });
 
-  factory DeviceInfo.fromJson(Map<String, dynamic> json) {
+  factory DeviceInfo.fromMap(Map<String, dynamic> map) {
     return DeviceInfo(
-      systemName: json['systemName'] as String?,
-      deviceName: json['deviceName'] as String?,
-      deviceManufacturer: json['deviceManufacturer'] as String?,
-      deviceVersion: json['deviceVersion'] as String?,
-      deviceApiLevel: json['deviceApiLevel']?.toString(),
-      deviceBoard: json['deviceBoard'] as String?,
-      deviceHardware: json['deviceHardware'] as String?,
-      deviceDisplay: json['deviceDisplay'] as String?,
-      batteryLevel: json['batteryLevel'] as String?,
-      screenBrightness: json['screenBrightness'] as String?,
-      volume: json['volume'] as String?,
-      deviceId: json['deviceId'] as String?,
+      systemName: map['systemName'] as String?,
+      deviceName: map['deviceName'] as String?,
+      deviceManufacturer: map['deviceManufacturer'] as String?,
+      deviceVersion: map['deviceVersion'] as String?,
+      deviceApiLevel: map['deviceApiLevel']?.toString(),
+      deviceBoard: map['deviceBoard'] as String?,
+      deviceHardware: map['deviceHardware'] as String?,
+      deviceDisplay: map['deviceDisplay'] as String?,
+      batteryLevel: map['batteryLevel'] as String?,
+      screenBrightness: map['screenBrightness'] as String?,
+      volume: map['volume'] as String?,
+      deviceId: map['deviceId'] as String?,
     );
   }
 }
@@ -195,5 +211,23 @@ class AppUsageInfo {
       appIcon: iconBase64,
       usageTime: map['usageTime'],
     );
+  }
+}
+
+///  Tạo enum cho các trường hợp xin quyền trên [Android]
+enum Permission {
+  accessibility,
+  overlay,
+  usageState,
+}
+
+int permissionInt(Permission type) {
+  switch (type) {
+    case Permission.accessibility:
+      return 1;
+    case Permission.overlay:
+      return 2;
+    case Permission.usageState:
+      return 3;
   }
 }

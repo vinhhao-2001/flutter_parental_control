@@ -1,51 +1,44 @@
 package com.hao.flutter_parental_control.utils
 
+import android.Manifest
+import android.app.Activity
 import android.app.AppOpsManager
-
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.text.TextUtils
-import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.hao.flutter_parental_control.service.MyAccessibilityService
 
 class RequestPermissions(private val context: Context) {
 
     // Hàm yêu cầu quyền truy cập trợ năng
-    fun requestAccessibilityPermission() {
-        if (!isAccessibilityPermissionGranted()) {
-            // Mở cài đặt trợ năng nếu chưa được cấp quyền
-            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(intent)
-        } else {
-            Toast.makeText(context, "Quyền trợ năng đã được cấp!", Toast.LENGTH_SHORT).show()
-        }
+    fun requestAccessibilityPermission(): Boolean {
+        return if (!isAccessibilityPermissionGranted()) {
+            openPermissionSettings(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+        } else true
     }
 
     // Hàm yêu cầu quyền hiển thị lên màn hình
-    fun requestOverlayPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(context)) {
-                // Mở cài đặt quyền hiển thị nếu chưa được cấp quyền
-                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.packageName)).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                context.startActivity(intent)
-            } else {
-                Toast.makeText(context, "Quyền hiển thị đã được cấp!", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            Toast.makeText(context, "Quyền hiển thị không yêu cầu trên Android trước Marshmallow!", Toast.LENGTH_SHORT).show()
-        }
+    fun requestOverlayPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(
+                context
+            )
+        ) {
+            openPermissionSettings(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:" + context.packageName)
+            )
+        } else true
     }
 
     // Hàm yêu cầu quyền truy cập thông tin sử dụng
-    fun requestUsageStatsPermissions() {
+    fun requestUsageStatsPermissions(): Boolean {
         val appOpsManager = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         val mode = appOpsManager.checkOpNoThrow(
             AppOpsManager.OPSTR_GET_USAGE_STATS,
@@ -53,16 +46,28 @@ class RequestPermissions(private val context: Context) {
             context.packageName
         )
 
-        if (mode != AppOpsManager.MODE_ALLOWED) {
-            // Mở cài đặt quyền truy cập thông tin sử dụng nếu chưa được cấp quyền
-            val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(intent)
+        return if (mode != AppOpsManager.MODE_ALLOWED) {
+            openPermissionSettings(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+        } else true
+    }
+
+    fun requestLocationPermissions(): Boolean {
+        return if (ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                context as Activity,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                1
+            )
+            false
         } else {
-            Toast.makeText(context, "Quyền truy cập thông tin sử dụng đã được cấp!", Toast.LENGTH_SHORT).show()
+            true
         }
     }
+
 
     // Kiểm tra quyền trợ năng
     private fun isAccessibilityPermissionGranted(): Boolean {
@@ -70,7 +75,7 @@ class RequestPermissions(private val context: Context) {
         val enabledServicesSetting = Settings.Secure.getString(
             context.contentResolver,
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-        ) ?: ""
+        ) ?: AppConstants.EMPTY
         val colonSplitter = TextUtils.SimpleStringSplitter(':')
         colonSplitter.setString(enabledServicesSetting)
 
@@ -82,5 +87,13 @@ class RequestPermissions(private val context: Context) {
         }
         return false
     }
-}
 
+    private fun openPermissionSettings(settingAction: String, uri: Uri? = null): Boolean {
+        // Hàm mở cài đặt để yêu cầu quyền
+        val intent = Intent(settingAction, uri).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+        return false
+    }
+}

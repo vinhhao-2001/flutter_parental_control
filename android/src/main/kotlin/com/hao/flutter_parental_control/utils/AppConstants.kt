@@ -2,10 +2,8 @@ package com.hao.flutter_parental_control.utils
 
 class AppConstants {
     companion object {
-
         const val EMPTY = ""
         const val PACKAGE = "package"
-        const val BROADCAST_ACCESSIBILITY = "broadcast_accessibility"
         const val LAUNCHER_PACKAGE = "com.google.android.apps.nexuslauncher"
 
         // trình duyệt
@@ -32,8 +30,36 @@ class AppConstants {
         const val BLOCK_WEBSITE_METHOD = "blockWebsiteMethod"
         const val START_SERVICE = "startServiceMethod"
         const val GET_APP_USAGE_INFO = "getAppUsageInfoMethod"
+        const val GET_WEB_HISTORY = "getWebHistoryMethod"
+        const val REQUEST_PERMISSION = "permissionMethod"
 
+        // key
+        const val REALM_NAME = "realm-db"
+        const val BLOCK_APPS = "blockApps"
+        const val BLOCK_WEBSITES = "blockWebsites"
+        const val TYPE_PERMISSION = "typePermission"
 
+        const val APP_NAME = "appName"
+        const val PACKAGE_NAME = "packageName"
+        const val APP_ICON = "appIcon"
+        const val IS_INSTALLED = "isInstalled"
+        const val USAGE_TIME = "usageTime"
+        const val SEARCH_QUERY = "searchQuery"
+        const val VISITED_TIME = "visitedTime"
 
+        // key device info
+        const val SYSTEM_NAME = "systemName"
+        const val ANDROID = "Android"
+        const val DEVICE_NAME = "deviceName"
+        const val DEVICE_MANUFACTURER = "deviceManufacturer"
+        const val DEVICE_VERSION = "deviceVersion"
+        const val DEVICE_API_LEVEL = "deviceApiLevel"
+        const val DEVICE_BOARD = "deviceBoard"
+        const val DEVICE_HARDWARE = "deviceHardware"
+        const val DEVICE_DISPLAY = "deviceDisplay"
+        const val BATTERY_LEVEL = "batteryLevel"
+        const val SCREEN_BRIGHTNESS = "screenBrightness"
+        const val VOLUME = "volume"
+        const val DEVICE_ID = "deviceId"
     }
 }

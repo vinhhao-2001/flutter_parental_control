@@ -7,40 +7,66 @@ class MethodChannelFlutterParentalControl
     extends FlutterParentalControlPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
-  final methodChannel = const MethodChannel('flutter_parental_control_method');
+  final methodChannel = const MethodChannel(AppConstants.methodChannel);
 
+  // Event channel
   @visibleForTesting
-  final eventChannel = const EventChannel('flutter_parental_control_event');
+  final eventChannel = const EventChannel(AppConstants.eventChannel);
 
+  /// Lấy các thông tin thiết bị
   @override
   Future<Map<String, dynamic>> getDeviceInfo() async {
-    final result = await methodChannel.invokeMethod('getDeviceInfoMethod');
+    final result = await methodChannel.invokeMethod(AppConstants.deviceMethod);
     return Map<String, dynamic>.from(result);
   }
 
+  /// Yêu cầu các quyền dành cho [Android]
+  @override
+  Future<bool> requestPermission(int type) async {
+    final result = await methodChannel.invokeMethod(
+        AppConstants.permissionMethod, {AppConstants.typePermission: type});
+    return result ?? false;
+  }
+
+  /// Sự kiện hỏi ý kiến của phụ huynh
+  @override
+  Future<void> askParent() async {
+    const MethodChannel('channel').setMethodCallHandler((MethodCall call) async {
+      if (call.method == AppConstants.askParent) {
+        debugPrint("Sự kiện hỏi ý kiến phụ huynh");
+      }
+    });
+  }
+
+  /// Lấy thông tin thời gian sử dụng các ứng dụng
   @override
   Future<List<Map<String, dynamic>>> getAppUsageInfo() async {
     final List<dynamic> data =
-        await methodChannel.invokeMethod('getAppUsageInfoMethod');
+        await methodChannel.invokeMethod(AppConstants.appUsageMethod);
     return data.map((e) => Map<String, dynamic>.from(e as Map)).toList();
   }
 
+  /// Tạo danh sách các ứng dụng bị chặn
   @override
   Future<void> setListAppBlocked(List<String> listApp) async {
-    await methodChannel.invokeMethod('blockAppMethod', {'blockApps': listApp});
+    await methodChannel.invokeMethod(
+        AppConstants.blockAppMethod, {AppConstants.blockApps: listApp});
   }
 
+  /// Tạo danh sách các trang web bị chặn
   @override
   Future<void> setListWebBlocked(List<String> listWeb) async {
-    await methodChannel
-        .invokeMethod('blockWebsiteMethod', {'blockWebsites': listWeb});
+    await methodChannel.invokeMethod(
+        AppConstants.blockWebMethod, {AppConstants.blockWeb: listWeb});
   }
 
+  /// Khởi động dịch vụ lắng nghe ứng dụng gỡ bỏ hoặc cài đặt
   @override
   Future<void> startService() async {
-    await methodChannel.invokeMethod('startServiceMethod');
+    await methodChannel.invokeMethod(AppConstants.startServiceMethod);
   }
 
+  /// Lắng nghe ứng dụng gỡ bỏ hoặc cài đặt
   @override
   Stream<Map<String, dynamic>> listenAppInstalled() {
     return eventChannel
@@ -48,29 +74,34 @@ class MethodChannelFlutterParentalControl
         .map((event) => Map<String, dynamic>.from(event));
   }
 
+  /// các sự kiện trên [ios]
+  /// Kiểm tra quyền kiểm soát của phụ huynh
   @override
   Future<void> checkParentControlPermission() async {
-    await methodChannel.invokeMethod('checkPermissionMethod');
+    await methodChannel.invokeMethod(AppConstants.permissionMethod);
   }
 
+  /// Thiết lập thời gian giới hạn trên thiết bị ios
   @override
   Future<void> scheduleMonitorSettings(bool isMonitoring, int startHour,
       int startMinute, int endHour, int endMinute) async {
     final Map<String, dynamic> args = {
-      'isMonitoring': isMonitoring,
-      'startHour': startHour,
-      'startMinute': startMinute,
-      'endHour': endHour,
-      'endMinute': endMinute,
+      AppConstants.isMonitoring: isMonitoring,
+      AppConstants.startHour: startHour,
+      AppConstants.startMinute: startMinute,
+      AppConstants.endHour: endHour,
+      AppConstants.endMinute: endMinute,
     };
-    await methodChannel.invokeMethod('toggleMonitoring', args);
+    await methodChannel.invokeMethod(AppConstants.toggleMonitoring, args);
   }
 
+  /// Giới hạn các ứng dụng trên thiết bị ios
   @override
   Future<void> limitedApp() async {
-    await methodChannel.invokeMethod('limitAppMethod');
+    await methodChannel.invokeMethod(AppConstants.limitAppMethod);
   }
 
+  /// Cài đặt giám sát thiết bị ios
   @override
   Future<void> settingMonitor({
     bool? requireAutomaticDateAndTime,
@@ -91,25 +122,74 @@ class MethodChannelFlutterParentalControl
     bool? denyAddingFriends,
   }) async {
     final settings = <String, dynamic>{
-      'requireAutomaticDateAndTime': requireAutomaticDateAndTime,
-      'lockAccounts': lockAccounts,
-      'lockPasscode': lockPasscode,
-      'denySiri': denySiri,
-      'lockAppCellularData': lockAppCellularData,
-      'lockESIM': lockESIM,
-      'denyInAppPurchases': denyInAppPurchases,
-      'maximumRating': maximumRating,
-      'requirePasswordForPurchases': requirePasswordForPurchases,
-      'denyExplicitContent': denyExplicitContent,
-      'denyMusicService': denyMusicService,
-      'denyBookstoreErotica': denyBookstoreErotica,
-      'maximumMovieRating': maximumMovieRating,
-      'maximumTVShowRating': maximumTVShowRating,
-      'denyMultiplayerGaming': denyMultiplayerGaming,
-      'denyAddingFriends': denyAddingFriends,
+      AppConstants.requireAutoTime: requireAutomaticDateAndTime,
+      AppConstants.lockAccounts: lockAccounts,
+      AppConstants.lockPasscode: lockPasscode,
+      AppConstants.denySiri: denySiri,
+      AppConstants.lockAppCellularData: lockAppCellularData,
+      AppConstants.lockESIM: lockESIM,
+      AppConstants.denyInAppPurchases: denyInAppPurchases,
+      AppConstants.maximumRating: maximumRating,
+      AppConstants.requirePasswordForPurchases: requirePasswordForPurchases,
+      AppConstants.denyExplicitContent: denyExplicitContent,
+      AppConstants.denyMusicService: denyMusicService,
+      AppConstants.denyBookstoreErotica: denyBookstoreErotica,
+      AppConstants.maximumMovieRating: maximumMovieRating,
+      AppConstants.maximumTVShowRating: maximumTVShowRating,
+      AppConstants.denyMultiplayerGaming: denyMultiplayerGaming,
+      AppConstants.denyAddingFriends: denyAddingFriends,
     };
 
     // Gọi method channel với Map vừa tạo
-    await methodChannel.invokeMethod('settingMonitorMethod', settings);
+    await methodChannel.invokeMethod(
+        AppConstants.settingMonitorMethod, settings);
   }
+}
+
+class AppConstants {
+  static const String methodChannel = 'flutter_parental_control_method';
+  static const String eventChannel = 'flutter_parental_control_event';
+
+  /// Method
+  static const String deviceMethod = 'getDeviceInfoMethod';
+  static const String appUsageMethod = 'getAppUsageInfoMethod';
+  static const String blockAppMethod = 'blockAppMethod';
+  static const String blockWebMethod = 'blockWebsiteMethod';
+  static const String startServiceMethod = 'startServiceMethod';
+  static const String permissionMethod = 'permissionMethod';
+  static const String toggleMonitoring = 'toggleMonitoring';
+  static const String limitAppMethod = 'limitAppMethod';
+  static const String settingMonitorMethod = 'settingMonitorMethod';
+
+  /// key data channel
+  static const String blockApps = 'blockApps';
+  static const String blockWeb = 'blockWebsites';
+  static const String typePermission = 'typePermission';
+  static const String askParent = 'askParent';
+
+  /// cài đặt thời gian hạn chế [ios]
+  static const String isMonitoring = 'isMonitoring';
+  static const String startHour = 'startHour';
+  static const String startMinute = 'startMinute';
+  static const String endHour = 'endHour';
+  static const String endMinute = 'endMinute';
+
+  /// các cài đặt hạn chế [ios]
+  static const String requireAutoTime = 'requireAutomaticDateAndTime';
+  static const String lockAccounts = 'lockAccounts';
+  static const String lockPasscode = 'lockPasscode';
+  static const String denySiri = 'denySiri';
+  static const String lockAppCellularData = 'lockAppCellularData';
+  static const String lockESIM = 'lockESIM';
+  static const String denyInAppPurchases = 'denyInAppPurchases';
+  static const String maximumRating = 'maximumRating';
+  static const String requirePasswordForPurchases =
+      'requirePasswordForPurchases';
+  static const String denyExplicitContent = 'denyExplicitContent';
+  static const String denyMusicService = 'denyMusicService';
+  static const String denyBookstoreErotica = 'denyBookstoreErotica';
+  static const String maximumMovieRating = 'maximumMovieRating';
+  static const String maximumTVShowRating = 'maximumTVShowRating';
+  static const String denyMultiplayerGaming = 'denyMultiplayerGaming';
+  static const String denyAddingFriends = 'denyAddingFriends';
 }

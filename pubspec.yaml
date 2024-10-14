@@ -1,6 +1,7 @@
 name: flutter_parental_control
 description: "A  Flutter plugin."
 version: 0.0.1
+repository: https://github.com/vinhhao-2001/flutter_parental_control.git
 
 environment:
   sdk: ^3.5.0
@@ -9,7 +10,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  geocoding: ^3.0.0
+  google_maps_flutter: ^2.9.0
   plugin_platform_interface: ^2.0.2
+  realm: ^20.0.0
 
 dev_dependencies:
   flutter_test:

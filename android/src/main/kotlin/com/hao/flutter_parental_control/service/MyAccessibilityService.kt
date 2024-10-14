@@ -1,54 +1,46 @@
 package com.hao.flutter_parental_control.service
 
 import android.accessibilityservice.AccessibilityService
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.net.Uri
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import com.hao.flutter_parental_control.overlay.BlockOverlay
-import com.hao.flutter_parental_control.overlay.RemoveMyAppOverlay
+import com.hao.flutter_parental_control.db_helper.DBHelper
+import com.hao.flutter_parental_control.model.SupportedBrowserConfig
+import com.hao.flutter_parental_control.overlay.Overlay
 import com.hao.flutter_parental_control.utils.AppConstants
+import com.hao.flutter_parental_control.utils.Utils
+import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.MethodChannel
 
 class MyAccessibilityService : AccessibilityService() {
 
-    private var prevApp: String = AppConstants.EMPTY // tên package trình duyệt
-    private var prevUrl: String = AppConstants.EMPTY // tên thanh địa chỉ tìm kiếm
+    private var currentBrowserPackageName: String = AppConstants.EMPTY
+    private var currentUrl: String = AppConstants.EMPTY
+    private lateinit var channel: MethodChannel
 
-    // tên ứng dụng
-    private var appName: String = AppConstants.EMPTY // tên ứng dụng parental control
-    private var blockedApps: List<String> = mutableListOf()
-    private var blockedWebsites: List<String> = mutableListOf()
+    companion object {
+        // Biến tĩnh để lưu FlutterPluginBinding
+        private var flutterPluginBinding: FlutterPlugin.FlutterPluginBinding? = null
 
-    // tạo broadcastReceiver để lấy dữ liệu từ flutter
-    private val broadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val appList = intent?.getStringArrayListExtra("blockApps")
-            val webList = intent?.getStringArrayListExtra("blockWebsites")
-            if (appList != null) {
-                blockedApps = appList
-            }
-            if (webList != null) {
-                blockedWebsites = webList
-            }
+        // Phương thức tĩnh để nhận FlutterPluginBinding
+        fun setFlutterPluginBinding(binding: FlutterPlugin.FlutterPluginBinding) {
+            flutterPluginBinding = binding
         }
     }
 
+    // Xử lý sự kiện Accessibility
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        event?.let {
-            val packageName = it.packageName?.toString() ?: return
+        event?.let { accessibilityEvent ->
+            val packageName = accessibilityEvent.packageName?.toString() ?: return
 
-            when (it.eventType) {
-                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
-                    handleWebViewEvent(it)
-                }
+            when (accessibilityEvent.eventType) {
+                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> handleBrowserEvent(
+                    accessibilityEvent
+                )
 
-                else -> {
-                    if (packageName == AppConstants.LAUNCHER_PACKAGE) {
-                        handleLauncherEvent(it)
-                    }
+                else -> if (packageName == AppConstants.LAUNCHER_PACKAGE) {
+                    handleLauncherEvent(accessibilityEvent)
                 }
             }
         }
@@ -56,103 +48,78 @@ class MyAccessibilityService : AccessibilityService() {
 
     override fun onInterrupt() {
         // Xử lý khi service bị ngắt
-        unregisterReceiver(broadcastReceiver)
     }
 
-    //
     override fun onServiceConnected() {
         super.onServiceConnected()
-        appName = getApplicationName()
-        val filter = IntentFilter(AppConstants.BROADCAST_ACCESSIBILITY)
-        registerReceiver(broadcastReceiver, filter)
+        flutterPluginBinding?.let { binding: FlutterPlugin.FlutterPluginBinding ->
+            channel = MethodChannel(binding.binaryMessenger, "channel")
+            println("Bắt đầu channel")
+        }
     }
 
-    private fun handleLauncherEvent(event: AccessibilityEvent) {
-        val contentDescription = event.contentDescription?.toString() ?: return
-        // Xử lý sự kiện khi người muốn xoá ứng dụng quản lý trẻ
-        if (event.eventType == AccessibilityEvent.TYPE_VIEW_LONG_CLICKED) {
+
+    private fun handleLauncherEvent(accessibilityEvent: AccessibilityEvent) {
+        // Kiểm tra sự kiện khi người dùng nhấn vào ứng dụng
+        val contentDescription = accessibilityEvent.contentDescription?.toString() ?: return
+
+        // Kiểm tra sự kiện người dùng muốn xóa ứng dụng
+        if (accessibilityEvent.eventType == AccessibilityEvent.TYPE_VIEW_LONG_CLICKED) {
+            val appName = Utils().getApplicationName(context = applicationContext)
             if (contentDescription.contains(appName)) {
-                RemoveMyAppOverlay(this).showRemoveMyAppOverlay()
+                Overlay(this).showOverlay(false)
             }
         }
-        // Xử lý sự kiện khi người dùng vào ứng dụng bị chặn
-        if (isAppBlocked(contentDescription)) {
-            BlockOverlay(this).showBlockScreen()
+
+        // Kiểm tra nếu ứng dụng bị chặn
+        if (DBHelper.isAppBlocked(contentDescription)) {
+            Overlay(this).showOverlay("block_view", "backBlockAppBtn", "askParentBtn") {
+                channel.invokeMethod("askParent", null)
+                println("Gửi lệnh askParent")
+            }
         }
     }
 
-    // Xử lý sự kiện khi URL được tải lên
-    private fun handleWebViewEvent(event: AccessibilityEvent) {
-        val parentNodeInfo: AccessibilityNodeInfo =
+    private fun handleBrowserEvent(accessibilityEvent: AccessibilityEvent) {
+        // Kiểm tra sự kiện khi người dùng mở trình duyệt
+        val parentNodeInfo: AccessibilityNodeInfo = accessibilityEvent.source ?: return
+        val packageName: String = accessibilityEvent.packageName?.toString() ?: return
+        val browserConfig = getBrowserConfig(packageName) ?: return
 
-            event.source ?: return
-
-        val packageName: String = event.packageName?.toString() ?: return
-        val browserConfig: SupportedBrowserConfig = getBrowserConfig(packageName) ?: return
-
-        val capturedUrl: String? = captureUrl(parentNodeInfo, browserConfig)
+        val capturedUrl: String? = extractUrlFromBrowser(parentNodeInfo, browserConfig)
         parentNodeInfo.recycle()
 
-        if (!capturedUrl.isNullOrEmpty() && (packageName != prevApp || capturedUrl != prevUrl)) {
-            prevApp = packageName
-            prevUrl = capturedUrl
-            handleUrlBlocking(capturedUrl)
+        if (!capturedUrl.isNullOrEmpty() && (packageName != currentBrowserPackageName || capturedUrl != currentUrl)) {
+            currentBrowserPackageName = packageName
+            currentUrl = capturedUrl
+
+            // Lưu lịch sử duyệt web của trẻ
+            DBHelper.insertWebHistory(capturedUrl)
+
+            // Kiểm tra nếu URL bị chặn
+            if (DBHelper.isUrlBlocked(capturedUrl)) {
+                redirectToBlankPage()
+            }
         }
     }
 
-    // Kiểm tra xem ứng dụng có bị chặn không
-    private fun isAppBlocked(appName: String): Boolean {
-        return blockedApps.contains(appName)
-    }
-
-    // Lấy cấu hình cho trình duyệt dựa trên tên gói ứng dụng
     private fun getBrowserConfig(packageName: String): SupportedBrowserConfig? {
-        return SupportedBrowserConfig.get().find { it.packageName == packageName }
+        return SupportedBrowserConfig.getSupportedBrowsers().find { it.packageName == packageName }
     }
 
-    // Lấy URL từ nút tìm kiếm
-    private fun captureUrl(info: AccessibilityNodeInfo, config: SupportedBrowserConfig): String? {
-        return info.findAccessibilityNodeInfosByViewId(config.addressBarId)
+    private fun extractUrlFromBrowser(
+        nodeInfo: AccessibilityNodeInfo, browserConfig: SupportedBrowserConfig
+    ): String? {
+        // Lấy URL từ thanh địa chỉ của trình duyệt
+        return nodeInfo.findAccessibilityNodeInfosByViewId(browserConfig.addressBarId)
             .firstOrNull()?.text?.toString()
     }
 
-    // Kiểm tra xem URL có bị chặn không
-    private fun handleUrlBlocking(capturedUrl: String) {
-        if (blockedWebsites.any { capturedUrl.contains(it, ignoreCase = true) }) {
-            redirectToBlankPage()
-        }
-    }
-
-    // Chuyển hướng đến trang trắng
     private fun redirectToBlankPage() {
-        val blankPage: Uri = Uri.parse(AppConstants.BLANK_PAGE)
-        val intent = Intent(Intent.ACTION_VIEW, blankPage).apply {
+        val blankPageUri = Uri.parse(AppConstants.BLANK_PAGE)
+        val intent = Intent(Intent.ACTION_VIEW, blankPageUri).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         applicationContext.startActivity(intent)
-    }
-
-    private fun Context.getApplicationName(): String {
-        val applicationInfo = applicationInfo
-        val stringId = applicationInfo.labelRes
-        return if (stringId == 0) applicationInfo.nonLocalizedLabel.toString() else getString(
-            stringId
-        )
-    }
-
-
-    class SupportedBrowserConfig(val packageName: String, val addressBarId: String) {
-        companion object SupportedBrowsers {
-            fun get(): List<SupportedBrowserConfig> {
-                return listOf(
-                    arrayOf(AppConstants.CHROME_PACKAGE, AppConstants.CHROME_URL),
-                    arrayOf(AppConstants.FIREFOX_PACKAGE, AppConstants.FIREFOX_URL),
-                    arrayOf(AppConstants.BROWSER_PACKAGE, AppConstants.BROWSER_URL),
-                    arrayOf(AppConstants.NATIVE_PACKAGE, AppConstants.NATIVE_URL),
-                    arrayOf(AppConstants.DUCK_PACKAGE, AppConstants.DUCK_URL),
-                    arrayOf(AppConstants.MICROSOFT_EDGE_PACKAGE, AppConstants.MICROSOFT_EDGE_URL)
-                ).map { SupportedBrowserConfig(it[0], it[1]) }
-            }
-        }
     }
 }

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_parental_control/flutter_parental_control.dart';
+import 'package:flutter_parental_control_example/child_location_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,14 +31,12 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
   @override
   void initState() {
     super.initState();
-    Platform.isAndroid ? android() : ios();
+  //   Platform.isAndroid ? android() : ios();
   }
 
   Future<void> android() async {
-    ParentalControl.startService();
-    ParentalControl.listenAppInstalledInfo().listen((appInfo) {
-      debugPrint(appInfo.packageName);
-    });
+    ParentalControl.requestPermission(Permission.accessibility);
+    ParentalControl.askParent();
   }
 
   Future<void> ios() async {
@@ -62,8 +61,10 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                ParentalControl.limitedApp();
-                ParentalControl.settingMonitor();
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const ChildLocationScreen()));
               },
               child: const Text('Set Log Value'),
             ),

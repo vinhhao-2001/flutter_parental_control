@@ -5,6 +5,7 @@ import android.media.AudioManager
 import android.os.BatteryManager
 import android.os.Build
 import android.provider.Settings
+import com.hao.flutter_parental_control.utils.AppConstants
 
 data class DeviceInfo(
     val systemName: String,
@@ -39,18 +40,18 @@ data class DeviceInfo(
             val volume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
 
             return mapOf(
-                "systemName" to "Android",
-                "deviceName" to Build.MODEL,
-                "deviceManufacturer" to Build.MANUFACTURER,
-                "deviceVersion" to Build.VERSION.RELEASE,
-                "deviceApiLevel" to Build.VERSION.SDK_INT,
-                "deviceBoard" to Build.BOARD,
-                "deviceHardware" to Build.HARDWARE,
-                "deviceDisplay" to Build.DISPLAY,
-                "batteryLevel" to "$batteryLevel%",
-                "screenBrightness" to screenBrightness.toString(),
-                "volume" to volume.toString(),
-                "deviceId" to Settings.Secure.getString(
+                AppConstants.SYSTEM_NAME to AppConstants.ANDROID,
+                AppConstants.DEVICE_NAME to Build.MODEL,
+                AppConstants.DEVICE_MANUFACTURER to Build.MANUFACTURER,
+                AppConstants.DEVICE_VERSION to Build.VERSION.RELEASE,
+                AppConstants.DEVICE_API_LEVEL to Build.VERSION.SDK_INT,
+                AppConstants.DEVICE_BOARD to Build.BOARD,
+                AppConstants.DEVICE_HARDWARE to Build.HARDWARE,
+                AppConstants.DEVICE_DISPLAY to Build.DISPLAY,
+                AppConstants.BATTERY_LEVEL to "$batteryLevel%",
+                AppConstants.SCREEN_BRIGHTNESS to screenBrightness.toString(),
+                AppConstants.VOLUME to volume.toString(),
+                AppConstants.DEVICE_ID to Settings.Secure.getString(
                     context.contentResolver,
                     Settings.Secure.ANDROID_ID
                 )

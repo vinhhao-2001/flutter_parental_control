@@ -1,5 +1,7 @@
 package com.hao.flutter_parental_control.model
 
+import com.hao.flutter_parental_control.utils.AppConstants
+
 
 data class AppInstalledInfo(
     val isInstalled: Boolean,
@@ -9,11 +11,33 @@ data class AppInstalledInfo(
 ) {
     fun toMap(): Map<String, Any> {
         return mapOf(
-            "isInstalled" to isInstalled,
-            "packageName" to packageName,
-            "appName" to appName,
-            "appIcon" to appIcon
+            AppConstants.IS_INSTALLED to isInstalled,
+            AppConstants.PACKAGE_NAME to packageName,
+            AppConstants.APP_NAME to appName,
+            AppConstants.APP_ICON to appIcon
         )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as AppInstalledInfo
+
+        if (isInstalled != other.isInstalled) return false
+        if (packageName != other.packageName) return false
+        if (appName != other.appName) return false
+        if (!appIcon.contentEquals(other.appIcon)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = isInstalled.hashCode()
+        result = 31 * result + packageName.hashCode()
+        result = 31 * result + appName.hashCode()
+        result = 31 * result + appIcon.contentHashCode()
+        return result
     }
 }
 

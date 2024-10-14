@@ -11,27 +11,18 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="100dp"
-        android:contentDescription="@string/text_app_limit"
-        android:src="@drawable/icon_limit" />
-
-    <TextView
-        android:id="@+id/blockAppTv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="@string/app_limit"
-        android:textColor="#BF360C"
-        android:textSize="24sp" />
+        android:contentDescription="abc"
+        android:src="@drawable/icon_notification" />
 
     <Button
-        android:id="@+id/homeBtn"
+        android:id="@+id/backBlockAppBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="100dp"
         android:background="#FF7043"
-        android:text="@string/back_home"
+        android:text="Trở về"
         android:textColor="#FFFFFF" />
 
     <TextView
@@ -42,8 +33,10 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="40dp"
         android:background="#FFDAB9"
-        android:text="@string/text_ask_parent"
+        android:text="Hỏi phụ huynh"
         android:textColor="#BF360C"
         android:textSize="16sp"
         android:textStyle="italic" />
+
+
 </RelativeLayout>
