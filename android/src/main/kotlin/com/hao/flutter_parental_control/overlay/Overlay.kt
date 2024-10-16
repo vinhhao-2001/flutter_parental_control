@@ -12,6 +12,7 @@ class Overlay(private val context: Context) {
     private var windowManager: WindowManager? = null
     private var blockView: View? = null
 
+    // Hàm hiển thị overlay
     fun showOverlay(isBlock: Boolean) {
         windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         blockView = if (isBlock) {
@@ -33,19 +34,20 @@ class Overlay(private val context: Context) {
         windowManager?.addView(blockView, layoutParams)
     }
 
+    // Hàm hiển thị overlay của người dùng tự thêm vào
     fun showOverlay(
-        nameBlockView: String,
-        nameBackButton: String,
-        askParentButton: String? = null,
+        nameOverlayView: String,
+        nameBackButtonId: String,
+        askParentButtonId: String? = null,
         onAskParentClick: (() -> Unit?)? = null,
     ) {
         // Nếu blockViewName không phải là null, lấy view người dùng tự thêm vào
-        blockView = getApplicationContext()?.let { Utils().getView(nameBlockView, it) }
+        blockView = getApplicationContext()?.let { Utils().getView(nameOverlayView, it) }
         if (blockView != null) {
             windowManager =
                 context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            val backId = getApplicationContext()?.let { Utils().getId(nameBackButton, it) }
-            val askParentId = getApplicationContext()?.let { askParentButton?.let { it1 ->
+            val backId = getApplicationContext()?.let { Utils().getId(nameBackButtonId, it) }
+            val askParentId = getApplicationContext()?.let { askParentButtonId?.let { it1 ->
                 Utils().getId(
                     it1, it)
             } }

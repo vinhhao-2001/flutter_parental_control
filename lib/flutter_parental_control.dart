@@ -1,7 +1,12 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
+import 'constants/app_constants.dart';
 import 'flutter_parental_control_platform_interface.dart';
+
+part 'model/app_usage_info.dart';
+part 'model/device_info.dart';
+part 'model/app_installed_info.dart';
+part 'model/web_history.dart';
 
 class ParentalControl {
   /// Lấy thông tin thiết bị, có sự khác nhau giữa Android và Ios
@@ -12,7 +17,7 @@ class ParentalControl {
 
   /// các phần chỉ dùng được trên [Android]
   /// Lắng nghe khi có có sự kiện nhấn nút hỏi phụ huynh
-  /// [Error] Bị mất kết nối khi chạy ở nền
+  /// [askParent] Bị mất kết nối khi chạy ở nền
   static Future<void> askParent() async {
     await FlutterParentalControlPlatform.instance.askParent();
   }
@@ -50,6 +55,13 @@ class ParentalControl {
   static Stream<AppInstalledInfo> listenAppInstalledInfo() {
     final result = FlutterParentalControlPlatform.instance.listenAppInstalled();
     return result.map((data) => AppInstalledInfo.map(data));
+  }
+
+  /// Lấy lịch sử duyệt web trên trình duyệt
+  static Future<List<WebHistory>> getWebHistory() async {
+    final result =
+        await FlutterParentalControlPlatform.instance.getWebHistory();
+    return result.map((app) => WebHistory.fromMap(app)).toList();
   }
 
   /// các phần chỉ dùng được trên [Ios]
@@ -113,114 +125,7 @@ class ParentalControl {
   }
 }
 
-///Danh sách các [model] của plugin
-/// thông tin thiết bị
-class DeviceInfo {
-  final String? systemName;
-  final String? deviceName;
-  final String? deviceManufacturer;
-  final String? deviceVersion;
-  final String? deviceApiLevel;
-  final String? deviceBoard;
-  final String? deviceHardware;
-  final String? deviceDisplay;
-  final String? batteryLevel;
-  final String? screenBrightness;
-  final String? volume;
-  final String? deviceId;
-
-  DeviceInfo({
-    this.systemName,
-    this.deviceName,
-    this.deviceManufacturer,
-    this.deviceVersion,
-    this.deviceApiLevel,
-    this.deviceBoard,
-    this.deviceHardware,
-    this.deviceDisplay,
-    this.batteryLevel,
-    this.screenBrightness,
-    this.volume,
-    this.deviceId,
-  });
-
-  factory DeviceInfo.fromMap(Map<String, dynamic> map) {
-    return DeviceInfo(
-      systemName: map['systemName'] as String?,
-      deviceName: map['deviceName'] as String?,
-      deviceManufacturer: map['deviceManufacturer'] as String?,
-      deviceVersion: map['deviceVersion'] as String?,
-      deviceApiLevel: map['deviceApiLevel']?.toString(),
-      deviceBoard: map['deviceBoard'] as String?,
-      deviceHardware: map['deviceHardware'] as String?,
-      deviceDisplay: map['deviceDisplay'] as String?,
-      batteryLevel: map['batteryLevel'] as String?,
-      screenBrightness: map['screenBrightness'] as String?,
-      volume: map['volume'] as String?,
-      deviceId: map['deviceId'] as String?,
-    );
-  }
-}
-
-/// thông tin ứng dụng cài đặt hoặc gỡ bỏ
-class AppInstalledInfo {
-  final bool isInstalled;
-  final String packageName;
-  final String appName;
-  final String appIcon;
-
-  AppInstalledInfo({
-    required this.isInstalled,
-    required this.packageName,
-    required this.appName,
-    required this.appIcon,
-  });
-
-  factory AppInstalledInfo.map(Map<String, dynamic> map) {
-    String iconBase64 =
-        base64Encode(Uint8List.fromList(map['appIcon'].cast<int>()));
-    return AppInstalledInfo(
-      isInstalled: map['isInstalled'],
-      packageName: map['packageName'],
-      appName: map['appName'],
-      appIcon: iconBase64,
-    );
-  }
-}
-
-/// Thông tin thời gian sử dụng các ứng dụng
-class AppUsageInfo {
-  final String appName;
-  final String packageName;
-  final String appIcon;
-  final int usageTime;
-
-  AppUsageInfo({
-    required this.appName,
-    required this.packageName,
-    required this.appIcon,
-    required this.usageTime,
-  });
-
-  factory AppUsageInfo.fromMap(Map<String, dynamic> map) {
-    String iconBase64 =
-        base64Encode(Uint8List.fromList(map['appIcon'].cast<int>()));
-    return AppUsageInfo(
-      appName: map['appName'],
-      packageName: map['packageName'],
-      appIcon: iconBase64,
-      usageTime: map['usageTime'],
-    );
-  }
-}
-
 ///  Tạo enum cho các trường hợp xin quyền trên [Android]
-enum Permission {
-  accessibility,
-  overlay,
-  usageState,
-}
-
 int permissionInt(Permission type) {
   switch (type) {
     case Permission.accessibility:
@@ -229,5 +134,9 @@ int permissionInt(Permission type) {
       return 2;
     case Permission.usageState:
       return 3;
+    case Permission.location:
+      return 4;
   }
 }
+
+enum Permission { accessibility, overlay, usageState, location }

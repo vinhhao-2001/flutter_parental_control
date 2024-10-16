@@ -53,8 +53,7 @@ class MyAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         flutterPluginBinding?.let { binding: FlutterPlugin.FlutterPluginBinding ->
-            channel = MethodChannel(binding.binaryMessenger, "channel")
-            println("Bắt đầu channel")
+            channel = MethodChannel(binding.binaryMessenger, AppConstants.METHOD_CHANNEL)
         }
     }
 

@@ -30,9 +30,6 @@ apply plugin: "realm-android"
 android {
     namespace = "com.hao.flutter_parental_control"
     compileSdk 34
-    //if (project.android.hasProperty("namespace")) {
-
-   // }
 
 
     compileOptions {

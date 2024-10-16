@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-
+import 'constants/app_constants.dart';
 import 'flutter_parental_control_platform_interface.dart';
 
 class MethodChannelFlutterParentalControl
@@ -31,7 +31,7 @@ class MethodChannelFlutterParentalControl
   /// Sự kiện hỏi ý kiến của phụ huynh
   @override
   Future<void> askParent() async {
-    const MethodChannel('channel').setMethodCallHandler((MethodCall call) async {
+    methodChannel.setMethodCallHandler((MethodCall call) async {
       if (call.method == AppConstants.askParent) {
         debugPrint("Sự kiện hỏi ý kiến phụ huynh");
       }
@@ -72,6 +72,13 @@ class MethodChannelFlutterParentalControl
     return eventChannel
         .receiveBroadcastStream()
         .map((event) => Map<String, dynamic>.from(event));
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getWebHistory() async {
+    final List<dynamic> data =
+        await methodChannel.invokeMethod(AppConstants.getWebHistory);
+    return data.map((e) => Map<String, dynamic>.from(e as Map)).toList();
   }
 
   /// các sự kiện trên [ios]
@@ -144,52 +151,4 @@ class MethodChannelFlutterParentalControl
     await methodChannel.invokeMethod(
         AppConstants.settingMonitorMethod, settings);
   }
-}
-
-class AppConstants {
-  static const String methodChannel = 'flutter_parental_control_method';
-  static const String eventChannel = 'flutter_parental_control_event';
-
-  /// Method
-  static const String deviceMethod = 'getDeviceInfoMethod';
-  static const String appUsageMethod = 'getAppUsageInfoMethod';
-  static const String blockAppMethod = 'blockAppMethod';
-  static const String blockWebMethod = 'blockWebsiteMethod';
-  static const String startServiceMethod = 'startServiceMethod';
-  static const String permissionMethod = 'permissionMethod';
-  static const String toggleMonitoring = 'toggleMonitoring';
-  static const String limitAppMethod = 'limitAppMethod';
-  static const String settingMonitorMethod = 'settingMonitorMethod';
-
-  /// key data channel
-  static const String blockApps = 'blockApps';
-  static const String blockWeb = 'blockWebsites';
-  static const String typePermission = 'typePermission';
-  static const String askParent = 'askParent';
-
-  /// cài đặt thời gian hạn chế [ios]
-  static const String isMonitoring = 'isMonitoring';
-  static const String startHour = 'startHour';
-  static const String startMinute = 'startMinute';
-  static const String endHour = 'endHour';
-  static const String endMinute = 'endMinute';
-
-  /// các cài đặt hạn chế [ios]
-  static const String requireAutoTime = 'requireAutomaticDateAndTime';
-  static const String lockAccounts = 'lockAccounts';
-  static const String lockPasscode = 'lockPasscode';
-  static const String denySiri = 'denySiri';
-  static const String lockAppCellularData = 'lockAppCellularData';
-  static const String lockESIM = 'lockESIM';
-  static const String denyInAppPurchases = 'denyInAppPurchases';
-  static const String maximumRating = 'maximumRating';
-  static const String requirePasswordForPurchases =
-      'requirePasswordForPurchases';
-  static const String denyExplicitContent = 'denyExplicitContent';
-  static const String denyMusicService = 'denyMusicService';
-  static const String denyBookstoreErotica = 'denyBookstoreErotica';
-  static const String maximumMovieRating = 'maximumMovieRating';
-  static const String maximumTVShowRating = 'maximumTVShowRating';
-  static const String denyMultiplayerGaming = 'denyMultiplayerGaming';
-  static const String denyAddingFriends = 'denyAddingFriends';
 }

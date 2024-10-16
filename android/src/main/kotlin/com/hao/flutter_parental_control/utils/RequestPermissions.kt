@@ -1,18 +1,14 @@
 package com.hao.flutter_parental_control.utils
 
-import android.Manifest
-import android.app.Activity
 import android.app.AppOpsManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.text.TextUtils
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+
 import com.hao.flutter_parental_control.service.MyAccessibilityService
 
 class RequestPermissions(private val context: Context) {
@@ -51,22 +47,6 @@ class RequestPermissions(private val context: Context) {
         } else true
     }
 
-    fun requestLocationPermissions(): Boolean {
-        return if (ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                context as Activity,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                1
-            )
-            false
-        } else {
-            true
-        }
-    }
 
 
     // Kiểm tra quyền trợ năng

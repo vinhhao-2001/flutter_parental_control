@@ -31,11 +31,11 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
   @override
   void initState() {
     super.initState();
-  //   Platform.isAndroid ? android() : ios();
+    Platform.isAndroid ? android() : ios();
   }
 
   Future<void> android() async {
-    ParentalControl.requestPermission(Permission.accessibility);
+    ParentalControl.requestPermission(Permission.location);
     ParentalControl.askParent();
   }
 

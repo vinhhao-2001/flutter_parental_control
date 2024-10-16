@@ -15,7 +15,6 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.common.MethodChannel.Result
 import io.realm.Realm
 import io.realm.RealmConfiguration
 
@@ -62,7 +61,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
     }
 
     // Hàm thực hiện khi có yêu cầu từ Flutter
-    override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+    override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: MethodChannel.Result) {
         when (call.method) {
             AppConstants.GET_DEVICE_INFO -> {
                 // Lấy thông tin thiết bị
@@ -71,14 +70,14 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
             }
 
             AppConstants.START_SERVICE -> {
-                DBHelper.insertListWebBlock(listOf("facebook", "abc"))
-                DBHelper.insertListAppBlock(listOf("Cài đặt"))
+                // Bắt đầu lắng nghe ứng dụng được cài đặt, gỡ bỏ
                 val serviceIntent = Intent(context, InstallAppService::class.java)
                 context.startService(serviceIntent)
                 result.success(AppConstants.EMPTY)
             }
 
             AppConstants.BLOCK_APP_METHOD -> {
+                // Thêm ứng dụng bị chặn vào danh sách ứng dụng bị chặn
                 val blockApps =
                     call.argument<List<String>>(AppConstants.BLOCK_APPS) ?: emptyList<String>()
                 DBHelper.insertListAppBlock(blockApps)
@@ -86,6 +85,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
             }
 
             AppConstants.BLOCK_WEBSITE_METHOD -> {
+                // Thêm trang web bị chặn vào danh sách trang web bị chặn
                 val blockWebsites =
                     call.argument<List<String>>(AppConstants.BLOCK_WEBSITES) ?: emptyList<String>()
                 DBHelper.insertListWebBlock(blockWebsites)
@@ -93,31 +93,30 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
             }
 
             AppConstants.GET_APP_USAGE_INFO -> {
+                // Lấy thông tin sử dụng ứng dụng
                 val appUsageInfoList = AppUsageInfo.getAppUsageInfo(context)
                 result.success(appUsageInfoList)
             }
 
             AppConstants.GET_WEB_HISTORY -> {
+                // Lấy lịch sử duyệt web
                 val webHistoryList = DBHelper.getWebHistory()
                 result.success(webHistoryList)
             }
 
             AppConstants.REQUEST_PERMISSION -> {
+                // Yêu cầu quyền cho ứng dụng
                 val type = call.argument<Int>(AppConstants.TYPE_PERMISSION)
                 val requestPermissions = RequestPermissions(context)
-                val isPermissionGranted = when (type) {
-                    1 -> requestPermissions.requestAccessibilityPermission()
-                    2 -> requestPermissions.requestOverlayPermission()
-                    3 -> requestPermissions.requestUsageStatsPermissions()
-                    else -> null
-                }
 
-                if (isPermissionGranted != null) {
-                    result.success(isPermissionGranted)
-                } else {
-                    result.error("INVALID_TYPE", null, null)
+                when (type) {
+                    1 -> result.success(requestPermissions.requestAccessibilityPermission())
+                    2 -> result.success(requestPermissions.requestOverlayPermission())
+                    3 -> result.success(requestPermissions.requestUsageStatsPermissions())
+                    else -> result.error("INVALID_TYPE", null, null)
                 }
             }
+
 
             else -> {
                 result.notImplemented()

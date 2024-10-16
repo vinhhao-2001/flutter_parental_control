@@ -2,36 +2,39 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.hao.flutter_parental_control">
     <!-- Quyền truy cập vào thông tin sử dụng -->
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
     <!-- quyền chạy nền-->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <!--quyền hiển thị trên ứng dụng khác-->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <!--quyền truy cập vào thông tin vị trí-->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <application>
-        <service android:name=".service.InstallAppService"
-            android:exported="true"
-            android:stopWithTask="false"
+        <service
+            android:name=".service.InstallAppService"
             android:enabled="true"
+            android:exported="true"
             android:foregroundServiceType="specialUse"
-            android:permission="android.permission.FOREGROUND_SERVICE">
-            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="explanation_for_special_use"/>
+            android:permission="android.permission.FOREGROUND_SERVICE"
+            android:stopWithTask="false">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="explanation_for_special_use" />
         </service>
 
         <service
             android:name=".service.MyAccessibilityService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:exported="true">
+            android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
@@ -41,8 +44,8 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
 
-<!--        <meta-data android:name="com.google.android.geo.API_KEY"-->
-<!--            android:value="AIzaSyCx10qvRhgY2575ZnLchGC2iTDfS5Airlc"/>-->
+        <!--        <meta-data android:name="com.google.android.geo.API_KEY"-->
+        <!--            android:value="AIzaSyCx10qvRhgY2575ZnLchGC2iTDfS5Airlc"/>-->
 
     </application>
 </manifest>

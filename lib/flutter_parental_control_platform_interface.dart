@@ -50,6 +50,10 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
     throw UnimplementedError('listenAppInstalled() has not been implemented.');
   }
 
+  Future<List<Map<String, dynamic>>> getWebHistory() {
+    throw UnimplementedError('getWebHistory() has not been implemented.');
+  }
+
   /// Các phần chỉ dùng được trên [Ios]
   /// Hàm kiểm tra quyền kiểm soát của phụ huynh
   Future<void> checkParentControlPermission() {
