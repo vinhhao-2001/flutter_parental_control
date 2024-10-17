@@ -12,9 +12,10 @@ import com.hao.flutter_parental_control.utils.AppConstants
 import com.hao.flutter_parental_control.utils.Utils
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodChannel
+// Dịch vụ trợ năng
+class AccessibilityService : AccessibilityService() {
 
-class MyAccessibilityService : AccessibilityService() {
-
+    // Khai báo các biến dùng nhiều trong ứng dụng
     private var currentBrowserPackageName: String = AppConstants.EMPTY
     private var currentUrl: String = AppConstants.EMPTY
     private lateinit var channel: MethodChannel
@@ -51,6 +52,7 @@ class MyAccessibilityService : AccessibilityService() {
     }
 
     override fun onServiceConnected() {
+        // Xử lý khi service đươc kết nối
         super.onServiceConnected()
         flutterPluginBinding?.let { binding: FlutterPlugin.FlutterPluginBinding ->
             channel = MethodChannel(binding.binaryMessenger, AppConstants.METHOD_CHANNEL)
@@ -66,19 +68,41 @@ class MyAccessibilityService : AccessibilityService() {
         if (accessibilityEvent.eventType == AccessibilityEvent.TYPE_VIEW_LONG_CLICKED) {
             val appName = Utils().getApplicationName(context = applicationContext)
             if (contentDescription.contains(appName)) {
-                Overlay(this).showOverlay(false)
+                val overlay = DBHelper.getOverlayView(false)
+                if (overlay != null) {
+                    Overlay(this).showOverlay(
+                        overlay.overlayView,
+                        overlay.nameBackButtonId,
+                        overlay.nameAskParentBtnId
+                    ) {
+                        Utils().openApp(applicationContext)
+                        channel.invokeMethod(AppConstants.ASK_PARENT_METHOD)
+                    }
+                } else {
+                    Overlay(this).showOverlay(false)
+                }
             }
         }
 
         // Kiểm tra nếu ứng dụng bị chặn
         if (DBHelper.isAppBlocked(contentDescription)) {
-            Overlay(this).showOverlay("block_view", "backBlockAppBtn", "askParentBtn") {
-                channel.invokeMethod("askParent", null)
-                println("Gửi lệnh askParent")
+            val overlay = DBHelper.getOverlayView(true)
+            if (overlay != null) {
+                Overlay(this).showOverlay(
+                    overlay.overlayView,
+                    overlay.nameBackButtonId,
+                    overlay.nameAskParentBtnId
+                ) {
+                    Utils().openApp(applicationContext)
+                    channel.invokeMethod(AppConstants.ASK_PARENT_METHOD)
+                }
+            } else {
+                Overlay(this).showOverlay(false)
             }
         }
     }
 
+    // Hàm xử lý sự kiện khi người dùng mở trình duyệt
     private fun handleBrowserEvent(accessibilityEvent: AccessibilityEvent) {
         // Kiểm tra sự kiện khi người dùng mở trình duyệt
         val parentNodeInfo: AccessibilityNodeInfo = accessibilityEvent.source ?: return
@@ -102,10 +126,12 @@ class MyAccessibilityService : AccessibilityService() {
         }
     }
 
+    // Hàm lấy cấu hình trình duyệt
     private fun getBrowserConfig(packageName: String): SupportedBrowserConfig? {
         return SupportedBrowserConfig.getSupportedBrowsers().find { it.packageName == packageName }
     }
 
+    // Hàm trích xuất URL từ trình duyệt
     private fun extractUrlFromBrowser(
         nodeInfo: AccessibilityNodeInfo, browserConfig: SupportedBrowserConfig
     ): String? {
@@ -114,6 +140,7 @@ class MyAccessibilityService : AccessibilityService() {
             .firstOrNull()?.text?.toString()
     }
 
+    // Hàm chuyển hướng đến trang trắng
     private fun redirectToBlankPage() {
         val blankPageUri = Uri.parse(AppConstants.BLANK_PAGE)
         val intent = Intent(Intent.ACTION_VIEW, blankPageUri).apply {

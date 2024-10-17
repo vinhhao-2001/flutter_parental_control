@@ -37,6 +37,7 @@ class InstallAppService : Service() {
         unregisterReceiver(appInstalledReceiver)
     }
 
+    // Hàm thực hiện khi có ứng dụng được cài đặt hoặc gỡ bỏ
     private val appInstalledReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val action = intent?.action

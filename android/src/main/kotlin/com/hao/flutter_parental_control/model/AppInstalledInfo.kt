@@ -2,7 +2,7 @@ package com.hao.flutter_parental_control.model
 
 import com.hao.flutter_parental_control.utils.AppConstants
 
-
+// Thông tin ứng dụng được cài đặt hoặc gỡ bỏ
 data class AppInstalledInfo(
     val isInstalled: Boolean,
     val packageName: String,

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Utils {
+  /// Chuyển chuỗi UintList thành icon của map
   BitmapDescriptor iconPosition(Uint8List? icon, double? size) {
     if (icon != null) {
       return BitmapDescriptor.bytes(icon,
@@ -11,6 +12,7 @@ class Utils {
     }
   }
 
+  /// Vẽ đa giác lồi từ các điểm có trên bản đồ
   List<LatLng> getConvexHull(List<LatLng> points) {
     points.sort((a, b) {
       if (a.latitude == b.latitude) return a.longitude.compareTo(b.longitude);
@@ -41,6 +43,7 @@ class Utils {
     return hull;
   }
 
+  /// Nối các điểm
   double _cross(LatLng o, LatLng a, LatLng b) {
     return (a.longitude - o.longitude) * (b.latitude - o.latitude) -
         (a.latitude - o.latitude) * (b.longitude - o.longitude);

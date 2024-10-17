@@ -1,6 +1,8 @@
 package com.hao.flutter_parental_control.utils
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.PixelFormat
 import android.graphics.drawable.AdaptiveIconDrawable
@@ -57,20 +59,46 @@ class Utils {
         else context.getString(stringId)
     }
 
+    // Mở ứng dụng
+    fun openApp(context: Context) {
+        try {
+            val packageName = context.packageName
+            val intent = context.packageManager.getLaunchIntentForPackage(packageName)
+            if (intent != null) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    // Lấy tên ứng dụng từ tên gói ứng dụng
+    fun getAppName(context: Context, packageName: String): String? {
+        val packageManager = context.packageManager
+        return try {
+            val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
+            packageManager.getApplicationLabel(applicationInfo).toString()
+        } catch (e: PackageManager.NameNotFoundException) {
+            null
+        }
+    }
+
+
     // Lấy tài nguyên từ ứng dụng
     fun getResource(resourceName: String, context: Context): Int {
-        return context.resources.getIdentifier(resourceName, "drawable", context.packageName)
+        return context.resources.getIdentifier(resourceName, AppConstants.DRAWABLE, context.packageName)
     }
 
     // Lấy view từ ứng dụng
     fun getView(viewName: String, context: Context): View {
-        val layoutId = context.resources.getIdentifier(viewName, "layout", context.packageName)
+        val layoutId = context.resources.getIdentifier(viewName, AppConstants.LAYOUT, context.packageName)
         return LayoutInflater.from(context).inflate(layoutId, null)
     }
 
     // Lấy id trong view của ứng dụng
     fun getId(idName: String, context: Context): Int {
-        return context.resources.getIdentifier(idName, "id", context.packageName)
+        return context.resources.getIdentifier(idName, AppConstants.ID, context.packageName)
     }
 
     // Tạo cửa sổ hiện thị của overlay
@@ -98,7 +126,7 @@ class Utils {
         }
     }
 
-    // Loại bỏ cửa sổ
+    // Loại bỏ cửa sổ hiện thị của overlay
     fun removeBlockScreen(windowManager: WindowManager?, view: View?) {
         if (windowManager != null && view != null) {
             windowManager.removeView(view)

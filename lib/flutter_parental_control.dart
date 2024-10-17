@@ -25,7 +25,7 @@ class ParentalControl {
   /// Kiểm tra các quyền trợ năng
   static Future<bool> requestPermission(Permission type) async {
     final result = await FlutterParentalControlPlatform.instance
-        .requestPermission(permissionInt(type));
+        .requestPermission(_permissionInt(type));
     return result;
   }
 
@@ -75,10 +75,14 @@ class ParentalControl {
   }
 
   /// Lập lịch thời gian giám sát thiết bị
-  static Future<void> scheduleMonitorSettings(bool isMonitoring, int startHour,
-      int startMinute, int endHour, int endMinute) async {
+  static Future<void> scheduleMonitorSettings(bool isMonitoring,
+      {int? startHour, int? startMinute, int? endHour, int? endMinute}) async {
     FlutterParentalControlPlatform.instance.scheduleMonitorSettings(
-        isMonitoring, startHour, startMinute, endHour, endMinute);
+        isMonitoring,
+        startHour: startHour,
+        startMinute: startMinute,
+        endHour: endHour,
+        endMinute: endMinute);
   }
 
   /// Mở giao diện chọn danh sách ứng dụng bị giới hạn
@@ -123,20 +127,23 @@ class ParentalControl {
       denyAddingFriends: denyAddingFriends,
     );
   }
-}
 
-///  Tạo enum cho các trường hợp xin quyền trên [Android]
-int permissionInt(Permission type) {
-  switch (type) {
-    case Permission.accessibility:
-      return 1;
-    case Permission.overlay:
-      return 2;
-    case Permission.usageState:
-      return 3;
-    case Permission.location:
-      return 4;
+  /// Các trường hợp xin quyền trong native
+  static int _permissionInt(Permission type) {
+    switch (type) {
+      case Permission.accessibility:
+        return 1;
+      case Permission.overlay:
+        return 2;
+      case Permission.usageState:
+        return 3;
+    }
   }
 }
 
-enum Permission { accessibility, overlay, usageState, location }
+///  Tạo enum cho các trường hợp xin quyền trên [Android]
+enum Permission {
+  accessibility,
+  overlay,
+  usageState,
+}

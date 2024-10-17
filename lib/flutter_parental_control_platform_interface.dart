@@ -61,8 +61,8 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
         'checkParentControlPermission() has not been implemented.');
   }
 
-  Future<void> scheduleMonitorSettings(bool isMonitoring, int startHour,
-      int startMinute, int endHour, int endMinute) {
+  Future<void> scheduleMonitorSettings(bool isMonitoring,
+      {int? startHour, int? startMinute, int? endHour, int? endMinute}) {
     throw UnimplementedError(
         'scheduleMonitorSettings() has not been implemented.');
   }

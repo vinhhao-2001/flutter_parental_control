@@ -7,7 +7,7 @@ import com.hao.flutter_parental_control.db_helper.DBHelper
 import com.hao.flutter_parental_control.model.AppUsageInfo
 import com.hao.flutter_parental_control.model.DeviceInfo
 import com.hao.flutter_parental_control.service.InstallAppService
-import com.hao.flutter_parental_control.service.MyAccessibilityService
+import com.hao.flutter_parental_control.service.AccessibilityService
 import com.hao.flutter_parental_control.utils.AppConstants
 import com.hao.flutter_parental_control.utils.RequestPermissions
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -34,7 +34,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
         context = flutterPluginBinding.applicationContext
         initRealm() // Khởi tạo Realm
 
-        MyAccessibilityService.setFlutterPluginBinding(flutterPluginBinding)
+        AccessibilityService.setFlutterPluginBinding(flutterPluginBinding)
 
         // Khởi tạo MethodChannel và EventChannel
         methodChannel =
@@ -80,7 +80,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                 // Thêm ứng dụng bị chặn vào danh sách ứng dụng bị chặn
                 val blockApps =
                     call.argument<List<String>>(AppConstants.BLOCK_APPS) ?: emptyList<String>()
-                DBHelper.insertListAppBlock(blockApps)
+                DBHelper.insertListAppBlock(context, blockApps)
                 result.success(AppConstants.EMPTY)
             }
 
@@ -117,6 +117,15 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                 }
             }
 
+            AppConstants.OVERLAY_METHOD -> {
+                // lấy thông tin overlay từ flutter và lưu vào db
+                val id = call.argument<Boolean>(AppConstants.PACKAGE)
+                val overlayView = call.argument<String>(AppConstants.PACKAGE)
+                val nameBackButtonId = call.argument<String>(AppConstants.PACKAGE)
+                val nameAskParentBtnId = call.argument<String?>(AppConstants.PACKAGE)
+                DBHelper.insertOverlayView(id, overlayView, nameBackButtonId, nameAskParentBtnId)
+                result.success(AppConstants.EMPTY)
+            }
 
             else -> {
                 result.notImplemented()

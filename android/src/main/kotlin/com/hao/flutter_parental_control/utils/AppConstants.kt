@@ -3,6 +3,7 @@ package com.hao.flutter_parental_control.utils
 class AppConstants {
     companion object {
         const val EMPTY = ""
+        const val COLON = ':'
         const val PACKAGE = "package"
         const val LAUNCHER_PACKAGE = "com.google.android.apps.nexuslauncher"
 
@@ -32,6 +33,8 @@ class AppConstants {
         const val GET_APP_USAGE_INFO = "getAppUsageInfoMethod"
         const val GET_WEB_HISTORY = "getWebHistoryMethod"
         const val REQUEST_PERMISSION = "permissionMethod"
+        const val OVERLAY_METHOD = "overlayMethod"
+        const val  ASK_PARENT_METHOD = "askParentMethod"
 
         // key
         const val REALM_NAME = "realm-db"
@@ -61,5 +64,11 @@ class AppConstants {
         const val SCREEN_BRIGHTNESS = "screenBrightness"
         const val VOLUME = "volume"
         const val DEVICE_ID = "deviceId"
+
+        // tyoe view của người dùng
+        const val DRAWABLE = "drawable"
+        const val LAYOUT = "layout"
+        const val ID = "id"
+        const val STRING = "string"
     }
 }

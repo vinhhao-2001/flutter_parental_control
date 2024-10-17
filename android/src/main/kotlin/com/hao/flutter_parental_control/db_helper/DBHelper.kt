@@ -1,6 +1,8 @@
 package com.hao.flutter_parental_control.db_helper
 
+import android.content.Context
 import com.hao.flutter_parental_control.utils.AppConstants
+import com.hao.flutter_parental_control.utils.Utils
 import io.realm.Realm
 import io.realm.RealmList
 import io.realm.RealmObject
@@ -9,16 +11,19 @@ import io.realm.annotations.PrimaryKey
 import org.bson.types.ObjectId
 
 object DBHelper {
-    fun insertListAppBlock(appList: List<String>) {
+    fun insertListAppBlock(context: Context, appList: List<String>) {
         // Thêm danh sách tên ứng dụng bị chặn vào DB
         Realm.getDefaultInstance().use { realm ->
             realm.executeTransaction {
                 realm.delete(BlockedApp::class.java)
-                appList.forEach { appName ->
-                    it.copyToRealmOrUpdate(BlockedApp().apply {
-                        this.appName = appName
-                        blockedAppList = RealmList()
-                    })
+                appList.forEach { packageName ->
+                    val appName = Utils().getAppName(context, packageName)
+                    if (appName != null) {
+                        realm.copyToRealmOrUpdate(BlockedApp().apply {
+                            this.appName = appName
+                            blockedAppList = RealmList()
+                        })
+                    }
                 }
             }
         }
@@ -28,7 +33,8 @@ object DBHelper {
         // Kiểm tra tên ứng dụng có bị chặn hay không
         Realm.getDefaultInstance().use { realm ->
             val blockedApp =
-                realm.where(BlockedApp::class.java).equalTo(AppConstants.APP_NAME, appName).findFirst()
+                realm.where(BlockedApp::class.java).equalTo(AppConstants.APP_NAME, appName)
+                    .findFirst()
             return blockedApp != null
         }
     }
@@ -77,6 +83,34 @@ object DBHelper {
             return webHistoryList.map { it.toMap() }
         }
     }
+
+    fun insertOverlayView(
+        id: Boolean,
+        overlayView: String,
+        nameBackButtonId: String,
+        nameAskParentBtnId: String? = null,
+    ) {
+        // Thêm overlay view vào DB
+        Realm.getDefaultInstance().use { realm ->
+            realm.executeTransaction {
+                realm.copyToRealmOrUpdate(OverlayView().apply {
+                    this.id = id
+                    this.overlayView = overlayView
+                    this.nameBackButtonId = nameBackButtonId
+                    this.nameAskParentBtnId = nameAskParentBtnId
+                    this.overlayViewList = RealmList()
+                })
+            }
+        }
+    }
+
+    fun getOverlayView(isBlock: Boolean): OverlayView? {
+        // Lấy overlay view theo id
+        Realm.getDefaultInstance().use { realm ->
+            return realm.where(OverlayView::class.java).equalTo(AppConstants.ID, isBlock)
+                .findFirst()
+        }
+    }
 }
 
 // Các model tương ứng với các bảng trong DB
@@ -113,4 +147,15 @@ open class WebHistory : RealmObject() {
             AppConstants.VISITED_TIME to visitedTime,
         )
     }
+}
+
+open class OverlayView : RealmObject() {
+    @PrimaryKey
+    var id: Boolean = false
+
+    @Index
+    var overlayView: String = AppConstants.EMPTY
+    var nameBackButtonId: String = AppConstants.EMPTY
+    var nameAskParentBtnId: String? = null
+    var overlayViewList: RealmList<OverlayView>? = RealmList()
 }

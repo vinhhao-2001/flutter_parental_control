@@ -90,8 +90,8 @@ class MethodChannelFlutterParentalControl
 
   /// Thiết lập thời gian giới hạn trên thiết bị ios
   @override
-  Future<void> scheduleMonitorSettings(bool isMonitoring, int startHour,
-      int startMinute, int endHour, int endMinute) async {
+  Future<void> scheduleMonitorSettings(bool isMonitoring,
+      {int? startHour, int? startMinute, int? endHour, int? endMinute}) async {
     final Map<String, dynamic> args = {
       AppConstants.isMonitoring: isMonitoring,
       AppConstants.startHour: startHour,
@@ -99,7 +99,7 @@ class MethodChannelFlutterParentalControl
       AppConstants.endHour: endHour,
       AppConstants.endMinute: endMinute,
     };
-    await methodChannel.invokeMethod(AppConstants.toggleMonitoring, args);
+    await methodChannel.invokeMethod(AppConstants.scheduleMethod, args);
   }
 
   /// Giới hạn các ứng dụng trên thiết bị ios

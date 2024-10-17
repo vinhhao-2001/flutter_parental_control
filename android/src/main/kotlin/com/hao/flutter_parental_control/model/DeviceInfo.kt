@@ -7,6 +7,7 @@ import android.os.Build
 import android.provider.Settings
 import com.hao.flutter_parental_control.utils.AppConstants
 
+// Thông tin thiết bị
 data class DeviceInfo(
     val systemName: String,
     val deviceName: String,
@@ -22,7 +23,7 @@ data class DeviceInfo(
     val deviceId: String
 ) {
     companion object {
-        // Method to create a map of device info from the context
+        // Lấy thông tin thiết bị
         fun getDeviceInfo(context: Context): Map<String, Any> {
             val batteryManager =
                 context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager

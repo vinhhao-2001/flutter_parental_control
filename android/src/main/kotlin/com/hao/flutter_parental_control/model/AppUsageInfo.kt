@@ -9,6 +9,7 @@ import com.hao.flutter_parental_control.utils.AppConstants
 import com.hao.flutter_parental_control.utils.Utils
 import java.util.Calendar
 
+// Thông tin thời gian sử dụng
 data class AppUsageInfo(
     val name: String,
     val packageName: String,
@@ -16,6 +17,7 @@ data class AppUsageInfo(
     val usageTime: Long
 ) {
     companion object {
+        // Lấy thông tin thời gian sử dụng
         fun getAppUsageInfo(context: Context): List<Map<String, Any>> {
             val calendar = Calendar.getInstance()
             calendar.add(Calendar.DAY_OF_YEAR, -1)

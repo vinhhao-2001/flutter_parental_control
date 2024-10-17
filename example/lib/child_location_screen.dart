@@ -19,6 +19,7 @@ class _ChildLocationScreenState extends State<ChildLocationScreen> {
   @override
   void initState() {
     super.initState();
+    getChildLocal();
     _mapController?.animateCamera(
         CameraUpdate.newCameraPosition(CameraPosition(target: childLocation)));
   }
@@ -76,7 +77,7 @@ class _ChildLocationScreenState extends State<ChildLocationScreen> {
     final add = await updateAddress(childLocation);
     setState(() {
       address =
-          '${add.street}, ${add.locality},${add.subAdminArea}, ${add.adminArea}, ${add.country}';
+          '${add.subAdminArea}, ${add.adminArea}, ${add.country}';
     });
     return childLocation;
   }

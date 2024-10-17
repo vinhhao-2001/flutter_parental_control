@@ -1,31 +1,30 @@
 class AppConstants {
   static const String empty = '';
-  static const String safeZone = 'safeZone';
-  static const String done = 'done';
+  static const String safeZone = 'Safe Zone';
+  static const String done = 'Done';
+  static const String update = 'Update';
 
   /// Method
   static const String methodChannel = 'flutter_parental_control_method';
   static const String eventChannel = 'flutter_parental_control_event';
-
   static const String deviceMethod = 'getDeviceInfoMethod';
   static const String appUsageMethod = 'getAppUsageInfoMethod';
   static const String blockAppMethod = 'blockAppMethod';
   static const String blockWebMethod = 'blockWebsiteMethod';
   static const String startServiceMethod = 'startServiceMethod';
   static const String permissionMethod = 'permissionMethod';
-  static const String toggleMonitoring = 'toggleMonitoring';
+  static const String scheduleMethod = 'scheduleMonitorMethod';
   static const String limitAppMethod = 'limitAppMethod';
   static const String settingMonitorMethod = 'settingMonitorMethod';
   static const String getWebHistory = 'getWebHistoryMethod';
+  static const String askParent = 'askParentMethod';
 
   /// key data channel
   static const String blockApps = 'blockApps';
   static const String blockWeb = 'blockWebsites';
   static const String typePermission = 'typePermission';
-  static const String askParent = 'askParent';
 
   /// key map
-
   static const String systemName = 'systemName';
   static const String deviceName = 'deviceName';
   static const String deviceManufacturer = 'deviceManufacturer';

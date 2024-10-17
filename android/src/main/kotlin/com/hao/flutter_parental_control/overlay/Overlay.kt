@@ -12,7 +12,7 @@ class Overlay(private val context: Context) {
     private var windowManager: WindowManager? = null
     private var blockView: View? = null
 
-    // Hàm hiển thị overlay
+    // Hàm hiển thị overlay mặc định
     fun showOverlay(isBlock: Boolean) {
         windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         blockView = if (isBlock) {

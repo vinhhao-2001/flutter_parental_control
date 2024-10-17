@@ -4,6 +4,7 @@ import CloudKit
 @available(iOS 16.0, *)
 class RequestPermission {
     
+    // Kiểm tra trạng thái uỷ quyền của thiết bị
     func checkParentalControl() async -> String {
         let center = AuthorizationCenter.shared
         do {
@@ -14,23 +15,23 @@ class RequestPermission {
                 
                 switch center.authorizationStatus {
                 case .notDetermined:
-                    return "AUTH_NOT_DETERMINED" // Trạng thái ủy quyền chưa xác định
+                    return AppConstants.AUTH_NOT_DETERMINED // Trạng thái ủy quyền chưa xác định
                 case .denied:
-                    return "AUTH_DENIED" // Trạng thái ủy quyền bị từ chối
+                    return AppConstants.AUTH_DENIED // Trạng thái ủy quyền bị từ chối
                 case .approved:
-                    return "AUTH_APPROVED" // Trạng thái ủy quyền được chấp nhận
+                    return AppConstants.AUTH_APPROVED // Trạng thái ủy quyền được chấp nhận
                 @unknown default:
-                    return "UNKNOWN_AUTH_STATUS" // Trạng thái ủy quyền không xác định
+                    return AppConstants.UNKNOWN_AUTH_STATUS // Trạng thái ủy quyền không xác định
                 }
             } else {
-                return "NO_ICLOUD_ACCOUNT" // Không có tài khoản iCloud hoặc chưa đăng nhập
+                return AppConstants.NO_ICLOUD_ACCOUNT // Không có tài khoản iCloud hoặc chưa đăng nhập
             }
         } catch FamilyControlsError.invalidAccountType {
-            return "INVALID_ACCOUNT_TYPE" // Tài khoản iCloud không phải của trẻ em
+            return AppConstants.INVALID_ACCOUNT_TYPE // Tài khoản iCloud không phải của trẻ em
         } catch FamilyControlsError.authorizationCanceled {
-            return "AUTHORIZATION_CANCELED" // Quyền bị hủy do không phải cha mẹ hoặc người giám hộ
+            return AppConstants.AUTHORIZATION_CANCELED // Quyền bị hủy do không phải cha mẹ hoặc người giám hộ
         } catch {
-            return "UNKNOWN_ERROR" // Lỗi không xác định xảy ra
+            return AppConstants.UNKNOWN_ERROR // Lỗi không xác định xảy ra
         }
     }
     

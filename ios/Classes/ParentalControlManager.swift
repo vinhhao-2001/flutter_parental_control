@@ -10,6 +10,7 @@ class ParentalControlManager: ObservableObject {
     
     private init() {}
     
+    // mở giao diện chọn ứng dụng giới hạn
     var selectionToDiscourage = FamilyActivitySelection() {
         willSet {
             let applications = newValue.applicationTokens
@@ -20,18 +21,20 @@ class ParentalControlManager: ObservableObject {
             store.shield.webDomains = webCategories
         }
     }
-    func scheduleMonitor(with options: [String: Any?]) {
+    
+    // Thiết lập thời gian giới hạn ứng dụng
+    func scheduleMonitor(with options: [String: Any?]) throws{
         let center = DeviceActivityCenter()
         
-        guard let isMonitoring = options["isMonitoring"] as? Bool else {
+        guard let isMonitoring = options[AppConstants.IS_MONITORING] as? Bool else {
             return
         }
         
         if isMonitoring {
-            let startHour = options["startHour"] as? Int ?? 0
-            let startMinute = options["startMinute"] as? Int ?? 0
-            let endHour = options["endHour"] as? Int ?? 23
-            let endMinute = options["endMinute"] as? Int ?? 59
+            let startHour = options[AppConstants.START_HOUR] as? Int ?? 0
+            let startMinute = options[AppConstants.START_MINUTE] as? Int ?? 0
+            let endHour = options[AppConstants.END_HOUR] as? Int ?? 23
+            let endMinute = options[AppConstants.END_MINUTE] as? Int ?? 59
             
             let start = DateComponents(hour: startHour, minute: startMinute)
             let end = DateComponents(hour: endHour, minute: endMinute)
@@ -44,66 +47,50 @@ class ParentalControlManager: ObservableObject {
             )
             do {
                 try center.startMonitoring(.daily, during: schedule)
-                print("Đã bắt đầu giám sát.")
             } catch {
-                print("Không thể bắt đầu giám sát: \(error.localizedDescription)")
+                throw error
             }
         } else {
             center.stopMonitoring()
         }
     }
     
+    // Cài đặt giám sát trên thiết bị
     func settingMonitor(with options: [String: Any?]) {
-        let settings: [(key: String, setter: (Any) -> Void)] = [
-            ("requireAutomaticDateAndTime", { store.dateAndTime.requireAutomaticDateAndTime = $0 as! Bool }),
-            ("lockAccounts", { store.account.lockAccounts = $0 as! Bool }),
-            ("lockPasscode", { store.passcode.lockPasscode = $0 as! Bool }),
-            ("denySiri", { store.siri.denySiri = $0 as! Bool }),
-            ("lockAppCellularData", { store.cellular.lockAppCellularData = $0 as! Bool }),
-            ("lockESIM", { store.cellular.lockESIM = $0 as! Bool }),
-            ("denyInAppPurchases", { store.appStore.denyInAppPurchases = $0 as! Bool }),
-            ("maximumRating", { store.appStore.maximumRating = $0 as! Int }),
-            ("requirePasswordForPurchases", { store.appStore.requirePasswordForPurchases = $0 as! Bool }),
-            ("denyExplicitContent", { store.media.denyExplicitContent = $0 as! Bool }),
-            ("denyMusicService", { store.media.denyMusicService = $0 as! Bool }),
-            ("denyBookstoreErotica", { store.media.denyBookstoreErotica = $0 as! Bool }),
-            ("maximumMovieRating", { store.media.maximumMovieRating = $0 as! Int }),
-            ("maximumTVShowRating", { store.media.maximumTVShowRating = $0 as! Int }),
-            ("denyMultiplayerGaming", { store.gameCenter.denyMultiplayerGaming = $0 as! Bool }),
-            ("denyAddingFriends", { store.gameCenter.denyAddingFriends = $0 as! Bool })
-        ]
-        
-        for (key, setter) in settings {
-            if let value = options[key] {
+        func setBool(for key: String, _ setter: @escaping (Bool) -> Void) {
+            if let value = options[key] as? Bool {
                 setter(value)
             }
         }
+        
+        func setInt(for key: String, _ setter: @escaping (Int) -> Void) {
+            if let value = options[key] as? Int {
+                setter(value)
+            }
+        }
+        
+        setBool(for: AppConstants.REQUIRE_AUTO_DATE) { self.store.dateAndTime.requireAutomaticDateAndTime = $0 }
+        setBool(for: AppConstants.LOCK_ACCOUNTS) { self.store.account.lockAccounts = $0 }
+        setBool(for: AppConstants.LOCK_PASSCODE) { self.store.passcode.lockPasscode = $0 }
+        setBool(for: AppConstants.DENY_SIRI) { self.store.siri.denySiri = $0 }
+        setBool(for: AppConstants.LOCK_APP_CELLULAR_DATA) { self.store.cellular.lockAppCellularData = $0 }
+        setBool(for: AppConstants.LOCK_E_SIM) { self.store.cellular.lockESIM = $0 }
+        setBool(for: AppConstants.DENY_IN_APP_PURCHASES) { self.store.appStore.denyInAppPurchases = $0 }
+        setBool(for: AppConstants.REQUIRE_PASSWORD_FOR_PURCHASES) { self.store.appStore.requirePasswordForPurchases = $0 }
+        setBool(for: AppConstants.DENY_EXPLICIT_CONTENT) { self.store.media.denyExplicitContent = $0 }
+        setBool(for: AppConstants.DENY_MUSIC_SERVICE) { self.store.media.denyMusicService = $0 }
+        setBool(for: AppConstants.DENY_BOOKSTORE_EROTICA) { self.store.media.denyBookstoreErotica = $0 }
+        setBool(for: AppConstants.DENY_MULTIPLAYER_GAMING) { self.store.gameCenter.denyMultiplayerGaming = $0 }
+        setBool(for: AppConstants.DENY_ADDING_FRIENDS) { self.store.gameCenter.denyAddingFriends = $0 }
+        
+        setInt(for: AppConstants.MAXIMUM_RATING) { self.store.appStore.maximumRating = $0 }
+        setInt(for: AppConstants.MAXIMUM_MOVIE_RATING) { self.store.media.maximumMovieRating = $0 }
+        setInt(for: AppConstants.MAXIMUM_TV_SHOW_RATING) { self.store.media.maximumTVShowRating = $0 }
     }
-    
-    
-    
-    //    func settingMonitor(with options: [String: Any]) {
-    //        store.dateAndTime.requireAutomaticDateAndTime = options["requireAutomaticDateAndTime"] as? Bool ?? false
-    //        store.account.lockAccounts = options["lockAccounts"] as? Bool ?? false
-    //        store.passcode.lockPasscode = options["lockPasscode"] as? Bool ?? false
-    //        store.siri.denySiri = options["denySiri"] as? Bool ?? false
-    //        store.cellular.lockAppCellularData = options["lockAppCellularData"] as? Bool ?? false
-    //        store.cellular.lockESIM = options["lockESIM"] as? Bool ?? false
-    //        store.appStore.denyInAppPurchases = options["denyInAppPurchases"] as? Bool ?? true
-    //        store.appStore.maximumRating = options["maximumRating"] as? Int ?? 1000
-    //        store.appStore.requirePasswordForPurchases = options["requirePasswordForPurchases"] as? Bool ?? true
-    //        store.media.denyExplicitContent = options["denyExplicitContent"] as? Bool ?? true
-    //        store.media.denyMusicService = options["denyMusicService"] as? Bool ?? false
-    //        store.media.denyBookstoreErotica = options["denyBookstoreErotica"] as? Bool ?? false
-    //        store.media.maximumMovieRating = options["maximumMovieRating"] as? Int ?? 1000
-    //        store.media.maximumTVShowRating = options["maximumTVShowRating"] as? Int ?? 1000
-    //        store.gameCenter.denyMultiplayerGaming = options["denyMultiplayerGaming"] as? Bool ?? false
-    //        store.gameCenter.denyAddingFriends = options["denyAddingFriends"] as? Bool ?? false
-    //    }
 }
 
 @available(iOS 16.0, *)
 extension DeviceActivityName {
-    static let daily = Self("daily")
-    static let weekly = Self("weekly")
+    static let daily = Self(AppConstants.DAILY)
+    static let weekly = Self(AppConstants.WEEKLY)
 }

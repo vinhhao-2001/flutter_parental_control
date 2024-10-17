@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_parental_control/constants/app_constants.dart';
 import 'package:flutter_parental_control/core/utils.dart';
@@ -44,6 +43,7 @@ class _ChildMapState extends State<ChildMap> {
     _loadSafeZone(widget.safeZoneInfo?.safeZone);
   }
 
+  /// Lấy phạm vi an toàn lúc khởi tạo map
   Future<void> _loadSafeZone(List<LatLng>? safeZonePoints) async {
     if (safeZonePoints != null) {
       setState(() {
@@ -62,6 +62,7 @@ class _ChildMapState extends State<ChildMap> {
     }
   }
 
+  /// Sự kiện khi nhấn 1 điểm trên bản đồ
   void _onMapTap(LatLng point) {
     if (_isDrawing) {
       setState(() {
@@ -70,6 +71,7 @@ class _ChildMapState extends State<ChildMap> {
     }
   }
 
+  /// Vẽ phạm vi an toàn từ các điểm được chọn trên map
   void _toggleDrawingMode() {
     setState(() {
       if (_isDrawing && _polygonPoints.length > 2) {
@@ -88,6 +90,7 @@ class _ChildMapState extends State<ChildMap> {
     });
   }
 
+  /// Cập nhật vị trí của trẻ
   Future<void> _updateChildLocation() async {
     updateAddress(childLocation);
     if (widget.childLocationFunc != null) {
@@ -150,7 +153,7 @@ class _ChildMapState extends State<ChildMap> {
               if (widget.childLocationFunc != null)
                 ElevatedButton(
                   onPressed: _updateChildLocation,
-                  child: Text(widget.updateButton ?? AppConstants.empty,
+                  child: Text(widget.updateButton ?? AppConstants.update,
                       style: const TextStyle(color: Colors.blue)),
                 ),
             ],
@@ -161,6 +164,7 @@ class _ChildMapState extends State<ChildMap> {
   }
 }
 
+/// Thông tin button vẽ phạm vi an toàn
 class SafeZoneButton {
   final String draw;
   final String safeZone;

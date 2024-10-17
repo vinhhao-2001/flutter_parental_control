@@ -9,7 +9,7 @@ import android.os.Build
 import android.provider.Settings
 import android.text.TextUtils
 
-import com.hao.flutter_parental_control.service.MyAccessibilityService
+import com.hao.flutter_parental_control.service.AccessibilityService
 
 class RequestPermissions(private val context: Context) {
 
@@ -28,7 +28,7 @@ class RequestPermissions(private val context: Context) {
         ) {
             openPermissionSettings(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:" + context.packageName)
+                Uri.parse(AppConstants.PACKAGE + AppConstants.COLON + context.packageName)
             )
         } else true
     }
@@ -51,12 +51,12 @@ class RequestPermissions(private val context: Context) {
 
     // Kiểm tra quyền trợ năng
     private fun isAccessibilityPermissionGranted(): Boolean {
-        val componentName = ComponentName(context, MyAccessibilityService::class.java)
+        val componentName = ComponentName(context, AccessibilityService::class.java)
         val enabledServicesSetting = Settings.Secure.getString(
             context.contentResolver,
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
         ) ?: AppConstants.EMPTY
-        val colonSplitter = TextUtils.SimpleStringSplitter(':')
+        val colonSplitter = TextUtils.SimpleStringSplitter(AppConstants.COLON)
         colonSplitter.setString(enabledServicesSetting)
 
         while (colonSplitter.hasNext()) {
