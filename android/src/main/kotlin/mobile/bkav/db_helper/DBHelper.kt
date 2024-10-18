@@ -1,13 +1,13 @@
-package com.hao.flutter_parental_control.db_helper
+package mobile.bkav.db_helper
 
 import android.content.Context
-import com.hao.flutter_parental_control.utils.AppConstants
-import com.hao.flutter_parental_control.utils.Utils
 import io.realm.Realm
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.Index
 import io.realm.annotations.PrimaryKey
+import mobile.bkav.utils.AppConstants
+import mobile.bkav.utils.Utils
 import org.bson.types.ObjectId
 
 object DBHelper {
@@ -96,8 +96,8 @@ object DBHelper {
                 realm.copyToRealmOrUpdate(OverlayView().apply {
                     this.id = if (id) 1 else 0
                     this.overlayView = overlayView
-                    this.nameBackButtonId = nameBackButtonId
-                    this.nameAskParentBtnId = nameAskParentBtnId
+                    this.backBtnId = nameBackButtonId
+                    this.askParentBtn = nameAskParentBtnId
                     this.overlayViewList = RealmList()
                 })
             }
@@ -156,7 +156,7 @@ open class OverlayView : RealmObject() {
 
     @Index
     var overlayView: String = AppConstants.EMPTY
-    var nameBackButtonId: String = AppConstants.EMPTY
-    var nameAskParentBtnId: String? = null
+    var backBtnId: String = AppConstants.EMPTY
+    var askParentBtn: String? = null
     var overlayViewList: RealmList<OverlayView>? = RealmList()
 }

@@ -1,6 +1,7 @@
-package com.hao.flutter_parental_control.model
+package mobile.bkav.models
 
-import com.hao.flutter_parental_control.utils.AppConstants
+import mobile.bkav.utils.AppConstants
+
 
 // Thông tin ứng dụng được cài đặt hoặc gỡ bỏ
 data class AppInstalledInfo(

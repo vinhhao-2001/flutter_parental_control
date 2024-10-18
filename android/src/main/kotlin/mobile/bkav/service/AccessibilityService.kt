@@ -1,17 +1,21 @@
-package com.hao.flutter_parental_control.service
+package mobile.bkav.service
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import android.net.Uri
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import com.hao.flutter_parental_control.db_helper.DBHelper
-import com.hao.flutter_parental_control.model.SupportedBrowserConfig
-import com.hao.flutter_parental_control.overlay.Overlay
-import com.hao.flutter_parental_control.utils.AppConstants
-import com.hao.flutter_parental_control.utils.Utils
+import mobile.bkav.db_helper.DBHelper
+import mobile.bkav.models.SupportedBrowserConfig
+import mobile.bkav.overlay.Overlay
+import mobile.bkav.utils.AppConstants
+import mobile.bkav.utils.Utils
+
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodChannel
+
+
+
 // Dịch vụ trợ năng
 class AccessibilityService : AccessibilityService() {
 
@@ -72,11 +76,11 @@ class AccessibilityService : AccessibilityService() {
                 if (overlay != null) {
                     Overlay(this).showOverlay(
                         overlay.overlayView,
-                        overlay.nameBackButtonId,
-                        overlay.nameAskParentBtnId
+                        overlay.backBtnId,
+                        overlay.askParentBtn
                     ) {
                         Utils().openApp(applicationContext)
-                        channel.invokeMethod(AppConstants.ASK_PARENT_METHOD)
+                        channel.invokeMethod(AppConstants.ASK_PARENT_METHOD, null)
                     }
                 } else {
                     Overlay(this).showOverlay(false)
@@ -90,14 +94,17 @@ class AccessibilityService : AccessibilityService() {
             if (overlay != null) {
                 Overlay(this).showOverlay(
                     overlay.overlayView,
-                    overlay.nameBackButtonId,
-                    overlay.nameAskParentBtnId
+                    overlay.backBtnId,
+                    overlay.askParentBtn
                 ) {
                     Utils().openApp(applicationContext)
-                    channel.invokeMethod(AppConstants.ASK_PARENT_METHOD)
+                    channel.invokeMethod(AppConstants.ASK_PARENT_METHOD, null)
                 }
             } else {
-                Overlay(this).showOverlay(false)
+                Overlay(this).showOverlay(true){
+                    Utils().openApp(applicationContext)
+                    channel.invokeMethod(AppConstants.ASK_PARENT_METHOD, null)
+                }
             }
         }
     }

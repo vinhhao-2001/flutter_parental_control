@@ -1,12 +1,12 @@
-package com.hao.flutter_parental_control.model
+package mobile.bkav.models
 
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import com.hao.flutter_parental_control.utils.AppConstants
-import com.hao.flutter_parental_control.utils.Utils
+import mobile.bkav.utils.AppConstants
+import mobile.bkav.utils.Utils
 import java.util.Calendar
 
 // Thông tin thời gian sử dụng

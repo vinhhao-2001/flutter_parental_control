@@ -1,15 +1,8 @@
-package com.hao.flutter_parental_control
+package mobile.bkav.flutter_parental_control
 
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.NonNull
-import com.hao.flutter_parental_control.db_helper.DBHelper
-import com.hao.flutter_parental_control.model.AppUsageInfo
-import com.hao.flutter_parental_control.model.DeviceInfo
-import com.hao.flutter_parental_control.service.AccessibilityService
-import com.hao.flutter_parental_control.service.InstallAppService
-import com.hao.flutter_parental_control.utils.AppConstants
-import com.hao.flutter_parental_control.utils.RequestPermissions
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
@@ -17,6 +10,13 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.realm.Realm
 import io.realm.RealmConfiguration
+import mobile.bkav.db_helper.DBHelper
+import mobile.bkav.models.AppUsageInfo
+import mobile.bkav.models.DeviceInfo
+import mobile.bkav.service.AccessibilityService
+import mobile.bkav.service.InstallAppService
+import mobile.bkav.utils.AppConstants
+import mobile.bkav.utils.RequestPermissions
 
 
 /** FlutterParentalControlPlugin */
@@ -113,7 +113,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                     1 -> result.success(requestPermissions.requestAccessibilityPermission())
                     2 -> result.success(requestPermissions.requestOverlayPermission())
                     3 -> result.success(requestPermissions.requestUsageStatsPermissions())
-                    else -> result.error("INVALID_TYPE", null, null)
+                    else -> result.error(AppConstants.ERROR_TYPE_PERMISSION, null, null)
                 }
             }
 
@@ -121,9 +121,11 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                 // lấy thông tin overlay từ flutter và lưu vào db
                 val id = call.argument<Boolean>(AppConstants.ID)
                 val overlayView = call.argument<String>(AppConstants.OVERLAY_VIEW)
-                val nameBackButtonId = call.argument<String>(AppConstants.BACK_BTN)
-                val nameAskParentBtnId = call.argument<String?>(AppConstants.ASK_PARENT_BTN)
-                DBHelper.insertOverlayView(id, overlayView, nameBackButtonId, nameAskParentBtnId)
+                val backBtn = call.argument<String>(AppConstants.BACK_BTN)
+                val askParentBtn = call.argument<String?>(AppConstants.ASK_PARENT_BTN)
+                if (id != null && overlayView != null && backBtn != null) {
+                    DBHelper.insertOverlayView(id, overlayView, backBtn, askParentBtn)
+                }
                 result.success(AppConstants.EMPTY)
             }
 

@@ -1,4 +1,4 @@
-package com.hao.flutter_parental_control.utils
+package mobile.bkav.utils
 
 import android.content.Context
 import android.content.Intent

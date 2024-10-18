@@ -1,11 +1,11 @@
-package com.hao.flutter_parental_control.model
+package mobile.bkav.models
 
 import android.content.Context
 import android.media.AudioManager
 import android.os.BatteryManager
 import android.os.Build
 import android.provider.Settings
-import com.hao.flutter_parental_control.utils.AppConstants
+import mobile.bkav.utils.AppConstants
 
 // Thông tin thiết bị
 data class DeviceInfo(

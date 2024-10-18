@@ -1,4 +1,4 @@
-package com.hao.flutter_parental_control.utils
+package mobile.bkav.utils
 
 class AppConstants {
     companion object {
@@ -71,5 +71,8 @@ class AppConstants {
         const val DRAWABLE = "drawable"
         const val LAYOUT = "layout"
         const val ID = "id"
+
+        // error
+        const val ERROR_TYPE_PERMISSION = "INVALID_TYPE"
     }
 }

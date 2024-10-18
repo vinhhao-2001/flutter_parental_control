@@ -24,7 +24,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.hao.flutter_parental_control
+        package: mobile.bkav.flutter_parental_control
         pluginClass: FlutterParentalControlPlugin
       ios:
         pluginClass: FlutterParentalControlPlugin

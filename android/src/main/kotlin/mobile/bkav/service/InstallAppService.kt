@@ -1,4 +1,4 @@
-package com.hao.flutter_parental_control.service
+package mobile.bkav.service
 
 import android.app.Service
 import android.content.BroadcastReceiver
@@ -6,10 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.IBinder
-import com.hao.flutter_parental_control.FlutterParentalControlPlugin
-import com.hao.flutter_parental_control.model.AppInstalledInfo
-import com.hao.flutter_parental_control.utils.AppConstants
-import com.hao.flutter_parental_control.utils.Utils
+import mobile.bkav.flutter_parental_control.FlutterParentalControlPlugin
+import mobile.bkav.models.AppInstalledInfo
+import mobile.bkav.utils.AppConstants
+import mobile.bkav.utils.Utils
 
 class InstallAppService : Service() {
 

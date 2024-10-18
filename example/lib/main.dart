@@ -1,5 +1,5 @@
+import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_parental_control/flutter_parental_control.dart';
 import 'package:flutter_parental_control_example/child_location_screen.dart';
@@ -28,6 +28,7 @@ class LoggingServicePage extends StatefulWidget {
 
 class _LoggingServicePageState extends State<LoggingServicePage> {
   final TextEditingController _controller = TextEditingController();
+  late DeviceInfo deviceInfo;
   @override
   void initState() {
     super.initState();
@@ -35,17 +36,18 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
   }
 
   Future<void> android() async {
+    ParentalControl.askParent();
     ParentalControl.requestPermission(Permission.accessibility);
     ParentalControl.requestPermission(Permission.overlay);
     ParentalControl.setListAppBlocked(
         ['com.google.android.youtube', 'com.google.android.deskclock']);
-    ParentalControl.askParent();
+    final deviceInfo = await ParentalControl.getDeviceInfo();
+    print(deviceInfo.deviceId);
   }
 
   Future<void> ios() async {
-    final a = await ParentalControl.getDeviceInfo();
+    deviceInfo = await ParentalControl.getDeviceInfo();
     await ParentalControl.scheduleMonitorSettings(false);
-    print(a.deviceId);
   }
 
   @override
@@ -65,10 +67,10 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const ChildLocationScreen()));
+                // Navigator.pushReplacement(
+                //     context,
+                //     MaterialPageRoute(
+                //         builder: (_) => const ChildLocationScreen()));
               },
               child: const Text('Set Log Value'),
             ),

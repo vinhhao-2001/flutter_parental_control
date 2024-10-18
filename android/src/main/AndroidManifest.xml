@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.hao.flutter_parental_control">
+    package="mobile.bkav">
     <!-- Quyền truy cập vào thông tin sử dụng -->
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"

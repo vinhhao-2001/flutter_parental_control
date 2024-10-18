@@ -1,4 +1,4 @@
-package com.hao.flutter_parental_control.utils
+package mobile.bkav.utils
 
 import android.app.AppOpsManager
 import android.content.ComponentName
@@ -9,7 +9,7 @@ import android.os.Build
 import android.provider.Settings
 import android.text.TextUtils
 
-import com.hao.flutter_parental_control.service.AccessibilityService
+import mobile.bkav.service.AccessibilityService
 
 class RequestPermissions(private val context: Context) {
 

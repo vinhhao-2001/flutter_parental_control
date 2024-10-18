@@ -1,6 +1,7 @@
-package com.hao.flutter_parental_control.model
+package mobile.bkav.models
 
-import com.hao.flutter_parental_control.utils.AppConstants
+import mobile.bkav.utils.AppConstants
+
 
 class SupportedBrowserConfig(val packageName: String, val addressBarId: String) {
     // Cấu hình danh sách các trình duyệt được hỗ trợ
