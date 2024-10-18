@@ -46,4 +46,21 @@ class DeviceInfo {
       deviceId: map[AppConstants.deviceId] as String?,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      AppConstants.systemName: systemName,
+      AppConstants.deviceName: deviceName,
+      AppConstants.deviceManufacturer: deviceManufacturer,
+      AppConstants.deviceVersion: deviceVersion,
+      AppConstants.deviceApiLevel: deviceApiLevel,
+      AppConstants.deviceBoard: deviceBoard,
+      AppConstants.deviceHardware: deviceHardware,
+      AppConstants.deviceDisplay: deviceDisplay,
+      AppConstants.batteryLevel: batteryLevel,
+      AppConstants.screenBrightness: screenBrightness,
+      AppConstants.volume: volume,
+      AppConstants.deviceId: deviceId,
+    };
+  }
 }
