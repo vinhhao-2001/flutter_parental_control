@@ -34,14 +34,13 @@ class AppConstants {
         const val GET_WEB_HISTORY = "getWebHistoryMethod"
         const val REQUEST_PERMISSION = "permissionMethod"
         const val OVERLAY_METHOD = "overlayMethod"
-        const val  ASK_PARENT_METHOD = "askParentMethod"
+        const val ASK_PARENT_METHOD = "askParentMethod"
 
         // key
         const val REALM_NAME = "realm-db"
         const val BLOCK_APPS = "blockApps"
         const val BLOCK_WEBSITES = "blockWebsites"
         const val TYPE_PERMISSION = "typePermission"
-
         const val APP_NAME = "appName"
         const val PACKAGE_NAME = "packageName"
         const val APP_ICON = "appIcon"
@@ -49,6 +48,9 @@ class AppConstants {
         const val USAGE_TIME = "usageTime"
         const val SEARCH_QUERY = "searchQuery"
         const val VISITED_TIME = "visitedTime"
+        const val OVERLAY_VIEW = "overlayView";
+        const val BACK_BTN = "backButton";
+        const val ASK_PARENT_BTN = "askParentBtn";
 
         // key device info
         const val SYSTEM_NAME = "systemName"
@@ -65,10 +67,9 @@ class AppConstants {
         const val VOLUME = "volume"
         const val DEVICE_ID = "deviceId"
 
-        // tyoe view của người dùng
+        // type view của người dùng
         const val DRAWABLE = "drawable"
         const val LAYOUT = "layout"
         const val ID = "id"
-        const val STRING = "string"
     }
 }

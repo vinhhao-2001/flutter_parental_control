@@ -19,7 +19,6 @@ class _ChildLocationScreenState extends State<ChildLocationScreen> {
   @override
   void initState() {
     super.initState();
-    getChildLocal();
     _mapController?.animateCamera(
         CameraUpdate.newCameraPosition(CameraPosition(target: childLocation)));
   }
@@ -48,8 +47,9 @@ class _ChildLocationScreenState extends State<ChildLocationScreen> {
                   const LatLng(21.02619022753218, 105.8126801997423),
                 ],
               ),
-              childLocationFunc: getChildLocal,
-              //  safeZoneButton: SafeZoneButton('Xác nhận', 'Vùng an toàn'),
+              childLocationFunc: updateChildLocationFunc,
+              safeZoneButton: SafeZoneButton('Xác nhận', 'Vùng an toàn'),
+              safeZonePointsFunc: safeZonePointsFunc,
             ),
           ),
           Padding(
@@ -72,14 +72,19 @@ class _ChildLocationScreenState extends State<ChildLocationScreen> {
     );
   }
 
-  Future<LatLng> getChildLocal() async {
+  // hàm demo cập nhật vị trí của trẻ
+  Future<LatLng> updateChildLocationFunc() async {
     const childLocation = LatLng(21.025693906586127, 105.78575260936253);
     final add = await updateAddress(childLocation);
     setState(() {
-      address =
-          '${add.subAdminArea}, ${add.adminArea}, ${add.country}';
+      address = '${add.subAdminArea}, ${add.adminArea}, ${add.country}';
     });
     return childLocation;
+  }
+
+  // hàm demo sử dụng các điểm của phạm vi an toàn
+  void safeZonePointsFunc(List<LatLng> safeZonePoints) {
+    print('Các điểm của phạm vi an toàn: $safeZonePoints');
   }
 
   static const icon =

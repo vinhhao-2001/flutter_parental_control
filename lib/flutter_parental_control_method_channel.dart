@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'constants/app_constants.dart';
+import 'core/app_constants.dart';
 import 'flutter_parental_control_platform_interface.dart';
 
 class MethodChannelFlutterParentalControl
@@ -9,7 +9,7 @@ class MethodChannelFlutterParentalControl
   @visibleForTesting
   final methodChannel = const MethodChannel(AppConstants.methodChannel);
 
-  // Event channel
+  /// Event channel
   @visibleForTesting
   final eventChannel = const EventChannel(AppConstants.eventChannel);
 
@@ -32,7 +32,7 @@ class MethodChannelFlutterParentalControl
   @override
   Future<void> askParent() async {
     methodChannel.setMethodCallHandler((MethodCall call) async {
-      if (call.method == AppConstants.askParent) {
+      if (call.method == AppConstants.askParentMethod) {
         debugPrint("Sự kiện hỏi ý kiến phụ huynh");
       }
     });
@@ -79,6 +79,17 @@ class MethodChannelFlutterParentalControl
     final List<dynamic> data =
         await methodChannel.invokeMethod(AppConstants.getWebHistory);
     return data.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+  }
+
+  @override
+  Future<void> setOverlayView(bool id, String overlayView,
+      {String? backBtnId, String? askParentBtnId}) async {
+    await methodChannel.invokeMethod(AppConstants.overlayMethod, {
+      AppConstants.id: id,
+      AppConstants.overlayView: overlayView,
+      AppConstants.backBtn: backBtnId,
+      AppConstants.askParentBtn: askParentBtnId,
+    });
   }
 
   /// các sự kiện trên [ios]

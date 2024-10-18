@@ -94,7 +94,7 @@ object DBHelper {
         Realm.getDefaultInstance().use { realm ->
             realm.executeTransaction {
                 realm.copyToRealmOrUpdate(OverlayView().apply {
-                    this.id = id
+                    this.id = if (id) 1 else 0
                     this.overlayView = overlayView
                     this.nameBackButtonId = nameBackButtonId
                     this.nameAskParentBtnId = nameAskParentBtnId
@@ -106,8 +106,9 @@ object DBHelper {
 
     fun getOverlayView(isBlock: Boolean): OverlayView? {
         // Lấy overlay view theo id
+        val id = if (isBlock) 1 else 0
         Realm.getDefaultInstance().use { realm ->
-            return realm.where(OverlayView::class.java).equalTo(AppConstants.ID, isBlock)
+            return realm.where(OverlayView::class.java).equalTo(AppConstants.ID, id)
                 .findFirst()
         }
     }
@@ -151,7 +152,7 @@ open class WebHistory : RealmObject() {
 
 open class OverlayView : RealmObject() {
     @PrimaryKey
-    var id: Boolean = false
+    var id: Int = 0
 
     @Index
     var overlayView: String = AppConstants.EMPTY

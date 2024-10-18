@@ -6,8 +6,8 @@ import androidx.annotation.NonNull
 import com.hao.flutter_parental_control.db_helper.DBHelper
 import com.hao.flutter_parental_control.model.AppUsageInfo
 import com.hao.flutter_parental_control.model.DeviceInfo
-import com.hao.flutter_parental_control.service.InstallAppService
 import com.hao.flutter_parental_control.service.AccessibilityService
+import com.hao.flutter_parental_control.service.InstallAppService
 import com.hao.flutter_parental_control.utils.AppConstants
 import com.hao.flutter_parental_control.utils.RequestPermissions
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -119,10 +119,10 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
 
             AppConstants.OVERLAY_METHOD -> {
                 // lấy thông tin overlay từ flutter và lưu vào db
-                val id = call.argument<Boolean>(AppConstants.PACKAGE)
-                val overlayView = call.argument<String>(AppConstants.PACKAGE)
-                val nameBackButtonId = call.argument<String>(AppConstants.PACKAGE)
-                val nameAskParentBtnId = call.argument<String?>(AppConstants.PACKAGE)
+                val id = call.argument<Boolean>(AppConstants.ID)
+                val overlayView = call.argument<String>(AppConstants.OVERLAY_VIEW)
+                val nameBackButtonId = call.argument<String>(AppConstants.BACK_BTN)
+                val nameAskParentBtnId = call.argument<String?>(AppConstants.ASK_PARENT_BTN)
                 DBHelper.insertOverlayView(id, overlayView, nameBackButtonId, nameAskParentBtnId)
                 result.success(AppConstants.EMPTY)
             }

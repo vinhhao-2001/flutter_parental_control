@@ -17,7 +17,8 @@ class AppConstants {
   static const String limitAppMethod = 'limitAppMethod';
   static const String settingMonitorMethod = 'settingMonitorMethod';
   static const String getWebHistory = 'getWebHistoryMethod';
-  static const String askParent = 'askParentMethod';
+  static const String overlayMethod = 'overlayMethod';
+  static const String askParentMethod = 'askParentMethod';
 
   /// key data channel
   static const String blockApps = 'blockApps';
@@ -54,6 +55,11 @@ class AppConstants {
 
   static const String searchQuery = 'searchQuery';
   static const String visitedTime = 'visitedTime';
+
+  static const String id = 'id';
+  static const String overlayView = 'overlayView';
+  static const String backBtn = 'backButton';
+  static const String askParentBtn = 'askParentBtn';
 
   /// cài đặt thời gian hạn chế [ios]
   static const String isMonitoring = 'isMonitoring';

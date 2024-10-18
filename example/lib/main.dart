@@ -36,12 +36,16 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
 
   Future<void> android() async {
     ParentalControl.requestPermission(Permission.accessibility);
-    ParentalControl.setListAppBlocked(['com.google.android.youtube', 'com.google.android.deskclock']);
+    ParentalControl.requestPermission(Permission.overlay);
+    ParentalControl.setListAppBlocked(
+        ['com.google.android.youtube', 'com.google.android.deskclock']);
     ParentalControl.askParent();
   }
 
   Future<void> ios() async {
-      await ParentalControl.scheduleMonitorSettings(false);
+    final a = await ParentalControl.getDeviceInfo();
+    await ParentalControl.scheduleMonitorSettings(false);
+    print(a.deviceId);
   }
 
   @override

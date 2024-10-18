@@ -61,7 +61,7 @@ class AccessibilityService : AccessibilityService() {
 
 
     private fun handleLauncherEvent(accessibilityEvent: AccessibilityEvent) {
-        // Kiểm tra sự kiện khi người dùng nhấn vào ứng dụng
+        // Kiểm tra sự kiện khi người dùng nhấn vào ứng dụng ở màn hình chính
         val contentDescription = accessibilityEvent.contentDescription?.toString() ?: return
 
         // Kiểm tra sự kiện người dùng muốn xóa ứng dụng

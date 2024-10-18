@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'constants/app_constants.dart';
+import 'core/app_constants.dart';
 import 'flutter_parental_control_platform_interface.dart';
 
 part 'model/app_usage_info.dart';
@@ -62,6 +62,18 @@ class ParentalControl {
     final result =
         await FlutterParentalControlPlatform.instance.getWebHistory();
     return result.map((app) => WebHistory.fromMap(app)).toList();
+  }
+
+  /// Thiết view của người dùng plugin cho ứng dụng đó
+  /// Sử dụng khi ứng dụng được khởi tạo hoặc trước khi bật dịch vụ trợ năng
+  static Future<void> setOverlayView(bool id, String overlayView,
+      {String? backBtnId, String? askParentBtnId}) async {
+    await FlutterParentalControlPlatform.instance.setOverlayView(
+      id,
+      overlayView,
+      backBtnId: backBtnId,
+      askParentBtnId: askParentBtnId,
+    );
   }
 
   /// các phần chỉ dùng được trên [Ios]

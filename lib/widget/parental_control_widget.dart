@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter_parental_control/constants/app_constants.dart';
+import 'package:flutter_parental_control/core/app_constants.dart';
 import 'package:flutter_parental_control/core/utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
@@ -9,20 +9,24 @@ part 'address.dart';
 part 'child_info.dart';
 part 'safe_zone_info.dart';
 
+/// Widget là bản đồ hiển thị  vị trí của trẻ
+/// Hiển thị phạm vi an toàn của trẻ
 class ChildMap extends StatefulWidget {
   final ChildInfo? childInfo;
   final SafeZoneInfo? safeZoneInfo;
   final String? updateButton;
   final SafeZoneButton? safeZoneButton;
   final Future<LatLng> Function()? childLocationFunc;
+  final Function(List<LatLng>)? safeZonePointsFunc;
 
   const ChildMap({
     super.key,
     this.childInfo,
     this.safeZoneInfo,
-    this.childLocationFunc,
     this.updateButton,
     this.safeZoneButton,
+    this.childLocationFunc,
+    this.safeZonePointsFunc,
   });
 
   @override
@@ -38,6 +42,7 @@ class _ChildMapState extends State<ChildMap> {
 
   @override
   void initState() {
+    /// Thực hiện khi widget được khởi tạo
     super.initState();
     childLocation = widget.childInfo?.childLocation ?? const LatLng(0.0, 0.0);
     _loadSafeZone(widget.safeZoneInfo?.safeZone);
@@ -84,6 +89,9 @@ class _ChildMapState extends State<ChildMap> {
           strokeWidth: 2,
           fillColor: Colors.blue.withOpacity(0.5),
         ));
+        if (widget.safeZonePointsFunc != null) {
+          widget.safeZonePointsFunc!(convexHullPoints);
+        }
       }
       _polygonPoints.clear();
       _isDrawing = !_isDrawing;

@@ -1,5 +1,4 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-
 import 'flutter_parental_control_method_channel.dart';
 
 abstract class FlutterParentalControlPlatform extends PlatformInterface {
@@ -54,6 +53,11 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
     throw UnimplementedError('getWebHistory() has not been implemented.');
   }
 
+  Future<void> setOverlayView(bool id, String overlayView,
+      {String? backBtnId, String? askParentBtnId}) {
+    throw UnimplementedError('setOverlayView() has not been implemented.');
+  }
+
   /// Các phần chỉ dùng được trên [Ios]
   /// Hàm kiểm tra quyền kiểm soát của phụ huynh
   Future<void> checkParentControlPermission() {
@@ -61,16 +65,19 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
         'checkParentControlPermission() has not been implemented.');
   }
 
+  /// Thiết lập thời gian giám sát thiết bị
   Future<void> scheduleMonitorSettings(bool isMonitoring,
       {int? startHour, int? startMinute, int? endHour, int? endMinute}) {
     throw UnimplementedError(
         'scheduleMonitorSettings() has not been implemented.');
   }
 
+  /// Giới hạn ứng dụng
   Future<void> limitedApp() {
     throw UnimplementedError('limitedApp() has not been implemented.');
   }
 
+  /// Cài đặt giám sát thiết bị
   Future<void> settingMonitor({
     bool? requireAutomaticDateAndTime,
     bool? lockAccounts,
