@@ -16,4 +16,10 @@ class WebHistory {
       visitedTime: map[AppConstants.visitedTime],
     );
   }
+  Map<String, dynamic> toMap() {
+    return {
+      AppConstants.searchQuery: searchQuery,
+      AppConstants.visitedTime: visitedTime,
+    };
+  }
 }

@@ -42,7 +42,7 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
     ParentalControl.setListAppBlocked(
         ['com.google.android.youtube', 'com.google.android.deskclock']);
     final deviceInfo = await ParentalControl.getDeviceInfo();
-    print(deviceInfo.deviceId);
+    print(deviceInfo.toMap());
   }
 
   Future<void> ios() async {

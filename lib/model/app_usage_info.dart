@@ -24,4 +24,12 @@ class AppUsageInfo {
       usageTime: map[AppConstants.usageTime],
     );
   }
+  Map<String, dynamic> toMap() {
+    return {
+      AppConstants.appName: appName,
+      AppConstants.packageName: packageName,
+      AppConstants.appIcon: appIcon,
+      AppConstants.usageTime: usageTime,
+    };
+  }
 }

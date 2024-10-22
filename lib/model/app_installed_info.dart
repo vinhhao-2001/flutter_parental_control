@@ -18,10 +18,18 @@ class AppInstalledInfo {
     String iconBase64 =
         base64Encode(Uint8List.fromList(map[AppConstants.appIcon].cast<int>()));
     return AppInstalledInfo(
+      isInstalled: map[AppConstants.isInstalled],
       appName: map[AppConstants.appName],
       packageName: map[AppConstants.packageName],
-      isInstalled: map[AppConstants.isInstalled],
       appIcon: iconBase64,
     );
+  }
+  Map<String, dynamic> toMap() {
+    return {
+      AppConstants.isInstalled: isInstalled,
+      AppConstants.appName: appName,
+      AppConstants.packageName: packageName,
+      AppConstants.appIcon: appIcon,
+    };
   }
 }
