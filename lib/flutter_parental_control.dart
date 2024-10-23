@@ -54,7 +54,7 @@ class ParentalControl {
   /// Lắng nghe và lấy thông tin ứng dụng bị cài đặt hoặc gỡ bỏ
   static Stream<AppInstalledInfo> listenAppInstalledInfo() {
     final result = FlutterParentalControlPlatform.instance.listenAppInstalled();
-    return result.map((data) => AppInstalledInfo.map(data));
+    return result.map((data) => AppInstalledInfo.fromMap(data));
   }
 
   /// Lấy lịch sử duyệt web trên trình duyệt
