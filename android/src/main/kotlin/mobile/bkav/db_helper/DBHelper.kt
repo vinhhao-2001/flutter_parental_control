@@ -11,33 +11,33 @@ import mobile.bkav.utils.Utils
 import org.bson.types.ObjectId
 
 object DBHelper {
-    fun insertListAppBlock(context: Context, appList: List<String>) {
+    fun insertListAppBlock(context: Context, appList: List<Map<String, Any>>) {
         // Thêm danh sách tên ứng dụng bị chặn vào DB
         Realm.getDefaultInstance().use { realm ->
             realm.executeTransaction {
                 realm.delete(BlockedApp::class.java)
-                appList.forEach { packageName ->
-                    val appName = Utils().getAppName(context, packageName)
-                    if (appName != null) {
-                        realm.copyToRealmOrUpdate(BlockedApp().apply {
-                            this.appName = appName
-                            blockedAppList = RealmList()
-                        })
-                    }
+                appList.forEach { map ->
+                    // Chuyển map thành object để lưu vào Realm
+                    val app = BlockedApp().fromMap(context, map)
+                    if (app != null)
+                        realm.copyToRealmOrUpdate(app)
                 }
             }
         }
     }
 
-    fun isAppBlocked(appName: String): Boolean {
-        // Kiểm tra tên ứng dụng có bị chặn hay không
+    fun isAppBlocked(context: Context, appName: String): Boolean {
         Realm.getDefaultInstance().use { realm ->
-            val blockedApp =
-                realm.where(BlockedApp::class.java).equalTo(AppConstants.APP_NAME, appName)
-                    .findFirst()
-            return blockedApp != null
+            val app: BlockedApp = realm.where(BlockedApp::class.java)
+                .equalTo(AppConstants.APP_NAME, appName)
+                .findFirst() ?: return false
+            val timeLimit = app.timeLimit
+            if (timeLimit == 0) return true
+            val timeUse = Utils().getAppUsageTimeInMinutes(context, app.packageName)
+            return timeUse >= timeLimit
         }
     }
+
 
     fun insertListWebBlock(webList: List<String>) {
         // Thêm danh sách tên website bị chặn vào DB
@@ -121,7 +121,21 @@ open class BlockedApp : RealmObject() {
 
     @Index
     var appName: String = AppConstants.EMPTY
-    var blockedAppList: RealmList<BlockedApp>? = RealmList()
+    var packageName: String = AppConstants.EMPTY
+    var timeLimit: Int = 0 // 24 hours in minutes
+    private var blockedAppList: RealmList<BlockedApp>? = RealmList()
+
+    // Chuyển map thành object
+    fun fromMap(context: Context, map: Map<String, Any>): BlockedApp? {
+        val appName =
+            Utils().getAppName(context, map[AppConstants.PACKAGE_NAME] as String) ?: return null
+        return BlockedApp().apply {
+            this.appName = appName
+            this.packageName = map[AppConstants.PACKAGE_NAME] as String
+            this.timeLimit = map[AppConstants.TIME_LIMIT] as Int
+            blockedAppList = RealmList()
+        }
+    }
 }
 
 open class BlockedWebsite : RealmObject() {

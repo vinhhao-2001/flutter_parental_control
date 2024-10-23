@@ -89,7 +89,7 @@ class AccessibilityService : AccessibilityService() {
         }
 
         // Kiểm tra nếu ứng dụng bị chặn
-        if (DBHelper.isAppBlocked(contentDescription)) {
+        if (DBHelper.isAppBlocked(context = applicationContext, contentDescription)) {
             val overlay = DBHelper.getOverlayView(true)
             if (overlay != null) {
                 Overlay(this).showOverlay(

@@ -7,6 +7,7 @@ part 'model/app_usage_info.dart';
 part 'model/device_info.dart';
 part 'model/app_installed_info.dart';
 part 'model/web_history.dart';
+part 'model/app_block.dart';
 
 class ParentalControl {
   /// Lấy thông tin thiết bị, có sự khác nhau giữa Android và Ios
@@ -37,8 +38,10 @@ class ParentalControl {
   }
 
   /// Thiết lập danh sách ứng dụng bị giới hạn
-  static Future<void> setListAppBlocked(List<String> listApp) async {
-    await FlutterParentalControlPlatform.instance.setListAppBlocked(listApp);
+  static Future<void> setListAppBlocked(List<AppBlock> listApp) async {
+    final listAppBlock = listApp.map((app) => app.toMap()).toList();
+    await FlutterParentalControlPlatform.instance
+        .setListAppBlocked(listAppBlock);
   }
 
   /// Thiết lập danh sách nội dung web bị giới hạn

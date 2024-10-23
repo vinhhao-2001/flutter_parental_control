@@ -45,6 +45,7 @@ class AppConstants {
         const val PACKAGE_NAME = "packageName"
         const val APP_ICON = "appIcon"
         const val IS_INSTALLED = "isInstalled"
+        const val TIME_LIMIT = "timeLimit"
         const val USAGE_TIME = "usageTime"
         const val SEARCH_QUERY = "searchQuery"
         const val VISITED_TIME = "visitedTime"

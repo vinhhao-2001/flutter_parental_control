@@ -48,7 +48,7 @@ class MethodChannelFlutterParentalControl
 
   /// Tạo danh sách các ứng dụng bị chặn
   @override
-  Future<void> setListAppBlocked(List<String> listApp) async {
+  Future<void> setListAppBlocked(List<Map<String, dynamic>> listApp) async {
     await methodChannel.invokeMethod(
         AppConstants.blockAppMethod, {AppConstants.blockApps: listApp});
   }

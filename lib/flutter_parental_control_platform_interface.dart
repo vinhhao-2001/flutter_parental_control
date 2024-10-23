@@ -29,7 +29,7 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
     throw UnimplementedError('getAppUsageInfo() has not been implemented.');
   }
 
-  Future<void> setListAppBlocked(List<String> listApp) {
+  Future<void> setListAppBlocked(List<Map<String, dynamic>> listApp) {
     throw UnimplementedError('setListAppBlocked() has not been implemented.');
   }
 

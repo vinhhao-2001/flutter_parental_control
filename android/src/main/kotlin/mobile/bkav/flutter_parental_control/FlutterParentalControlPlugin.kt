@@ -79,7 +79,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
             AppConstants.BLOCK_APP_METHOD -> {
                 // Thêm ứng dụng bị chặn vào danh sách ứng dụng bị chặn
                 val blockApps =
-                    call.argument<List<String>>(AppConstants.BLOCK_APPS) ?: emptyList<String>()
+                    call.argument<List<Map<String, Any>>>(AppConstants.BLOCK_APPS) ?: emptyList<Map<String, Any>>()
                 DBHelper.insertListAppBlock(context, blockApps)
                 result.success(AppConstants.EMPTY)
             }

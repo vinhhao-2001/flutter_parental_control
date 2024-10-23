@@ -1,5 +1,6 @@
 package mobile.bkav.utils
 
+import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import java.io.ByteArrayOutputStream
+import java.util.Calendar
 
 class Utils {
     // Hàm chuyển đổi drawable thành ByteArray
@@ -51,7 +53,31 @@ class Utils {
         return stream.toByteArray()
     }
 
-    // Lấy tên ứng dụng
+    // Lấy thời gian sử dụng của ứng dụng
+    fun getAppUsageTimeInMinutes(context: Context, packageName: String): Int {
+        val startTime = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+        }.timeInMillis
+
+        val endTime = System.currentTimeMillis()
+
+        val usageStatsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            context.getSystemService(Context.USAGE_STATS_SERVICE)
+                    as UsageStatsManager
+        } else {
+            return 0
+        }
+
+        val usageStatsList =
+            usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
+        val appUsageStats = usageStatsList.find { it.packageName == packageName }
+        return appUsageStats?.totalTimeInForeground?.div(1000)?.div(60)?.toInt() ?: 0
+    }
+
+
+    // Lấy tên ứng dụng này
     fun getApplicationName(context: Context): String {
         val applicationInfo = context.applicationInfo
         val stringId = applicationInfo.labelRes
@@ -84,15 +110,19 @@ class Utils {
         }
     }
 
-
     // Lấy tài nguyên từ ứng dụng
     fun getResource(resourceName: String, context: Context): Int {
-        return context.resources.getIdentifier(resourceName, AppConstants.DRAWABLE, context.packageName)
+        return context.resources.getIdentifier(
+            resourceName,
+            AppConstants.DRAWABLE,
+            context.packageName
+        )
     }
 
     // Lấy view từ ứng dụng
     fun getView(viewName: String, context: Context): View {
-        val layoutId = context.resources.getIdentifier(viewName, AppConstants.LAYOUT, context.packageName)
+        val layoutId =
+            context.resources.getIdentifier(viewName, AppConstants.LAYOUT, context.packageName)
         return LayoutInflater.from(context).inflate(layoutId, null)
     }
 

@@ -44,6 +44,7 @@ class AppConstants {
   static const String packageName = 'packageName';
   static const String isInstalled = 'isInstalled';
   static const String usageTime = 'usageTime';
+  static const String timeLimit = 'timeLimit';
 
   static const String name = 'name';
   static const String street = 'street';

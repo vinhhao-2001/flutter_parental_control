@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_parental_control/flutter_parental_control.dart';
-import 'package:flutter_parental_control_example/child_location_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -37,12 +35,13 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
 
   Future<void> android() async {
     ParentalControl.askParent();
-    ParentalControl.requestPermission(Permission.accessibility);
-    ParentalControl.requestPermission(Permission.overlay);
-    ParentalControl.setListAppBlocked(
-        ['com.google.android.youtube', 'com.google.android.deskclock']);
-    final deviceInfo = await ParentalControl.getDeviceInfo();
-    print(deviceInfo.toMap());
+    await ParentalControl.requestPermission(Permission.accessibility);
+    await ParentalControl.requestPermission(Permission.overlay);
+    await ParentalControl.requestPermission(Permission.usageState);
+    ParentalControl.setListAppBlocked([
+      AppBlock(packageName: 'com.android.camera2', timeLimit: 0),
+      AppBlock(packageName: 'com.android.contacts', timeLimit: 1440),
+    ]);
   }
 
   Future<void> ios() async {
