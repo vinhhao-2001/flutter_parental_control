@@ -6,7 +6,7 @@ class AppBlock {
 
   AppBlock({
     required this.packageName,
-    this.timeLimit,
+    this.timeLimit = 0,
   });
 
   factory AppBlock.fromMap(Map<String, dynamic> map) {
