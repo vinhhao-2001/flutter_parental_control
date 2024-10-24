@@ -35,6 +35,7 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
   }
 
   Future<void> android() async {
+    ParentalControl.checkPermission();
     ParentalControl.askParent();
     await ParentalControl.requestPermission(Permission.accessibility);
     await ParentalControl.requestPermission(Permission.overlay);

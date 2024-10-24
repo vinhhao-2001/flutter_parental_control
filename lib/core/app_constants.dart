@@ -90,6 +90,9 @@ class AppConstants {
   static const String denyAddingFriends = 'denyAddingFriends';
 
   /// error
+  static const String iosPlatformError = 'iOS platform specific function';
+  static const String androidPlatformError =
+      'Android platform specific function';
   static const String addressError = 'Unable to get location information';
   static const String locationError = 'Location access required';
 }

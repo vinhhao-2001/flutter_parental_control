@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:geolocator/geolocator.dart';
 import 'core/app_constants.dart';
@@ -37,69 +38,116 @@ class ParentalControl {
   /// Lắng nghe khi có có sự kiện nhấn nút hỏi phụ huynh
   /// [askParent] Bị mất kết nối khi chạy ở nền
   static Future<void> askParent() async {
-    await FlutterParentalControlPlatform.instance.askParent();
+    try {
+      _checkPlatform(false);
+      await FlutterParentalControlPlatform.instance.askParent();
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Kiểm tra các quyền trợ năng
   static Future<bool> requestPermission(Permission type) async {
-    final result = await FlutterParentalControlPlatform.instance
-        .requestPermission(_permissionInt(type));
-    return result;
+    try {
+      _checkPlatform(false);
+      final result = await FlutterParentalControlPlatform.instance
+          .requestPermission(_permissionInt(type));
+      return result;
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Lấy thời gian sử dụng trong thiết bị
   static Future<List<AppUsageInfo>> getAppUsageInfo() async {
-    final data =
-        await FlutterParentalControlPlatform.instance.getAppUsageInfo();
-    return data.map((app) => AppUsageInfo.fromMap(app)).toList();
+    try {
+      _checkPlatform(false);
+      final data =
+          await FlutterParentalControlPlatform.instance.getAppUsageInfo();
+      return data.map((app) => AppUsageInfo.fromMap(app)).toList();
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Thiết lập danh sách ứng dụng bị giới hạn
   static Future<void> setListAppBlocked(List<AppBlock> listApp) async {
-    final listAppBlock = listApp.map((app) => app.toMap()).toList();
-    await FlutterParentalControlPlatform.instance
-        .setListAppBlocked(listAppBlock);
+    try {
+      _checkPlatform(false);
+      final listAppBlock = listApp.map((app) => app.toMap()).toList();
+      await FlutterParentalControlPlatform.instance
+          .setListAppBlocked(listAppBlock);
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Thiết lập danh sách nội dung web bị giới hạn
   static Future<void> setListWebBlocked(List<String> listWeb) async {
-    await FlutterParentalControlPlatform.instance.setListWebBlocked(listWeb);
+    try {
+      _checkPlatform(false);
+      await FlutterParentalControlPlatform.instance.setListWebBlocked(listWeb);
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Khởi chạy dịch vụ lắng nghe ứng dụng được cài đặt hoặc gỡ bỏ
   static Future<void> startService() async {
-    await FlutterParentalControlPlatform.instance.startService();
+    try {
+      _checkPlatform(false);
+      await FlutterParentalControlPlatform.instance.startService();
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Lắng nghe và lấy thông tin ứng dụng bị cài đặt hoặc gỡ bỏ
   static Stream<AppInstalledInfo> listenAppInstalledInfo() {
-    final result = FlutterParentalControlPlatform.instance.listenAppInstalled();
-    return result.map((data) => AppInstalledInfo.fromMap(data));
+    try {
+      _checkPlatform(false);
+      final result =
+          FlutterParentalControlPlatform.instance.listenAppInstalled();
+      return result.map((data) => AppInstalledInfo.fromMap(data));
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Lấy lịch sử duyệt web trên trình duyệt
-  static Future<List<WebHistory>> getWebHistory() async {
-    final result =
-        await FlutterParentalControlPlatform.instance.getWebHistory();
-    return result.map((app) => WebHistory.fromMap(app)).toList();
+  static Future<List<WebHistory>?> getWebHistory() async {
+    try {
+      _checkPlatform(false);
+      final result =
+          await FlutterParentalControlPlatform.instance.getWebHistory();
+      return result.map((app) => WebHistory.fromMap(app)).toList();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   /// Thiết view của người dùng plugin cho ứng dụng đó
   /// Sử dụng khi ứng dụng được khởi tạo hoặc trước khi bật dịch vụ trợ năng
   static Future<void> setOverlayView(bool id, String overlayView,
       {String? backBtnId, String? askParentBtnId}) async {
-    await FlutterParentalControlPlatform.instance.setOverlayView(
-      id,
-      overlayView,
-      backBtnId: backBtnId,
-      askParentBtnId: askParentBtnId,
-    );
+    try {
+      _checkPlatform(false);
+      await FlutterParentalControlPlatform.instance.setOverlayView(
+        id,
+        overlayView,
+        backBtnId: backBtnId,
+        askParentBtnId: askParentBtnId,
+      );
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// các phần chỉ dùng được trên [Ios]
   /// Kiểm tra quyền kiểm soát của phụ huynh
   static Future<void> checkPermission() async {
     try {
+      _checkPlatform(true);
       FlutterParentalControlPlatform.instance.checkParentControlPermission();
     } catch (e) {
       rethrow;
@@ -109,17 +157,27 @@ class ParentalControl {
   /// Lập lịch thời gian giám sát thiết bị
   static Future<void> scheduleMonitorSettings(bool isMonitoring,
       {int? startHour, int? startMinute, int? endHour, int? endMinute}) async {
-    FlutterParentalControlPlatform.instance.scheduleMonitorSettings(
-        isMonitoring,
-        startHour: startHour,
-        startMinute: startMinute,
-        endHour: endHour,
-        endMinute: endMinute);
+    try {
+      _checkPlatform(true);
+      await FlutterParentalControlPlatform.instance.scheduleMonitorSettings(
+          isMonitoring,
+          startHour: startHour,
+          startMinute: startMinute,
+          endHour: endHour,
+          endMinute: endMinute);
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Mở giao diện chọn danh sách ứng dụng bị giới hạn
   static Future<void> limitedApp() async {
-    FlutterParentalControlPlatform.instance.limitedApp();
+    try {
+      _checkPlatform(true);
+      await FlutterParentalControlPlatform.instance.limitedApp();
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Cài đặt thiết bị
@@ -141,23 +199,37 @@ class ParentalControl {
     bool? denyMultiplayerGaming,
     bool? denyAddingFriends,
   }) async {
-    FlutterParentalControlPlatform.instance.settingMonitor(
-      requireAutomaticDateAndTime: requireAutomaticDateAndTime,
-      lockAccounts: lockAccounts,
-      lockPasscode: lockPasscode,
-      denySiri: denySiri,
-      lockAppCellularData: lockAppCellularData,
-      lockESIM: lockESIM,
-      denyInAppPurchases: denyInAppPurchases,
-      maximumRating: maximumRating,
-      requirePasswordForPurchases: requireAutomaticDateAndTime,
-      denyExplicitContent: denyExplicitContent,
-      denyBookstoreErotica: denyBookstoreErotica,
-      maximumMovieRating: maximumMovieRating,
-      maximumTVShowRating: maximumTVShowRating,
-      denyMultiplayerGaming: denyMultiplayerGaming,
-      denyAddingFriends: denyAddingFriends,
-    );
+    try {
+      _checkPlatform(true);
+      FlutterParentalControlPlatform.instance.settingMonitor(
+        requireAutomaticDateAndTime: requireAutomaticDateAndTime,
+        lockAccounts: lockAccounts,
+        lockPasscode: lockPasscode,
+        denySiri: denySiri,
+        lockAppCellularData: lockAppCellularData,
+        lockESIM: lockESIM,
+        denyInAppPurchases: denyInAppPurchases,
+        maximumRating: maximumRating,
+        requirePasswordForPurchases: requireAutomaticDateAndTime,
+        denyExplicitContent: denyExplicitContent,
+        denyBookstoreErotica: denyBookstoreErotica,
+        maximumMovieRating: maximumMovieRating,
+        maximumTVShowRating: maximumTVShowRating,
+        denyMultiplayerGaming: denyMultiplayerGaming,
+        denyAddingFriends: denyAddingFriends,
+      );
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  /// Hàm kiểm tra xem platform có phải ios hoặc android không
+  static void _checkPlatform(bool isIos) {
+    if ((isIos && !Platform.isIOS) || (!isIos && !Platform.isAndroid)) {
+      throw isIos
+          ? AppConstants.iosPlatformError
+          : AppConstants.androidPlatformError;
+    }
   }
 
   /// Các trường hợp xin quyền trong native
