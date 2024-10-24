@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_parental_control/flutter_parental_control.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_parental_control/widget/parental_control_widget.dart';
 
@@ -33,7 +34,7 @@ class _ChildLocationScreenState extends State<ChildLocationScreen> {
       body: Column(
         children: [
           Expanded(
-            child: ChildMap(
+            child: ChildLocationWidget(
               childInfo: ChildInfo(
                 childName: 'Trẻ',
                 childLocation: childLocation,
@@ -74,7 +75,8 @@ class _ChildLocationScreenState extends State<ChildLocationScreen> {
 
   // hàm demo cập nhật vị trí của trẻ
   Future<LatLng> updateChildLocationFunc() async {
-    const childLocation = LatLng(21.025693906586127, 105.78575260936253);
+    final location = await ParentalControl.getLocation();
+    childLocation = LatLng(location.latitude, location.longitude);
     final add = await updateAddress(childLocation);
     setState(() {
       address = '${add.subAdminArea}, ${add.adminArea}, ${add.country}';

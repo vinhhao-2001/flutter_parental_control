@@ -4,6 +4,7 @@ part of 'parental_control_widget.dart';
 class SafeZoneInfo {
   final String? safeZoneName;
   final Uint8List? safeZoneIcon;
+  /// Phạm vi an toàn
   final List<LatLng>? safeZone;
   final double? iconSize;
 

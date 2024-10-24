@@ -8,6 +8,7 @@ class AppConstants {
   static const String methodChannel = 'flutter_parental_control_method';
   static const String eventChannel = 'flutter_parental_control_event';
   static const String deviceMethod = 'getDeviceInfoMethod';
+  static const String locationMethod = 'getLocationMethod';
   static const String appUsageMethod = 'getAppUsageInfoMethod';
   static const String blockAppMethod = 'blockAppMethod';
   static const String blockWebMethod = 'blockWebsiteMethod';
@@ -90,4 +91,5 @@ class AppConstants {
 
   /// error
   static const String addressError = 'Unable to get location information';
+  static const String locationError = 'Location access required';
 }

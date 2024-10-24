@@ -20,6 +20,13 @@ class MethodChannelFlutterParentalControl
     return Map<String, dynamic>.from(result);
   }
 
+  @override
+  Future<Map<String, dynamic>> getLocation() async {
+    final result =
+        await methodChannel.invokeMethod(AppConstants.locationMethod);
+    return Map<String, dynamic>.from(result);
+  }
+
   /// Yêu cầu các quyền dành cho [Android]
   @override
   Future<bool> requestPermission(int type) async {

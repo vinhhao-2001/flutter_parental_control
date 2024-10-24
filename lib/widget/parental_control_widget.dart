@@ -11,15 +11,26 @@ part 'safe_zone_info.dart';
 
 /// Widget là bản đồ hiển thị  vị trí của trẻ
 /// Hiển thị phạm vi an toàn của trẻ
-class ChildMap extends StatefulWidget {
+class ChildLocationWidget extends StatefulWidget {
+  /// Thông tin của trẻ
   final ChildInfo? childInfo;
+
+  /// Thông tin của phạm vi an toàn
   final SafeZoneInfo? safeZoneInfo;
+
+  /// Thông tin của button cập nhật vị trí
   final String? updateButton;
+
+  /// Thông tin của button vẽ phạm vi an toàn
   final SafeZoneButton? safeZoneButton;
+
+  /// Hàm cập nhật vị trí của trẻ
   final Future<LatLng> Function()? childLocationFunc;
+
+  /// Hàm trả về các điểm của phạm vi an toàn
   final Function(List<LatLng>)? safeZonePointsFunc;
 
-  const ChildMap({
+  const ChildLocationWidget({
     super.key,
     this.childInfo,
     this.safeZoneInfo,
@@ -30,10 +41,10 @@ class ChildMap extends StatefulWidget {
   });
 
   @override
-  State<ChildMap> createState() => _ChildMapState();
+  State<ChildLocationWidget> createState() => _ChildLocationWidgetState();
 }
 
-class _ChildMapState extends State<ChildMap> {
+class _ChildLocationWidgetState extends State<ChildLocationWidget> {
   GoogleMapController? _mapController;
   late LatLng childLocation;
   final Set<Polygon> _polygons = {};
@@ -67,7 +78,8 @@ class _ChildMapState extends State<ChildMap> {
     }
   }
 
-  /// Sự kiện khi nhấn 1 điểm trên bản đồ
+  /// Xử lý khi nhấn 1 điểm trên bản đồ
+  /// Dùng để vẽ phạm vi an toàn của trẻ
   void _onMapTap(LatLng point) {
     if (_isDrawing) {
       setState(() {

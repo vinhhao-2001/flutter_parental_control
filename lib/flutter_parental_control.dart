@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:geolocator/geolocator.dart';
 import 'core/app_constants.dart';
 import 'flutter_parental_control_platform_interface.dart';
 
@@ -14,6 +15,22 @@ class ParentalControl {
   static Future<DeviceInfo> getDeviceInfo() async {
     final data = await FlutterParentalControlPlatform.instance.getDeviceInfo();
     return DeviceInfo.fromMap(data);
+  }
+
+  /// Lấy vị trí của trẻ
+  static Future<Position> getLocation() async {
+    try {
+      final locationPermission = await _locationPermission();
+      if (locationPermission) {
+        return await Geolocator.getCurrentPosition(
+            locationSettings:
+                const LocationSettings(accuracy: LocationAccuracy.best));
+      } else {
+        throw AppConstants.locationError;
+      }
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// các phần chỉ dùng được trên [Android]
@@ -153,6 +170,19 @@ class ParentalControl {
       case Permission.usageState:
         return 3;
     }
+  }
+
+  /// Hàm kiểm tra quyền truy cập vị trí
+  static Future<bool> _locationPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    if (permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse) {
+      return true;
+    }
+    return false;
   }
 }
 

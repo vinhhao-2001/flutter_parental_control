@@ -17,6 +17,9 @@ public class FlutterParentalControlPlugin: NSObject, FlutterPlugin {
         case AppConstants.GET_DEVICE_INFO:
             result(DeviceInfo.getDeviceInfo())
             break
+        case AppConstants.GET_LOCATION:
+            self.getCurrentLocation(result: result)
+            break
         case AppConstants.CHECK_PERMISSION: // Kiểm tra quyền của phụ huynh
             Task {
                 let requestPermission = RequestPermission()
@@ -48,6 +51,15 @@ public class FlutterParentalControlPlugin: NSObject, FlutterPlugin {
             break
         default:
             result(FlutterMethodNotImplemented)
+        }
+    }
+    
+    private func getCurrentLocation(result: @escaping FlutterResult) {
+        var locationManager: LocationManager?
+        locationManager = LocationManager()
+        locationManager?.getCurrentLocation { locationData in
+            print(locationData)
+            result(locationData)
         }
     }
     
