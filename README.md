@@ -21,7 +21,7 @@ Tài liệu về flutter [online documentation](https://docs.flutter.dev)
      flutter_parental_control: # thêm plugin
        git:
          url: https://github.com/vinhhao-2001/flutter_parental_control.git
-         ref: 0.0.1
+         ref: 0.0.1 # Chọn phiên bản phù hợp
    
 2. **Cập nhật tệp `android/build.gradle`:**
 
