@@ -47,7 +47,7 @@ samples, guidance on mobile development, and a full API reference.
    }
 3. **In `app/build.gradle`:**
 
-   Mở tệp `build.gradle` trong thư mục `android/app` của dự án và thêm đoạn code sau:
+   Mở tệp `build.gradle` trong thư mục `android/app` của dự án và sửa lại đoạn code sau:
     ```groovy
    plugins {
     id "com.android.application"
