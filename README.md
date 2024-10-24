@@ -62,3 +62,9 @@ samples, guidance on mobile development, and a full API reference.
     Mở terminal và chạy lệnh sau để tải về các gói phụ thuộc:
     ```bash
     flutter pub get
+5. Sử dụng trong ứng dụng:
+
+    Trong ứng dụng để sử dụng plugin cần thêm dòng sau
+    ```dart
+   import 'package:flutter_parental_control/flutter_parental_control.dart';
+   
