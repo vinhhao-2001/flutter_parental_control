@@ -35,7 +35,6 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
   }
 
   Future<void> android() async {
-    ParentalControl.checkPermission();
     ParentalControl.askParent();
     await ParentalControl.requestPermission(Permission.accessibility);
     await ParentalControl.requestPermission(Permission.overlay);
@@ -68,10 +67,12 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const ChildLocationScreen()));
+                final a = await ParentalControl.getWebHistory();
+                print(a.first.searchQuery);
+                // Navigator.push(
+                //     context,
+                //     MaterialPageRoute(
+                //         builder: (_) => const ChildLocationScreen()));
               },
               child: const Text('Set Log Value'),
             ),

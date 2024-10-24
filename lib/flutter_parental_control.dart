@@ -14,8 +14,13 @@ part 'model/app_block.dart';
 class ParentalControl {
   /// Lấy thông tin thiết bị, có sự khác nhau giữa Android và Ios
   static Future<DeviceInfo> getDeviceInfo() async {
-    final data = await FlutterParentalControlPlatform.instance.getDeviceInfo();
-    return DeviceInfo.fromMap(data);
+    try {
+      final data =
+          await FlutterParentalControlPlatform.instance.getDeviceInfo();
+      return DeviceInfo.fromMap(data);
+    } catch (_) {
+      rethrow;
+    }
   }
 
   /// Lấy vị trí của trẻ
@@ -115,7 +120,7 @@ class ParentalControl {
   }
 
   /// Lấy lịch sử duyệt web trên trình duyệt
-  static Future<List<WebHistory>?> getWebHistory() async {
+  static Future<List<WebHistory>> getWebHistory() async {
     try {
       _checkPlatform(false);
       final result =
@@ -145,7 +150,7 @@ class ParentalControl {
 
   /// các phần chỉ dùng được trên [Ios]
   /// Kiểm tra quyền kiểm soát của phụ huynh
-  static Future<void> checkPermission() async {
+  static Future<void> parentalControlPermission() async {
     try {
       _checkPlatform(true);
       FlutterParentalControlPlatform.instance.checkParentControlPermission();
