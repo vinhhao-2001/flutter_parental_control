@@ -45,7 +45,7 @@ Tài liệu về flutter [online documentation](https://docs.flutter.dev)
    ```
    Trong `gradle-wrapper.properties` cập nhật:
    ```properties
-   distributionUrl=https\://services.gradle.org/distributions/gradle-8.10.2-bin.zip // thay đổi phiên bản phù hơp
+   distributionUrl=https\://services.gradle.org/distributions/gradle-8.10.2-bin.zip #thay đổi phiên bản phù hơp
    ```
    
 2. **Cập nhật tệp `android/build.gradle` và `app/build.gradle`:**
