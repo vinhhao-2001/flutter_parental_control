@@ -10,6 +10,8 @@ part 'model/device_info.dart';
 part 'model/app_installed_info.dart';
 part 'model/web_history.dart';
 part 'model/app_block.dart';
+part 'model/schedule.dart';
+part 'model/monitor_setting.dart';
 
 class ParentalControl {
   /// Lấy thông tin thiết bị, có sự khác nhau giữa Android và Ios
@@ -160,16 +162,15 @@ class ParentalControl {
   }
 
   /// Lập lịch thời gian giám sát thiết bị
-  static Future<void> scheduleMonitorSettings(bool isMonitoring,
-      {int? startHour, int? startMinute, int? endHour, int? endMinute}) async {
+  static Future<void> scheduleMonitorSettings(Schedule schedule) async {
     try {
       _checkPlatform(true);
       await FlutterParentalControlPlatform.instance.scheduleMonitorSettings(
-          isMonitoring,
-          startHour: startHour,
-          startMinute: startMinute,
-          endHour: endHour,
-          endMinute: endMinute);
+          schedule.isMonitoring,
+          startHour: schedule.startHour,
+          startMinute: schedule.startMinute,
+          endHour: schedule.endHour,
+          endMinute: schedule.endMinute);
     } catch (_) {
       rethrow;
     }
@@ -186,42 +187,27 @@ class ParentalControl {
   }
 
   /// Cài đặt thiết bị
-  static Future<void> settingMonitor({
-    bool? requireAutomaticDateAndTime,
-    bool? lockAccounts,
-    bool? lockPasscode,
-    bool? denySiri,
-    bool? lockAppCellularData,
-    bool? lockESIM,
-    bool? denyInAppPurchases,
-    int? maximumRating,
-    bool? requirePasswordForPurchases,
-    bool? denyExplicitContent,
-    bool? denyMusicService,
-    bool? denyBookstoreErotica,
-    int? maximumMovieRating,
-    int? maximumTVShowRating,
-    bool? denyMultiplayerGaming,
-    bool? denyAddingFriends,
-  }) async {
+  static Future<void> settingMonitor(MonitorSetting monitorSettings) async {
     try {
       _checkPlatform(true);
       FlutterParentalControlPlatform.instance.settingMonitor(
-        requireAutomaticDateAndTime: requireAutomaticDateAndTime,
-        lockAccounts: lockAccounts,
-        lockPasscode: lockPasscode,
-        denySiri: denySiri,
-        lockAppCellularData: lockAppCellularData,
-        lockESIM: lockESIM,
-        denyInAppPurchases: denyInAppPurchases,
-        maximumRating: maximumRating,
-        requirePasswordForPurchases: requireAutomaticDateAndTime,
-        denyExplicitContent: denyExplicitContent,
-        denyBookstoreErotica: denyBookstoreErotica,
-        maximumMovieRating: maximumMovieRating,
-        maximumTVShowRating: maximumTVShowRating,
-        denyMultiplayerGaming: denyMultiplayerGaming,
-        denyAddingFriends: denyAddingFriends,
+        requireAutomaticDateAndTime:
+            monitorSettings.requireAutomaticDateAndTime,
+        lockAccounts: monitorSettings.lockAccounts,
+        lockPasscode: monitorSettings.lockPasscode,
+        denySiri: monitorSettings.denySiri,
+        lockAppCellularData: monitorSettings.lockAppCellularData,
+        lockESIM: monitorSettings.lockESIM,
+        denyInAppPurchases: monitorSettings.denyInAppPurchases,
+        maximumRating: monitorSettings.maximumRating,
+        requirePasswordForPurchases:
+            monitorSettings.requireAutomaticDateAndTime,
+        denyExplicitContent: monitorSettings.denyExplicitContent,
+        denyBookstoreErotica: monitorSettings.denyBookstoreErotica,
+        maximumMovieRating: monitorSettings.maximumMovieRating,
+        maximumTVShowRating: monitorSettings.maximumTVShowRating,
+        denyMultiplayerGaming: monitorSettings.denyMultiplayerGaming,
+        denyAddingFriends: monitorSettings.denyAddingFriends,
       );
     } catch (_) {
       rethrow;
@@ -237,7 +223,7 @@ class ParentalControl {
     }
   }
 
-  /// Các trường hợp xin quyền trong native
+  /// Các trường hợp xin quyền trong native Android
   static int _permissionInt(Permission type) {
     switch (type) {
       case Permission.accessibility:

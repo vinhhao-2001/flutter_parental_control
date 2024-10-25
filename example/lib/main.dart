@@ -47,7 +47,7 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
 
   Future<void> ios() async {
     deviceInfo = await ParentalControl.getDeviceInfo();
-    await ParentalControl.scheduleMonitorSettings(false);
+    await ParentalControl.scheduleMonitorSettings(Schedule(isMonitoring: true));
   }
 
   @override
