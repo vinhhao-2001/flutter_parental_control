@@ -4,15 +4,15 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id 'kotlin-kapt'
-    id "realm-android"
+//    id 'kotlin-kapt'
+//    id "realm-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
 
 android {
     namespace = "com.hao.flutter_parental_control_example"
     compileSdk = 34
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = flutter.ndkVersion // "25.1.8937393"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
