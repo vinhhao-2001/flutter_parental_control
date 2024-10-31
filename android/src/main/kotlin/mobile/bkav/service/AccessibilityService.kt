@@ -5,15 +5,13 @@ import android.content.Intent
 import android.net.Uri
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.MethodChannel
 import mobile.bkav.db_helper.DBHelper
 import mobile.bkav.models.SupportedBrowserConfig
 import mobile.bkav.overlay.Overlay
 import mobile.bkav.utils.AppConstants
 import mobile.bkav.utils.Utils
-
-import io.flutter.embedding.engine.plugins.FlutterPlugin
-import io.flutter.plugin.common.MethodChannel
-
 
 
 // Dịch vụ trợ năng
@@ -101,7 +99,7 @@ class AccessibilityService : AccessibilityService() {
                     channel.invokeMethod(AppConstants.ASK_PARENT_METHOD, null)
                 }
             } else {
-                Overlay(this).showOverlay(true){
+                Overlay(this).showOverlay(true) {
                     Utils().openApp(applicationContext)
                     channel.invokeMethod(AppConstants.ASK_PARENT_METHOD, null)
                 }

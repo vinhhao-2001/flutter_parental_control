@@ -20,6 +20,14 @@ class MethodChannelFlutterParentalControl
     return Map<String, dynamic>.from(result);
   }
 
+  /// Lấy danh sách chứa thông tin các ứng dụng
+  @override
+  Future<List<Map<String, dynamic>>> getAppDetailInfo() async {
+    final List<dynamic> data =
+        await methodChannel.invokeMethod(AppConstants.appDetailMethod);
+    return data.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+  }
+
   @override
   Future<Map<String, dynamic>> getLocation() async {
     final result =
@@ -37,20 +45,18 @@ class MethodChannelFlutterParentalControl
 
   /// Sự kiện hỏi ý kiến của phụ huynh
   @override
-  Future<void> askParent() async {
+  Future<void> askParent(Function function) async {
     methodChannel.setMethodCallHandler((MethodCall call) async {
-      if (call.method == AppConstants.askParentMethod) {
-        debugPrint("Sự kiện hỏi ý kiến phụ huynh");
-      }
+      if (call.method == AppConstants.askParentMethod) () => function;
     });
   }
 
   /// Lấy thông tin thời gian sử dụng các ứng dụng
   @override
-  Future<List<Map<String, dynamic>>> getAppUsageInfo() async {
-    final List<dynamic> data =
+  Future<Map<String, dynamic>> getAppUsageInfo() async {
+    final result =
         await methodChannel.invokeMethod(AppConstants.appUsageMethod);
-    return data.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    return Map<String, dynamic>.from(result);
   }
 
   /// Tạo danh sách các ứng dụng bị chặn

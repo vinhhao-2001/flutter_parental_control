@@ -1,4 +1,4 @@
-part of 'parental_control_widget.dart';
+part of '../parental_control_widget.dart';
 
 /// Thông tin hiển thị của trẻ trong bản đồ
 class ChildInfo {
@@ -6,11 +6,13 @@ class ChildInfo {
   final Uint8List? childIcon;
   final LatLng? childLocation;
   final double? iconSize;
+  final String? routeName;
 
   ChildInfo({
     this.childName,
     this.childIcon,
     this.childLocation,
     this.iconSize,
+    this.routeName,
   });
 }

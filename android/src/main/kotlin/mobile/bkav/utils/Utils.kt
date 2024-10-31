@@ -1,5 +1,7 @@
 package mobile.bkav.utils
 
+import android.app.usage.UsageEvents
+import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
@@ -53,6 +55,19 @@ class Utils {
         return stream.toByteArray()
     }
 
+    fun appUsageTime(context: Context, startTime: Long, endTime: Long): List<UsageStats> {
+        val usageStatsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        } else {
+            return emptyList()
+        }
+        return usageStatsManager.queryUsageStats(
+            UsageStatsManager.INTERVAL_DAILY,
+            startTime,
+            endTime
+        ) ?: emptyList()
+    }
+
     // Lấy thời gian sử dụng của ứng dụng
     fun getAppUsageTimeInMinutes(context: Context, packageName: String): Int {
         val startTime = Calendar.getInstance().apply {
@@ -63,16 +78,10 @@ class Utils {
 
         val endTime = System.currentTimeMillis()
 
-        val usageStatsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            context.getSystemService(Context.USAGE_STATS_SERVICE)
-                    as UsageStatsManager
-        } else {
-            return 0
-        }
-
-        val usageStatsList =
-            usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
+        val usageStatsList = appUsageTime(context, startTime, endTime)
         val appUsageStats = usageStatsList.find { it.packageName == packageName }
+
+        // Trả về thời gian sử dụng của ứng dụng theo đơn vị phút
         return appUsageStats?.totalTimeInForeground?.div(1000)?.div(60)?.toInt() ?: 0
     }
 

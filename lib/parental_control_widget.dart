@@ -5,13 +5,24 @@ import 'package:flutter_parental_control/core/utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 
-part 'address.dart';
-part 'child_info.dart';
-part 'safe_zone_info.dart';
+part 'model/address.dart';
+part 'model/child_info.dart';
+part 'model/safe_zone_info.dart';
+part 'model/location_info.dart';
 
 /// Widget là bản đồ hiển thị  vị trí của trẻ
 /// Hiển thị phạm vi an toàn của trẻ
 class ChildLocationWidget extends StatefulWidget {
+  const ChildLocationWidget({
+    super.key,
+    this.childInfo,
+    this.safeZoneInfo,
+    this.updateButton,
+    this.safeZoneButton,
+    this.childLocationFunc,
+    this.safeZonePointsFunc,
+  });
+
   /// Thông tin của trẻ
   final ChildInfo? childInfo;
 
@@ -30,16 +41,6 @@ class ChildLocationWidget extends StatefulWidget {
   /// Hàm trả về các điểm của phạm vi an toàn
   final Function(List<LatLng>)? safeZonePointsFunc;
 
-  const ChildLocationWidget({
-    super.key,
-    this.childInfo,
-    this.safeZoneInfo,
-    this.updateButton,
-    this.safeZoneButton,
-    this.childLocationFunc,
-    this.safeZonePointsFunc,
-  });
-
   @override
   State<ChildLocationWidget> createState() => _ChildLocationWidgetState();
 }
@@ -49,18 +50,28 @@ class _ChildLocationWidgetState extends State<ChildLocationWidget> {
   late LatLng childLocation;
   final Set<Polygon> _polygons = {};
   final List<LatLng> _polygonPoints = [];
+  final Set<Polyline> _polyLine = {};
+  final List<LatLng> _polyLinesPoints = [];
+
   bool _isDrawing = false;
 
   @override
   void initState() {
     /// Thực hiện khi widget được khởi tạo
     super.initState();
+
+    /// vị trí ban đầu của trẻ
     childLocation = widget.childInfo?.childLocation ?? const LatLng(0.0, 0.0);
-    _loadSafeZone(widget.safeZoneInfo?.safeZone);
+
+    /// vẽ phạm vi an toàn
+    _initSafeZone(widget.safeZoneInfo?.safeZone);
+
+    /// vẽ tuyến đường hoạt động của trẻ
+    _initChildRoute();
   }
 
   /// Lấy phạm vi an toàn lúc khởi tạo map
-  Future<void> _loadSafeZone(List<LatLng>? safeZonePoints) async {
+  Future<void> _initSafeZone(List<LatLng>? safeZonePoints) async {
     if (safeZonePoints != null) {
       setState(() {
         _polygonPoints.addAll(safeZonePoints);
@@ -78,14 +89,28 @@ class _ChildLocationWidgetState extends State<ChildLocationWidget> {
     }
   }
 
+  void _initChildRoute() {
+    _polyLine.add(
+      Polyline(
+        polylineId:
+            PolylineId(widget.childInfo?.routeName ?? AppConstants.empty),
+        points: _polyLinesPoints,
+        color: Colors.blue,
+        width: 5,
+      ),
+    );
+    setState(() {});
+  }
+
   /// Xử lý khi nhấn 1 điểm trên bản đồ
-  /// Dùng để vẽ phạm vi an toàn của trẻ
+
   void _onMapTap(LatLng point) {
     if (_isDrawing) {
+      /// Vẽ phạm vi an toàn của trẻ
       setState(() {
         _polygonPoints.add(point);
       });
-    }
+    } else {}
   }
 
   /// Vẽ phạm vi an toàn từ các điểm được chọn trên map
@@ -155,6 +180,7 @@ class _ChildLocationWidgetState extends State<ChildLocationWidget> {
               ),
           },
           polygons: _polygons,
+          polylines: _polyLine,
           onTap: _onMapTap,
         ),
         Positioned(
@@ -165,8 +191,8 @@ class _ChildLocationWidgetState extends State<ChildLocationWidget> {
                 onPressed: _toggleDrawingMode,
                 child: Text(
                     _isDrawing
-                        ? widget.safeZoneButton?.draw ?? AppConstants.done
-                        : widget.safeZoneButton?.safeZone ??
+                        ? widget.safeZoneButton?.drawBtn ?? AppConstants.done
+                        : widget.safeZoneButton?.safeZoneBtn ??
                             AppConstants.safeZone,
                     style: const TextStyle(color: Colors.blue)),
               ),
@@ -186,8 +212,11 @@ class _ChildLocationWidgetState extends State<ChildLocationWidget> {
 
 /// Thông tin button vẽ phạm vi an toàn
 class SafeZoneButton {
-  final String draw;
-  final String safeZone;
+  /// Tên button vẽ
+  final String drawBtn;
 
-  SafeZoneButton(this.draw, this.safeZone);
+  /// Tên button phạm vi an toàn
+  final String safeZoneBtn;
+
+  SafeZoneButton(this.drawBtn, this.safeZoneBtn);
 }

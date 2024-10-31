@@ -3,8 +3,9 @@
 Plugin để kiểm soát thiết bị và ứng dụng trên thiết bị của trẻ em..
 
 ## Getting Started
-        
-Tài liệu về flutter [online documentation](https://docs.flutter.dev)
+Yêu cầu phần mềm để sử dụng plugin
+
+Plugin yêu cầu phiên bản dart 3.5.0 trở lên.
 
 ## Cài đặt
 
@@ -35,8 +36,8 @@ Tài liệu về flutter [online documentation](https://docs.flutter.dev)
    import 'package:flutter_parental_control/flutter_parental_control.dart';
    ```
 ## Các cách xử lý khi có lỗi
-
-1. **Cập nhật tệp `android/setting.gradle` và `gradle-wrapper.properties`:**
+Khi gặp lỗi build.gradle thì có thể thử các cách sau:
+### Cách 1. **Cập nhật tệp `android/setting.gradle` và `gradle-wrapper.properties`:**
 
    Thay đổi phiên bản của các thành phần sau:
    Trong `android/setting.gradle` cập nhật:
@@ -48,7 +49,7 @@ Tài liệu về flutter [online documentation](https://docs.flutter.dev)
    distributionUrl=https\://services.gradle.org/distributions/gradle-8.10.2-bin.zip #thay đổi phiên bản phù hơp
    ```
    
-2. **Cập nhật tệp `android/build.gradle` và `app/build.gradle`:**
+### Cách 2. **Cập nhật tệp `android/build.gradle` và `app/build.gradle`:**
    Nếu cách trên không được thì thử cách này:
    Mở tệp `build.gradle` trong thư mục `android` của dự án và thêm dòng code bên dưới.
    Nếu chưa có phần `buildscript` thì thêm cả đoạn code bên dưới vào phần đầu của file:
@@ -75,3 +76,25 @@ Tài liệu về flutter [online documentation](https://docs.flutter.dev)
     id "dev.flutter.flutter-gradle-plugin"
    }
    ```
+   
+## Sử dụng
+
+### Để sử dụng chức năng Google Map cần thêm API Key vào `AndroidManifest.xml` và `AppDelegate.swift`:
+Android:
+   ```xml
+        <application>
+        <!--        Thêm API key vào đây-->
+        <meta-data android:name="com.google.android.geo.API_KEY"
+        android:value="YOUR_API_KEY"/>
+        </application>
+   ```
+iOS:
+   ```swift
+    GMSServices.provideAPIKey("YOUR_API_KEY")
+   ```
+Nếu cần lấy vị trí của thiết bị thì cần thêm quyền vào `Info.plist`:
+   ```text
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app needs access to location when open.</string>
+   ```
+

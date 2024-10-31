@@ -8,6 +8,7 @@ class AppConstants {
   static const String methodChannel = 'flutter_parental_control_method';
   static const String eventChannel = 'flutter_parental_control_event';
   static const String deviceMethod = 'getDeviceInfoMethod';
+  static const String appDetailMethod = 'getAppDetailMethod';
   static const String locationMethod = 'getLocationMethod';
   static const String appUsageMethod = 'getAppUsageInfoMethod';
   static const String blockAppMethod = 'blockAppMethod';
@@ -40,9 +41,13 @@ class AppConstants {
   static const String volume = 'volume';
   static const String deviceId = 'deviceId';
 
-  static const String appIcon = 'appIcon';
-  static const String appName = 'appName';
   static const String packageName = 'packageName';
+  static const String appName = 'appName';
+  static const String appIcon = 'appIcon';
+  static const String versionName = 'versionName';
+  static const String versionCode = 'versionCode';
+  static const String timeInstall = 'timeInstall';
+  static const String timeUpdate = 'timeUpdate';
   static const String isInstalled = 'isInstalled';
   static const String usageTime = 'usageTime';
   static const String timeLimit = 'timeLimit';

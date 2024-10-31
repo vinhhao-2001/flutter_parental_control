@@ -11,7 +11,7 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import mobile.bkav.db_helper.DBHelper
-import mobile.bkav.models.AppUsageInfo
+import mobile.bkav.manager.ManagerApp
 import mobile.bkav.models.DeviceInfo
 import mobile.bkav.service.AccessibilityService
 import mobile.bkav.service.InstallAppService
@@ -69,6 +69,12 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                 result.success(deviceInfo)
             }
 
+            AppConstants.GET_APP_DETAIL -> {
+                // Lấy thông tin các ứng dụng được cài đặt
+                val appDetailInfo = ManagerApp().getAppDetailInfo(context)
+                result.success(appDetailInfo)
+            }
+
             AppConstants.START_SERVICE -> {
                 // Bắt đầu lắng nghe ứng dụng được cài đặt, gỡ bỏ
                 val serviceIntent = Intent(context, InstallAppService::class.java)
@@ -79,7 +85,8 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
             AppConstants.BLOCK_APP_METHOD -> {
                 // Thêm ứng dụng bị chặn vào danh sách ứng dụng bị chặn
                 val blockApps =
-                    call.argument<List<Map<String, Any>>>(AppConstants.BLOCK_APPS) ?: emptyList<Map<String, Any>>()
+                    call.argument<List<Map<String, Any>>>(AppConstants.BLOCK_APPS)
+                        ?: emptyList<Map<String, Any>>()
                 DBHelper.insertListAppBlock(context, blockApps)
                 result.success(AppConstants.EMPTY)
             }
@@ -94,7 +101,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
 
             AppConstants.GET_APP_USAGE_INFO -> {
                 // Lấy thông tin sử dụng ứng dụng
-                val appUsageInfoList = AppUsageInfo.getAppUsageInfo(context)
+                val appUsageInfoList = ManagerApp().getAppUsageForLast7Days(context)
                 result.success(appUsageInfoList)
             }
 

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_parental_control/flutter_parental_control.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter_parental_control/widget/parental_control_widget.dart';
+import 'package:flutter_parental_control/parental_control_widget.dart';
 
 class ChildLocationScreen extends StatefulWidget {
   const ChildLocationScreen({super.key});

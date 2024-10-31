@@ -1,4 +1,4 @@
-part of 'parental_control_widget.dart';
+part of '../parental_control_widget.dart';
 
 /// Tập hợp các trường địa chỉ của trẻ
 class Address {

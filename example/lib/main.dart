@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_parental_control/flutter_parental_control.dart';
-import 'package:flutter_parental_control_example/child_location_screen.dart';
+
+import 'child_location_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,6 +29,7 @@ class LoggingServicePage extends StatefulWidget {
 class _LoggingServicePageState extends State<LoggingServicePage> {
   final TextEditingController _controller = TextEditingController();
   late DeviceInfo deviceInfo;
+
   @override
   void initState() {
     super.initState();
@@ -35,10 +37,12 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
   }
 
   Future<void> android() async {
-    ParentalControl.askParent();
-    await ParentalControl.requestPermission(Permission.accessibility);
-    await ParentalControl.requestPermission(Permission.overlay);
-    await ParentalControl.requestPermission(Permission.usageState);
+    // ParentalControl.askParent(() {
+    //   debugPrint('Hỏi ý kiến của phụ huynh');
+    // });
+    // await ParentalControl.requestPermission(Permission.accessibility);
+    // await ParentalControl.requestPermission(Permission.overlay);
+    // await ParentalControl.requestPermission(Permission.usageState);
     ParentalControl.setListAppBlocked([
       AppBlock(packageName: 'com.android.camera2', timeLimit: 0),
       AppBlock(packageName: 'com.android.contacts', timeLimit: 1440),
@@ -67,12 +71,10 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                final a = await ParentalControl.getWebHistory();
-                print(a.first.searchQuery);
-                // Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //         builder: (_) => const ChildLocationScreen()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const ChildLocationScreen()));
               },
               child: const Text('Set Log Value'),
             ),

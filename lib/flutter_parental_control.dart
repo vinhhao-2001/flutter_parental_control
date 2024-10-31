@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter_parental_control/core/app_constants.dart';
 import 'package:geolocator/geolocator.dart';
-import 'core/app_constants.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'flutter_parental_control_platform_interface.dart';
 
 part 'model/app_usage_info.dart';
 part 'model/device_info.dart';
+part 'model/app_detail.dart';
 part 'model/app_installed_info.dart';
 part 'model/web_history.dart';
 part 'model/app_block.dart';
@@ -41,13 +43,52 @@ class ParentalControl {
     }
   }
 
+  /// Hàm kiểm tra trẻ có trong phạm vi an toàn không
+  Future<bool> checkChildLocation(
+      LatLng childLocation, List<LatLng> polygonPoints) async {
+    if (polygonPoints.length < 3) throw 'Vùng an toàn phải có 3 điểm trở lên';
+    int intersections = 0;
+
+    /// Kiểm tra xem điểm có nằm trong vùng an toàn không
+    /// Dùng thuật toán Ray-casting để kiểm tra
+    for (int i = 0; i < polygonPoints.length; i++) {
+      var p1 = polygonPoints[i],
+          p2 = polygonPoints[(i + 1) % polygonPoints.length];
+      if (((p1.latitude <= childLocation.latitude &&
+                  childLocation.latitude < p2.latitude) ||
+              (p2.latitude <= childLocation.latitude &&
+                  childLocation.latitude < p1.latitude)) &&
+          (childLocation.longitude <
+              (p2.longitude - p1.longitude) *
+                      (childLocation.latitude - p1.latitude) /
+                      (p2.latitude - p1.latitude) +
+                  p1.longitude)) {
+        intersections++;
+      }
+    }
+
+    return intersections.isOdd;
+  }
+
   /// các phần chỉ dùng được trên [Android]
   /// Lắng nghe khi có có sự kiện nhấn nút hỏi phụ huynh
   /// [askParent] Bị mất kết nối khi chạy ở nền
-  static Future<void> askParent() async {
+  static Future<void> askParent(Function function) async {
     try {
       _checkPlatform(false);
-      await FlutterParentalControlPlatform.instance.askParent();
+      await FlutterParentalControlPlatform.instance.askParent(function);
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  /// Lấy danh sách chứa thông tin của các ứng dụng
+  static Future<List<AppDetail>> getListAppDetail() async {
+    try {
+      _checkPlatform(false);
+      final result =
+          await FlutterParentalControlPlatform.instance.getAppDetailInfo();
+      return result.map((app) => AppDetail.fromMap(app)).toList();
     } catch (_) {
       rethrow;
     }
@@ -71,7 +112,16 @@ class ParentalControl {
       _checkPlatform(false);
       final data =
           await FlutterParentalControlPlatform.instance.getAppUsageInfo();
-      return data.map((app) => AppUsageInfo.fromMap(app)).toList();
+      List<AppUsageInfo> listApp = data.entries.map((entry) {
+        String packageName = entry.key;
+        Map<int, int> usageMap = Map<int, int>.from(entry.value);
+        List<DailyUsage> usageTime = usageMap.entries.map((usageEntry) {
+          return DailyUsage(date: usageEntry.key, timeUsed: usageEntry.value);
+        }).toList();
+
+        return AppUsageInfo(packageName: packageName, usageTime: usageTime);
+      }).toList();
+      return listApp;
     } catch (_) {
       rethrow;
     }
@@ -214,6 +264,7 @@ class ParentalControl {
     }
   }
 
+  /// Các hàm chỉ dùng trong [plugin]
   /// Hàm kiểm tra xem platform có phải ios hoặc android không
   static void _checkPlatform(bool isIos) {
     if ((isIos && !Platform.isIOS) || (!isIos && !Platform.isAndroid)) {

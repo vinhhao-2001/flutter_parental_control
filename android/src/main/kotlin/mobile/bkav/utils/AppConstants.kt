@@ -27,6 +27,7 @@ class AppConstants {
         const val METHOD_CHANNEL = "flutter_parental_control_method"
         const val EVENT_CHANNEL = "flutter_parental_control_event"
         const val GET_DEVICE_INFO = "getDeviceInfoMethod"
+        const val GET_APP_DETAIL = "getAppDetailMethod"
         const val BLOCK_APP_METHOD = "blockAppMethod"
         const val BLOCK_WEBSITE_METHOD = "blockWebsiteMethod"
         const val START_SERVICE = "startServiceMethod"
@@ -67,6 +68,12 @@ class AppConstants {
         const val SCREEN_BRIGHTNESS = "screenBrightness"
         const val VOLUME = "volume"
         const val DEVICE_ID = "deviceId"
+
+        // key app details
+        const val VERSION_CODE = "versionCode"
+        const val VERSION_NAME = "versionName"
+        const val TIME_INSTALL = "timeInstall"
+        const val TIME_UPDATE = "timeUpdate"
 
         // type view của người dùng
         const val DRAWABLE = "drawable"
