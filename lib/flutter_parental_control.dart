@@ -157,12 +157,23 @@ class ParentalControl {
 
   /// Thiết view của người dùng plugin cho ứng dụng đó
   /// Sử dụng khi ứng dụng được khởi tạo hoặc trước khi bật dịch vụ trợ năng
-  static Future<void> setOverlayView(bool id, String overlayView,
-      {String? backBtnId, String? askParentBtnId}) async {
+  static Future<void> setOverlayView(
+    /// isBlock = true là giao diện chặn sử dụng ứng dụng
+    /// isBlock = false là giao diện chặn xoá ứng dụng
+    bool isBlock,
+
+    /// tên của màn hình chặn, không lấy phần .xml
+    String overlayView, {
+    /// id của nút thoát màn hình chặn = về home
+    String? backBtnId,
+
+    /// id nút hỏi phụ huynh
+    String? askParentBtnId,
+  }) async {
     try {
       _checkPlatform(false);
       await FlutterParentalControlPlatform.instance.setOverlayView(
-        id,
+        isBlock,
         overlayView,
         backBtnId: backBtnId,
         askParentBtnId: askParentBtnId,

@@ -70,7 +70,7 @@ class _ChildLocationScreenState extends State<ChildLocationScreen> {
   // hàm demo cập nhật vị trí của trẻ
   Future<LocationInfo> updateChildLocationFunc() async {
     final location = await ParentalControl.getLocation();
-    double a = DateTime.now().millisecond.toDouble();
+    double a = DateTime.now().second.toDouble();
     final childLocation = LocationInfo(
       latitude: location.latitude + a/100,
       longitude: location.longitude - a/150,

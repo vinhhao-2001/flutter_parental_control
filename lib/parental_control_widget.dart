@@ -124,6 +124,7 @@ class _ChildLocationWidgetState extends State<ChildLocationWidget> {
       List<LatLng> convexHullPoints = Utils().getConvexHull(_polygonPoints);
       drawSafeZone(convexHullPoints);
       if (widget.safeZonePointsFunc != null) {
+        /// Trả các điểm an toàn ra để người dùng xử lý
         widget.safeZonePointsFunc!(convexHullPoints);
       }
     }
