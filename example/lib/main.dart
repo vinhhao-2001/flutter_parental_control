@@ -80,12 +80,10 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             ),
             ElevatedButton(
                 onPressed: () async {
-                  await ParentalControl.requestPermission(
-                      Permission.usageState);
                   final a = await ParentalControl.getAppUsageInfo(day: 7);
 
                   for (var b in a) {
-                    if(b.packageName == 'com.android.flutter_parental_control_example'){
+                    if(b.packageName == 'com.android.settings'){
                       print(b.usageTime.first.timeUsed);
                     }
                   }
