@@ -33,7 +33,7 @@ class _ChildLocationScreenState extends State<ChildLocationScreen> {
         children: [
           Expanded(
             child: ChildLocationWidget(
-              childInfo: ChildInfo(childName: 'Trẻ'),
+              childInfo: ChildInfo(childName: 'Trẻ', childRoute: childRoute),
               safeZoneInfo: SafeZoneInfo(
                 safeZoneName: 'Safe Zone',
                 safeZone: [
@@ -70,10 +70,10 @@ class _ChildLocationScreenState extends State<ChildLocationScreen> {
   // hàm demo cập nhật vị trí của trẻ
   Future<LocationInfo> updateChildLocationFunc() async {
     final location = await ParentalControl.getLocation();
-    double a = DateTime.now().second.toDouble();
+    double a = DateTime.now().millisecond.toDouble();
     final childLocation = LocationInfo(
       latitude: location.latitude + a/100,
-      longitude: location.longitude - a/100,
+      longitude: location.longitude - a/150,
       timestamp: location.timestamp,
     );
     final add = await getAddress(childLocation);
