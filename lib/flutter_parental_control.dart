@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_parental_control/core/app_constants.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'flutter_parental_control_platform_interface.dart';
 
 part 'model/app_usage_info.dart';
@@ -41,33 +40,6 @@ class ParentalControl {
     } catch (_) {
       rethrow;
     }
-  }
-
-  /// Hàm kiểm tra trẻ có trong phạm vi an toàn không
-  Future<bool> checkChildLocation(
-      LatLng childLocation, List<LatLng> polygonPoints) async {
-    if (polygonPoints.length < 3) throw 'Vùng an toàn phải có 3 điểm trở lên';
-    int intersections = 0;
-
-    /// Kiểm tra xem điểm có nằm trong vùng an toàn không
-    /// Dùng thuật toán Ray-casting để kiểm tra
-    for (int i = 0; i < polygonPoints.length; i++) {
-      var p1 = polygonPoints[i],
-          p2 = polygonPoints[(i + 1) % polygonPoints.length];
-      if (((p1.latitude <= childLocation.latitude &&
-                  childLocation.latitude < p2.latitude) ||
-              (p2.latitude <= childLocation.latitude &&
-                  childLocation.latitude < p1.latitude)) &&
-          (childLocation.longitude <
-              (p2.longitude - p1.longitude) *
-                      (childLocation.latitude - p1.latitude) /
-                      (p2.latitude - p1.latitude) +
-                  p1.longitude)) {
-        intersections++;
-      }
-    }
-
-    return intersections.isOdd;
   }
 
   /// các phần chỉ dùng được trên [Android]

@@ -29,11 +29,13 @@ class LoggingServicePage extends StatefulWidget {
 class _LoggingServicePageState extends State<LoggingServicePage> {
   final TextEditingController _controller = TextEditingController();
   late DeviceInfo deviceInfo;
+  String a = 'a';
 
   @override
   void initState() {
     super.initState();
     Platform.isAndroid ? android() : ios();
+    print(a);
   }
 
   Future<void> android() async {

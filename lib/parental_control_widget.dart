@@ -36,7 +36,7 @@ class ChildLocationWidget extends StatefulWidget {
   final SafeZoneButton? safeZoneButton;
 
   /// Hàm cập nhật vị trí của trẻ
-  final Future<LatLng> Function()? childLocationFunc;
+  final Future<LocationInfo> Function()? childLocationFunc;
 
   /// Hàm trả về các điểm của phạm vi an toàn
   final Function(List<LatLng>)? safeZonePointsFunc;
@@ -47,12 +47,11 @@ class ChildLocationWidget extends StatefulWidget {
 
 class _ChildLocationWidgetState extends State<ChildLocationWidget> {
   GoogleMapController? _mapController;
-  late LatLng childLocation;
+  late LocationInfo childLocation;
   final Set<Polygon> _polygons = {};
   final List<LatLng> _polygonPoints = [];
   final Set<Polyline> _polyLine = {};
-  final List<LatLng> _polyLinesPoints = [];
-
+  final List<LocationInfo> _polyLinesPoints = [];
   bool _isDrawing = false;
 
   @override
@@ -60,50 +59,56 @@ class _ChildLocationWidgetState extends State<ChildLocationWidget> {
     /// Thực hiện khi widget được khởi tạo
     super.initState();
 
-    /// vị trí ban đầu của trẻ
-    childLocation = widget.childInfo?.childLocation ?? const LatLng(0.0, 0.0);
-
     /// vẽ phạm vi an toàn
     _initSafeZone(widget.safeZoneInfo?.safeZone);
 
     /// vẽ tuyến đường hoạt động của trẻ
-    _initChildRoute();
+    _initChildRoute(widget.childInfo?.childRoute);
   }
 
   /// Lấy phạm vi an toàn lúc khởi tạo map
   Future<void> _initSafeZone(List<LatLng>? safeZonePoints) async {
-    if (safeZonePoints != null) {
-      setState(() {
-        _polygonPoints.addAll(safeZonePoints);
-        if (safeZonePoints.isNotEmpty) {
-          _polygons.add(Polygon(
-            polygonId: PolygonId(
-                widget.safeZoneInfo?.safeZoneName ?? AppConstants.empty),
-            points: safeZonePoints,
-            strokeColor: Colors.blue,
-            strokeWidth: 2,
-            fillColor: Colors.blue.withOpacity(0.5),
-          ));
-        }
-      });
+    if (safeZonePoints?.isNotEmpty ?? false) {
+      drawSafeZone(safeZonePoints!);
     }
   }
 
-  void _initChildRoute() {
-    _polyLine.add(
-      Polyline(
+  /// Lấy tuyến đường hoạt động của trẻ lúc khởi tạo Map
+  void _initChildRoute(List<LocationInfo>? childRoutePoints) {
+    if (childRoutePoints?.isNotEmpty ?? false) {
+      _polyLinesPoints.addAll(childRoutePoints!);
+      childLocation = childRoutePoints.last;
+      drawRoute(_polyLinesPoints);
+    } else {
+      childLocation = const LocationInfo(latitude: 0.0, longitude: 0.0);
+    }
+  }
+
+  /// Vẽ phạm vi an toàn của trẻ
+  void drawSafeZone(List<LatLng> listPoint) {
+    _polygons.add(Polygon(
+      polygonId:
+          PolygonId(widget.safeZoneInfo?.safeZoneName ?? AppConstants.empty),
+      points: listPoint,
+      strokeColor: Colors.blue,
+      strokeWidth: 2,
+      fillColor: Colors.blue.withOpacity(0.5),
+    ));
+  }
+
+  /// Vẽ tuyến đường trên bản đồ
+  void drawRoute(List<LocationInfo> listPoint) {
+    setState(() {
+      _polyLine.add(Polyline(
         polylineId:
             PolylineId(widget.childInfo?.routeName ?? AppConstants.empty),
-        points: _polyLinesPoints,
+        points: listPoint,
         color: Colors.blue,
-        width: 5,
-      ),
-    );
-    setState(() {});
+      ));
+    });
   }
 
   /// Xử lý khi nhấn 1 điểm trên bản đồ
-
   void _onMapTap(LatLng point) {
     if (_isDrawing) {
       /// Vẽ phạm vi an toàn của trẻ
@@ -115,33 +120,25 @@ class _ChildLocationWidgetState extends State<ChildLocationWidget> {
 
   /// Vẽ phạm vi an toàn từ các điểm được chọn trên map
   void _toggleDrawingMode() {
-    setState(() {
-      if (_isDrawing && _polygonPoints.length > 2) {
-        List<LatLng> convexHullPoints = Utils().getConvexHull(_polygonPoints);
-        _polygons.add(Polygon(
-          polygonId: PolygonId(
-              widget.safeZoneInfo?.safeZoneName ?? AppConstants.safeZone),
-          points: convexHullPoints,
-          strokeColor: Colors.blue,
-          strokeWidth: 2,
-          fillColor: Colors.blue.withOpacity(0.5),
-        ));
-        if (widget.safeZonePointsFunc != null) {
-          widget.safeZonePointsFunc!(convexHullPoints);
-        }
+    if (_isDrawing && _polygonPoints.length > 2) {
+      List<LatLng> convexHullPoints = Utils().getConvexHull(_polygonPoints);
+      drawSafeZone(convexHullPoints);
+      if (widget.safeZonePointsFunc != null) {
+        widget.safeZonePointsFunc!(convexHullPoints);
       }
-      _polygonPoints.clear();
-      _isDrawing = !_isDrawing;
-    });
+    }
+    _polygonPoints.clear();
+    _isDrawing = !_isDrawing;
+    setState(() {});
   }
 
   /// Cập nhật vị trí của trẻ
   Future<void> _updateChildLocation() async {
-    updateAddress(childLocation);
     if (widget.childLocationFunc != null) {
-      LatLng newPosition = await widget.childLocationFunc!();
+      LocationInfo newPosition = await widget.childLocationFunc!();
       setState(() {
         childLocation = newPosition;
+        _polyLinesPoints.add(newPosition);
       });
       _mapController?.animateCamera(CameraUpdate.newLatLng(newPosition));
     }
@@ -219,4 +216,47 @@ class SafeZoneButton {
   final String safeZoneBtn;
 
   SafeZoneButton(this.drawBtn, this.safeZoneBtn);
+}
+
+/// Hàm kiểm tra trẻ có trong phạm vi an toàn không
+Future<bool> checkChildLocation(
+    LatLng childLocation, List<LatLng> polygonPoints) async {
+  if (polygonPoints.length < 3) throw AppConstants.safeZoneError;
+  int intersections = 0;
+
+  /// Kiểm tra xem điểm có nằm trong vùng an toàn không
+  /// Dùng thuật toán Ray-casting để kiểm tra
+  for (int i = 0; i < polygonPoints.length; i++) {
+    var p1 = polygonPoints[i],
+        p2 = polygonPoints[(i + 1) % polygonPoints.length];
+    if (((p1.latitude <= childLocation.latitude &&
+                childLocation.latitude < p2.latitude) ||
+            (p2.latitude <= childLocation.latitude &&
+                childLocation.latitude < p1.latitude)) &&
+        (childLocation.longitude <
+            (p2.longitude - p1.longitude) *
+                    (childLocation.latitude - p1.latitude) /
+                    (p2.latitude - p1.latitude) +
+                p1.longitude)) {
+      intersections++;
+    }
+  }
+
+  return intersections.isOdd;
+}
+
+/// Lấy thông tin vị trí từ toạ độ trên Google Map
+Future<Address> getAddress(LatLng location) async {
+  try {
+    final placeMarks =
+        await placemarkFromCoordinates(location.latitude, location.longitude);
+    if (placeMarks.isNotEmpty) {
+      final childAddress = Address.fromPlaceMark(placeMarks[0]);
+      return childAddress;
+    } else {
+      throw AppConstants.addressError;
+    }
+  } catch (_) {
+    rethrow;
+  }
 }

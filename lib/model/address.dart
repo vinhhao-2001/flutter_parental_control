@@ -57,17 +57,3 @@ class Address {
   }
 }
 
-Future<Address> updateAddress(LatLng location) async {
-  try {
-    final placeMarks =
-        await placemarkFromCoordinates(location.latitude, location.longitude);
-    if (placeMarks.isNotEmpty) {
-      final childAddress = Address.fromPlaceMark(placeMarks[0]);
-      return childAddress;
-    } else {
-      throw AppConstants.addressError;
-    }
-  } catch (_) {
-    rethrow;
-  }
-}

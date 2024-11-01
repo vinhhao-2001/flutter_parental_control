@@ -1,15 +1,13 @@
 part of '../parental_control_widget.dart';
 
-class LocationInfo {
-  final double latitude;
-  final double longitude;
+class LocationInfo extends LatLng {
   final DateTime? timestamp;
 
-  LocationInfo({
-    required this.latitude,
-    required this.longitude,
+  const LocationInfo({
+    required double latitude,
+    required double longitude,
     this.timestamp,
-  });
+  }) : super(latitude, longitude);
 
   Map<String, dynamic> toMap() {
     return {

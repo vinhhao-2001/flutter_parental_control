@@ -4,15 +4,15 @@ part of '../parental_control_widget.dart';
 class ChildInfo {
   final String? childName;
   final Uint8List? childIcon;
-  final LatLng? childLocation;
   final double? iconSize;
   final String? routeName;
+  final List<LocationInfo>? childRoute;
 
   ChildInfo({
     this.childName,
     this.childIcon,
-    this.childLocation,
     this.iconSize,
     this.routeName,
+    this.childRoute,
   });
 }

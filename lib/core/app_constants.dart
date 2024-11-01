@@ -100,4 +100,5 @@ class AppConstants {
       'Android platform specific function';
   static const String addressError = 'Unable to get location information';
   static const String locationError = 'Location access required';
+  static const String safeZoneError = 'Safe Zone must have 3 points or more';
 }
