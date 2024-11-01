@@ -46,17 +46,31 @@ class ChildLocationWidget extends StatefulWidget {
 }
 
 class _ChildLocationWidgetState extends State<ChildLocationWidget> {
+  /// Điều khiển camera bằng [_mapController]
   GoogleMapController? _mapController;
-  late LocationInfo childLocation;
+
+  /// Vị trí hiện tại của trẻ dùng để: Cập nhật vị trí camera, đánh dấu vị trí trên bản đồ
+  late LocationInfo _childLocation;
+
+  /// Phạm vi an toàn trên bản đồ
   final Set<Polygon> _polygons = {};
+
+  /// Các điểm an toàn
   final List<LatLng> _polygonPoints = [];
+
+  /// Tuyến đường hoạt động
   final Set<Polyline> _polyLine = {};
+
+  /// Các điểm của tuyến đường
+  /// Điểm cuối cùng của [_polyLinesPoints] là vị trí của trẻ
   final List<LocationInfo> _polyLinesPoints = [];
+
+  /// Giá trị cho biết đang vẽ phạm vi an toàn không
   bool _isDrawing = false;
 
+  /// Thực hiện khi widget được khởi tạo
   @override
   void initState() {
-    /// Thực hiện khi widget được khởi tạo
     super.initState();
 
     /// vẽ phạm vi an toàn
@@ -66,26 +80,16 @@ class _ChildLocationWidgetState extends State<ChildLocationWidget> {
     _initChildRoute(widget.childInfo?.childRoute);
   }
 
+  /// Vẽ và hiển thị phạm vi an toàn [_initSafeZone] và [_drawSafeZone]
   /// Lấy phạm vi an toàn lúc khởi tạo map
   Future<void> _initSafeZone(List<LatLng>? safeZonePoints) async {
     if (safeZonePoints?.isNotEmpty ?? false) {
-      drawSafeZone(safeZonePoints!);
-    }
-  }
-
-  /// Lấy tuyến đường hoạt động của trẻ lúc khởi tạo Map
-  void _initChildRoute(List<LocationInfo>? childRoutePoints) {
-    if (childRoutePoints?.isNotEmpty ?? false) {
-      _polyLinesPoints.addAll(childRoutePoints!);
-      childLocation = childRoutePoints.last;
-      drawRoute(_polyLinesPoints);
-    } else {
-      childLocation = const LocationInfo(latitude: 0.0, longitude: 0.0);
+      _drawSafeZone(safeZonePoints!);
     }
   }
 
   /// Vẽ phạm vi an toàn của trẻ
-  void drawSafeZone(List<LatLng> listPoint) {
+  void _drawSafeZone(List<LatLng> listPoint) {
     _polygons.add(Polygon(
       polygonId:
           PolygonId(widget.safeZoneInfo?.safeZoneName ?? AppConstants.empty),
@@ -96,8 +100,20 @@ class _ChildLocationWidgetState extends State<ChildLocationWidget> {
     ));
   }
 
+  /// Vẽ và hiển thị phạm vi an toàn [_initChildRoute] và [_drawRoute]
+  /// Lấy tuyến đường hoạt động của trẻ lúc khởi tạo Map
+  void _initChildRoute(List<LocationInfo>? childRoutePoints) {
+    if (childRoutePoints?.isNotEmpty ?? false) {
+      _polyLinesPoints.addAll(childRoutePoints!);
+      _childLocation = childRoutePoints.last;
+      _drawRoute(_polyLinesPoints);
+    } else {
+      _childLocation = const LocationInfo(latitude: 0.0, longitude: 0.0);
+    }
+  }
+
   /// Vẽ tuyến đường trên bản đồ
-  void drawRoute(List<LocationInfo> listPoint) {
+  void _drawRoute(List<LocationInfo> listPoint) {
     setState(() {
       _polyLine.add(Polyline(
         polylineId:
@@ -122,7 +138,7 @@ class _ChildLocationWidgetState extends State<ChildLocationWidget> {
   void _toggleDrawingMode() {
     if (_isDrawing && _polygonPoints.length > 2) {
       List<LatLng> convexHullPoints = Utils().getConvexHull(_polygonPoints);
-      drawSafeZone(convexHullPoints);
+      _drawSafeZone(convexHullPoints);
       if (widget.safeZonePointsFunc != null) {
         /// Trả các điểm an toàn ra để người dùng xử lý
         widget.safeZonePointsFunc!(convexHullPoints);
@@ -138,7 +154,7 @@ class _ChildLocationWidgetState extends State<ChildLocationWidget> {
     if (widget.childLocationFunc != null) {
       LocationInfo newPosition = await widget.childLocationFunc!();
       setState(() {
-        childLocation = newPosition;
+        _childLocation = newPosition;
         _polyLinesPoints.add(newPosition);
       });
       _mapController?.animateCamera(CameraUpdate.newLatLng(newPosition));
@@ -154,14 +170,14 @@ class _ChildLocationWidgetState extends State<ChildLocationWidget> {
             _mapController = controller;
           },
           initialCameraPosition: CameraPosition(
-            target: childLocation,
+            target: _childLocation,
             zoom: 15.0,
           ),
           markers: {
             Marker(
               markerId:
                   MarkerId(widget.childInfo?.childName ?? AppConstants.empty),
-              position: childLocation,
+              position: _childLocation,
               icon: Utils().iconPosition(
                 widget.childInfo?.childIcon,
                 widget.childInfo?.iconSize,
