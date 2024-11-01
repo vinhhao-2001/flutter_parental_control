@@ -33,7 +33,7 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
     throw UnimplementedError('requestPermission() has not been implemented.');
   }
 
-  Future<Map<String, dynamic>> getAppUsageInfo() {
+  Future<Map<String, dynamic>> getAppUsageInfo({day}) {
     throw UnimplementedError('getAppUsageInfo() has not been implemented.');
   }
 

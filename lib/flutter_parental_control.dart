@@ -79,11 +79,12 @@ class ParentalControl {
   }
 
   /// Lấy thời gian sử dụng trong thiết bị
-  static Future<List<AppUsageInfo>> getAppUsageInfo() async {
+  /// [day] là số ngày lấy thời gian sử dụng
+  static Future<List<AppUsageInfo>> getAppUsageInfo({int? day}) async {
     try {
       _checkPlatform(false);
-      final data =
-          await FlutterParentalControlPlatform.instance.getAppUsageInfo();
+      final data = await FlutterParentalControlPlatform.instance
+          .getAppUsageInfo(day: day);
       List<AppUsageInfo> listApp = data.entries.map((entry) {
         String packageName = entry.key;
         Map<int, int> usageMap = Map<int, int>.from(entry.value);

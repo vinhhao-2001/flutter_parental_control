@@ -11,17 +11,6 @@ import mobile.bkav.utils.Utils
 import java.util.Calendar
 
 class ManagerApp {
-    private fun getLauncherAppPackages(context: Context): Set<String> {
-        val intent = Intent(Intent.ACTION_MAIN, null)
-        intent.addCategory(Intent.CATEGORY_LAUNCHER)
-        val resolveInfoList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL)
-        } else {
-            context.packageManager.queryIntentActivities(intent, 0)
-        }
-        return resolveInfoList.map { it.activityInfo.packageName }.toSet()
-    }
-
     // Lấy thông tin các ứng dụng mặc định
     fun getAppDetailInfo(context: Context): List<Map<String, Any>> {
         val packageManager = context.packageManager
@@ -60,21 +49,12 @@ class ManagerApp {
     // Lấy thời gian sử dụng của các ứng dụng dùng UsageState
     fun getAppUsageInfo(context: Context): Map<String, Map<Long, Long>> {
         val launcherApps = getLauncherAppPackages(context)
-        val appUsageInfoMap =
-            mutableMapOf<String, MutableMap<Long, Long>>()
+        val appUsageInfoMap = mutableMapOf<String, MutableMap<Long, Long>>()
         val calendar = Calendar.getInstance()
 
         for (i in 0 until 7) {
-            calendar.set(Calendar.HOUR_OF_DAY, 0)
-            calendar.set(Calendar.MINUTE, 0)
-            calendar.set(Calendar.SECOND, 0)
-            calendar.set(Calendar.MILLISECOND, 0)
-            val startTime = calendar.timeInMillis
-            calendar.set(Calendar.HOUR_OF_DAY, 23)
-            calendar.set(Calendar.MINUTE, 59)
-            calendar.set(Calendar.SECOND, 59)
-            calendar.set(Calendar.MILLISECOND, 999)
-            val endTime = calendar.timeInMillis
+            val startTime = getStartOfDay(calendar)
+            val endTime = getEndOfDay(calendar)
 
             // Lấy dữ liệu sử dụng cho ngày cụ thể
             val usageStatsList = Utils().appUsageTime(context, startTime, endTime)
@@ -82,25 +62,23 @@ class ManagerApp {
                 if (!launcherApps.contains(usageStats.packageName)) continue
                 val dailyUsageMap =
                     appUsageInfoMap.getOrPut(usageStats.packageName) { mutableMapOf() }
-                // Thêm thời gian sử dụng cho ngày cụ thể vào `Map` con
-                dailyUsageMap[startTime] = usageStats.totalTimeInForeground
+                // Thêm thời gian sử dụng cho ngày cụ thể vào `Map` thời gian sử dụng
+                dailyUsageMap[startTime] = (dailyUsageMap[startTime] ?: 0) + usageStats.totalTimeInForeground
             }
-
             // Lùi lại 1 ngày để chuẩn bị tính startTime và endTime cho ngày trước đó
             calendar.add(Calendar.DAY_OF_YEAR, -1)
         }
-        println(appUsageInfoMap)
         return appUsageInfoMap
     }
 
     // Lấy thời gian sử dụng của các ứng dụng dùng UsageEvent
-    fun getAppUsageForLast7Days(context: Context): Map<String, Map<Long, Long>> {
+    fun getAppUsageInfo(context: Context, day: Int): Map<String, Map<Long, Long>> {
         val launcherApps = getLauncherAppPackages(context)
         val usageByAppMap = mutableMapOf<String, MutableMap<Long, Long>>() // Cấu trúc mới
 
         val calendar = Calendar.getInstance()
 
-        for (i in 0 until 7) {
+        for (i in 0 until day) {
             val startDay = getStartOfDay(calendar) // Thời gian bắt đầu ngày 0h00
             val endDay = getEndOfDay(calendar) // Thời gian kết thúc ngày 23h59
             val usageStatsManager = getUsageStatsManager(context) ?: return emptyMap()
@@ -181,5 +159,16 @@ class ManagerApp {
                 }
             }
         }
+    }
+
+    private fun getLauncherAppPackages(context: Context): Set<String> {
+        val intent = Intent(Intent.ACTION_MAIN, null)
+        intent.addCategory(Intent.CATEGORY_LAUNCHER)
+        val resolveInfoList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL)
+        } else {
+            context.packageManager.queryIntentActivities(intent, 0)
+        }
+        return resolveInfoList.map { it.activityInfo.packageName }.toSet()
     }
 }

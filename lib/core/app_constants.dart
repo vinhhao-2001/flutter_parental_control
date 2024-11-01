@@ -67,6 +67,7 @@ class AppConstants {
   static const String overlayView = 'overlayView';
   static const String backBtn = 'backButton';
   static const String askParentBtn = 'askParentBtn';
+  static const String day = 'day';
 
   /// cài đặt thời gian hạn chế [ios]
   static const String isMonitoring = 'isMonitoring';

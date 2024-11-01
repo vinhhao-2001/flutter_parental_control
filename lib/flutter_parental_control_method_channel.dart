@@ -53,9 +53,9 @@ class MethodChannelFlutterParentalControl
 
   /// Lấy thông tin thời gian sử dụng các ứng dụng
   @override
-  Future<Map<String, dynamic>> getAppUsageInfo() async {
-    final result =
-        await methodChannel.invokeMethod(AppConstants.appUsageMethod);
+  Future<Map<String, dynamic>> getAppUsageInfo({day}) async {
+    final result = await methodChannel
+        .invokeMethod(AppConstants.appUsageMethod, {AppConstants.day: day});
     return Map<String, dynamic>.from(result);
   }
 

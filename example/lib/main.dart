@@ -70,7 +70,7 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () async {
+              onPressed: () {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -78,6 +78,19 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
               },
               child: const Text('Set Log Value'),
             ),
+            ElevatedButton(
+                onPressed: () async {
+                  await ParentalControl.requestPermission(
+                      Permission.usageState);
+                  final a = await ParentalControl.getAppUsageInfo(day: 7);
+
+                  for (var b in a) {
+                    if(b.packageName == 'com.android.flutter_parental_control_example'){
+                      print(b.usageTime.first.timeUsed);
+                    }
+                  }
+                },
+                child: const Text("Lấy thông tin từ native"))
           ],
         ),
       ),
