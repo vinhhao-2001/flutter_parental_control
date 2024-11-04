@@ -45,13 +45,13 @@ data class DeviceInfo(
                 AppConstants.DEVICE_NAME to Build.MODEL,
                 AppConstants.DEVICE_MANUFACTURER to Build.MANUFACTURER,
                 AppConstants.DEVICE_VERSION to Build.VERSION.RELEASE,
-                AppConstants.DEVICE_API_LEVEL to Build.VERSION.SDK_INT,
+                AppConstants.DEVICE_API_LEVEL to Build.VERSION.SDK_INT.toString(),
                 AppConstants.DEVICE_BOARD to Build.BOARD,
                 AppConstants.DEVICE_HARDWARE to Build.HARDWARE,
                 AppConstants.DEVICE_DISPLAY to Build.DISPLAY,
-                AppConstants.BATTERY_LEVEL to "$batteryLevel%",
-                AppConstants.SCREEN_BRIGHTNESS to screenBrightness.toString(),
-                AppConstants.VOLUME to volume.toString(),
+                AppConstants.BATTERY_LEVEL to batteryLevel,
+                AppConstants.SCREEN_BRIGHTNESS to screenBrightness,
+                AppConstants.VOLUME to volume,
                 AppConstants.DEVICE_ID to Settings.Secure.getString(
                     context.contentResolver,
                     Settings.Secure.ANDROID_ID

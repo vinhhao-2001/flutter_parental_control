@@ -80,12 +80,10 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             ),
             ElevatedButton(
                 onPressed: () async {
-                  final a = await ParentalControl.getAppUsageInfo(day: 7);
-
+                  final a = await ParentalControl.getAppUsageInfo(day: 1);
                   for (var b in a) {
-                    if(b.packageName == 'com.android.settings'){
-                      print(b.usageTime.first.timeUsed);
-                    }
+                    print(b.packageName);
+                    print(b.usageTime.first.timeUsed);
                   }
                 },
                 child: const Text("Lấy thông tin từ native"))

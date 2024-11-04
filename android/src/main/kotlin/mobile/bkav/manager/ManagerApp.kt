@@ -63,7 +63,8 @@ class ManagerApp {
                 val dailyUsageMap =
                     appUsageInfoMap.getOrPut(usageStats.packageName) { mutableMapOf() }
                 // Thêm thời gian sử dụng cho ngày cụ thể vào `Map` thời gian sử dụng
-                dailyUsageMap[startTime] = (dailyUsageMap[startTime] ?: 0) + usageStats.totalTimeInForeground
+                dailyUsageMap[startTime] =
+                    (dailyUsageMap[startTime] ?: 0) + usageStats.totalTimeInForeground
             }
             // Lùi lại 1 ngày để chuẩn bị tính startTime và endTime cho ngày trước đó
             calendar.add(Calendar.DAY_OF_YEAR, -1)
@@ -148,11 +149,10 @@ class ManagerApp {
                         if (packageName == event.packageName) {
                             val totalTimeInForeground = event.timeStamp - lastForegroundStartTime
                             // Cập nhật thời gian sử dụng vào usageMap
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                usageMap.getOrPut(packageName) { mutableMapOf() }[currentDay] =
-                                    usageMap.getOrDefault(packageName, mutableMapOf())
-                                        .getOrDefault(currentDay, 0L) + totalTimeInForeground
-                            }
+                            usageMap.getOrPut(packageName) { mutableMapOf() }[currentDay] =
+                                usageMap.getOrPut(packageName) { mutableMapOf() }[currentDay]?.let {
+                                    it + totalTimeInForeground
+                                } ?: totalTimeInForeground
                             currentForegroundApp = null
                         }
                     }

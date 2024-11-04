@@ -101,7 +101,13 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
 
             AppConstants.GET_APP_USAGE_INFO -> {
                 // Lấy thông tin sử dụng ứng dụng
-                val appUsageInfoList = ManagerApp().getAppUsageInfo(context)
+                val day = call.argument<Int>(AppConstants.DAY) ?: 7
+                val appUsageInfoList = if (day != null) {
+                    ManagerApp().getAppUsageInfo(context, day)
+                } else {
+                    ManagerApp().getAppUsageInfo(context)
+                }
+
                 result.success(appUsageInfoList)
             }
 

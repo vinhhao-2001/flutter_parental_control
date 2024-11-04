@@ -47,7 +47,7 @@ class AppConstants {
         const val APP_ICON = "appIcon"
         const val IS_INSTALLED = "isInstalled"
         const val TIME_LIMIT = "timeLimit"
-        const val USAGE_TIME = "usageTime"
+        const val DAY = "day"
         const val SEARCH_QUERY = "searchQuery"
         const val VISITED_TIME = "visitedTime"
         const val OVERLAY_VIEW = "overlayView";
