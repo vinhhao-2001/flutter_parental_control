@@ -15,6 +15,7 @@ class Schedule {
     this.endMinute,
   });
 
+  /// Lấy đối tượng từ map
   factory Schedule.fromMap(Map<String, dynamic> map) {
     return Schedule(
       isMonitoring: map[AppConstants.isMonitoring],
@@ -24,6 +25,8 @@ class Schedule {
       endMinute: map[AppConstants.endMinute],
     );
   }
+
+  /// chuyển đổi đối tượng thành map
   Map<String, dynamic> toMap() {
     return {
       AppConstants.isMonitoring: isMonitoring,
@@ -33,4 +36,13 @@ class Schedule {
       AppConstants.endMinute: endMinute,
     };
   }
+
+  /// keys schedule
+  static List<String> get keys => [
+        AppConstants.isMonitoring,
+        AppConstants.startHour,
+        AppConstants.startMinute,
+        AppConstants.endHour,
+        AppConstants.endMinute,
+      ];
 }

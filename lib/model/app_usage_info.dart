@@ -28,11 +28,19 @@ class AppUsageInfo {
     };
   }
 
-  Map<int, int> toUsageMap() {
+  /// chuyển đổi thời gian sử dụng thành Map
+  Map<String, int> toUsageMap() {
     return {
-      for (var dailyUsage in usageTime) dailyUsage.date: dailyUsage.timeUsed
+      for (var dailyUsage in usageTime)
+        dailyUsage.date.toString(): dailyUsage.timeUsed,
     };
   }
+
+  /// Tạo danh sách key
+  static List<String> get keys => [
+        AppConstants.packageName,
+        AppConstants.usageTime,
+      ];
 }
 
 /// Thời gian sử dụng trong 1 ngày

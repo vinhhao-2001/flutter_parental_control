@@ -55,4 +55,15 @@ class AppDetail {
       AppConstants.timeUpdate: timeUpdate,
     };
   }
+
+  /// Danh sách keys
+  static List<String> get keys => [
+        AppConstants.appName,
+        AppConstants.packageName,
+        AppConstants.appIcon,
+        AppConstants.versionName,
+        AppConstants.versionCode,
+        AppConstants.timeInstall,
+        AppConstants.timeUpdate,
+      ];
 }

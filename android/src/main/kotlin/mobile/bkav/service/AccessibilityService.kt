@@ -88,6 +88,7 @@ class AccessibilityService : AccessibilityService() {
 
         // Kiểm tra nếu ứng dụng bị chặn
         if (DBHelper.isAppBlocked(context = applicationContext, contentDescription)) {
+            // Hiển thị màn hình chặn
             val overlay = DBHelper.getOverlayView(true)
             if (overlay != null) {
                 Overlay(this).showOverlay(
@@ -95,6 +96,10 @@ class AccessibilityService : AccessibilityService() {
                     overlay.backBtnId,
                     overlay.askParentBtn
                 ) {
+                    // Xử lý khi nhấn nút
+                    // Đang test gọi dậy ứng dụng để tạo kệnh Flutter- native
+                    // có lỗi do kệnh mới không trao đổi được dữ liệu với kênh cũ
+                    // có thể do channel được khai báo từ sớm
                     Utils().openApp(applicationContext)
                     channel.invokeMethod(AppConstants.ASK_PARENT_METHOD, null)
                 }

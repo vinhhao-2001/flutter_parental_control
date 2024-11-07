@@ -43,4 +43,12 @@ class AppInstalledInfo {
       AppConstants.appIcon: appIcon,
     };
   }
+
+  /// Tạo key cho các trường
+  static List<String> get keys => [
+        'isInstalled',
+        'packageName',
+        'appName',
+        'appIcon',
+      ];
 }

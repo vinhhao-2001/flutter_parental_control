@@ -21,4 +21,9 @@ class AppBlock {
       AppConstants.timeLimit: timeLimit,
     };
   }
+
+  static List<String> get keys=>[
+    AppConstants.packageName,
+    AppConstants.timeLimit,
+  ];
 }

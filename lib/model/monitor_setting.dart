@@ -109,25 +109,25 @@ class MonitorSetting {
   }) {
     return MonitorSetting(
       requireAutomaticDateAndTime:
-          requireAutomaticDateAndTime ?? this.requireAutomaticDateAndTime,
+      requireAutomaticDateAndTime ?? this.requireAutomaticDateAndTime,
       lockAccounts: lockAccounts ?? this.lockAccounts,
       lockPasscode: lockPasscode ?? this.lockPasscode,
       denySiri: denySiri ?? this.denySiri,
       denyInAppPurchases: denyInAppPurchases ?? this.denyInAppPurchases,
       requirePasswordForPurchases:
-          requirePasswordForPurchases ?? this.requirePasswordForPurchases,
+      requirePasswordForPurchases ?? this.requirePasswordForPurchases,
       maximumRating: maximumRating ?? this.maximumRating,
       maximumMovieRating: maximumMovieRating ?? this.maximumMovieRating,
       maximumTVShowRating: maximumTVShowRating ?? this.maximumTVShowRating,
       denyExplicitContent: denyExplicitContent ?? this.denyExplicitContent,
       denyMultiplayerGaming:
-          denyMultiplayerGaming ?? this.denyMultiplayerGaming,
+      denyMultiplayerGaming ?? this.denyMultiplayerGaming,
       denyMusicService: denyMusicService ?? this.denyMusicService,
       denyAddingFriends: denyAddingFriends ?? this.denyAddingFriends,
     );
   }
 
-  // Chuyển đổi đối tượng thành map
+  /// Chuyển đổi đối tượng thành map
   Map<String, dynamic> toMap() {
     return {
       AppConstants.requireAutoTime: requireAutomaticDateAndTime,
@@ -149,7 +149,7 @@ class MonitorSetting {
     };
   }
 
-  // chuyển đổi map thành đối tượng
+  /// chuyển đổi map thành đối tượng
   factory MonitorSetting.fromMap(Map<String, dynamic> map) {
     return MonitorSetting(
       requireAutomaticDateAndTime: map[AppConstants.requireAutoTime],
@@ -161,7 +161,7 @@ class MonitorSetting {
       denyInAppPurchases: map[AppConstants.denyInAppPurchases],
       maximumRating: map[AppConstants.maximumRating],
       requirePasswordForPurchases:
-          map[AppConstants.requirePasswordForPurchases],
+      map[AppConstants.requirePasswordForPurchases],
       denyExplicitContent: map[AppConstants.denyExplicitContent],
       denyMusicService: map[AppConstants.denyMusicService],
       denyBookstoreErotica: map[AppConstants.denyBookstoreErotica],
@@ -171,4 +171,24 @@ class MonitorSetting {
       denyAddingFriends: map[AppConstants.denyAddingFriends],
     );
   }
+
+  /// Danh sách keys của monitor
+  static List<String> get keys=> [
+    AppConstants.requireAutoTime,
+    AppConstants.lockAccounts,
+    AppConstants.lockPasscode,
+    AppConstants.denySiri,
+    AppConstants.lockAppCellularData,
+    AppConstants.lockESIM,
+    AppConstants.denyInAppPurchases,
+    AppConstants.maximumRating,
+    AppConstants.requirePasswordForPurchases,
+    AppConstants.denyExplicitContent,
+    AppConstants.denyMusicService,
+    AppConstants.denyBookstoreErotica,
+    AppConstants.maximumMovieRating,
+    AppConstants.maximumTVShowRating,
+    AppConstants.denyMultiplayerGaming,
+    AppConstants.denyAddingFriends,
+  ];
 }

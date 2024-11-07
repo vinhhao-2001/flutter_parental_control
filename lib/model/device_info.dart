@@ -10,13 +10,13 @@ class DeviceInfo {
   final String? deviceBoard;
   final String? deviceHardware;
   final String? deviceDisplay;
-  final String? batteryLevel;
-  final String? screenBrightness;
-  final String? volume;
+  final int? batteryLevel;
+  final int? screenBrightness;
+  final int? volume;
   final String? deviceId;
 
   DeviceInfo({
-    this.systemName,
+    this.systemName = '',
     this.deviceName,
     this.deviceManufacturer,
     this.deviceVersion,
@@ -40,9 +40,9 @@ class DeviceInfo {
       deviceBoard: map[AppConstants.deviceBoard] as String?,
       deviceHardware: map[AppConstants.deviceHardware] as String?,
       deviceDisplay: map[AppConstants.deviceDisplay] as String?,
-      batteryLevel: map[AppConstants.batteryLevel] as String?,
-      screenBrightness: map[AppConstants.screenBrightness] as String?,
-      volume: map[AppConstants.volume] as String?,
+      batteryLevel: map[AppConstants.batteryLevel] as int?,
+      screenBrightness: map[AppConstants.screenBrightness] as int?,
+      volume: map[AppConstants.volume] as int?,
       deviceId: map[AppConstants.deviceId] as String?,
     );
   }
@@ -63,4 +63,19 @@ class DeviceInfo {
       AppConstants.deviceId: deviceId,
     };
   }
+
+  static List<String> get keys => [
+        'systemName',
+        'deviceName',
+        'deviceManufacturer',
+        'deviceVersion',
+        'deviceApiLevel',
+        'deviceBoard',
+        'deviceHardware',
+        'deviceDisplay',
+        'batteryLevel',
+        'screenBrightness',
+        'volume',
+        'deviceId',
+      ];
 }
