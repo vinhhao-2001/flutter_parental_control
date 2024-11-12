@@ -1,14 +1,16 @@
+library parental_control;
+
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter_parental_control/core/app_constants.dart';
-import 'package:flutter_parental_control/core/utils.dart';
+import 'package:flutter_parental_control/src/core/app_constants.dart';
+import 'package:flutter_parental_control/src/core/utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 
-part 'model/address.dart';
-part 'model/child_info.dart';
-part 'model/safe_zone_info.dart';
-part 'model/location_info.dart';
+part 'src/model/address.dart';
+part 'src/model/child_info.dart';
+part 'src/model/safe_zone_info.dart';
+part 'src/model/location_info.dart';
 
 /// Widget là bản đồ hiển thị  vị trí của trẻ
 /// Hiển thị phạm vi an toàn của trẻ

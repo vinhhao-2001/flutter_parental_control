@@ -24,7 +24,9 @@ class AppUsageInfo {
   Map<String, dynamic> toMap() {
     return {
       AppConstants.packageName: packageName,
-      AppConstants.usageTime: usageTime,
+      AppConstants.usageTime: usageTime.map((time) {
+        return time.toMap();
+      }),
     };
   }
 
@@ -52,4 +54,7 @@ class DailyUsage {
     required this.date,
     required this.timeUsed,
   });
+  Map<String, dynamic> toMap() {
+    return {date.toString(): timeUsed};
+  }
 }

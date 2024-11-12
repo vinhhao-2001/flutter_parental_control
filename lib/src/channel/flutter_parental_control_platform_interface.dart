@@ -1,3 +1,5 @@
+library parental_control;
+
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'flutter_parental_control_method_channel.dart';
 
@@ -22,6 +24,10 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
 
   Future<List<Map<String, dynamic>>> getAppDetailInfo() {
     throw UnimplementedError('getAppDetailInfo() has not been implemented.');
+  }
+
+  Future<int> getDeviceUsage() {
+    throw UnimplementedError('getDeviceUsage() has not been implemented.');
   }
 
   Future<Map<String, dynamic>> getLocation() {

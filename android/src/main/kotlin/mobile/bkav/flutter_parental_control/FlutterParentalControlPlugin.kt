@@ -81,6 +81,11 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                 context.startService(serviceIntent)
                 result.success(AppConstants.EMPTY)
             }
+            AppConstants.GET_DEVICE_USAGE->{
+                // Lấy thời gian sử dụng của thiết bị trong ngày
+                val deviceUsage = ManagerApp().getDeviceUsage(context)
+                result.success(deviceUsage)
+            }
 
             AppConstants.BLOCK_APP_METHOD -> {
                 // Thêm ứng dụng bị chặn vào danh sách ứng dụng bị chặn
@@ -102,12 +107,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
             AppConstants.GET_APP_USAGE_INFO -> {
                 // Lấy thông tin sử dụng ứng dụng
                 val day = call.argument<Int>(AppConstants.DAY) ?: 7
-                val appUsageInfoList = if (day != null) {
-                    ManagerApp().getAppUsageInfo(context, day)
-                } else {
-                    ManagerApp().getAppUsageInfo(context)
-                }
-
+                val appUsageInfoList = ManagerApp().getAppUsageInfo(context, day)
                 result.success(appUsageInfoList)
             }
 
@@ -126,6 +126,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                     1 -> result.success(requestPermissions.requestAccessibilityPermission())
                     2 -> result.success(requestPermissions.requestOverlayPermission())
                     3 -> result.success(requestPermissions.requestUsageStatsPermissions())
+                    4 -> result.success(requestPermissions.requestAdminPermission())
                     else -> result.error(AppConstants.ERROR_TYPE_PERMISSION, null, null)
                 }
             }

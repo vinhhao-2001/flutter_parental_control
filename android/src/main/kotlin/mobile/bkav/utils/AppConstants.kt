@@ -28,6 +28,7 @@ class AppConstants {
         const val EVENT_CHANNEL = "flutter_parental_control_event"
         const val GET_DEVICE_INFO = "getDeviceInfoMethod"
         const val GET_APP_DETAIL = "getAppDetailMethod"
+        const val GET_DEVICE_USAGE = "getDeviceUsageMethod"
         const val BLOCK_APP_METHOD = "blockAppMethod"
         const val BLOCK_WEBSITE_METHOD = "blockWebsiteMethod"
         const val START_SERVICE = "startServiceMethod"
@@ -52,7 +53,7 @@ class AppConstants {
         const val VISITED_TIME = "visitedTime"
         const val OVERLAY_VIEW = "overlayView";
         const val BACK_BTN = "backButton";
-        const val ASK_PARENT_BTN = "askParentBtn";
+        const val ASK_PARENT_BTN = "askParentBtn"
 
         // key device info
         const val SYSTEM_NAME = "systemName"

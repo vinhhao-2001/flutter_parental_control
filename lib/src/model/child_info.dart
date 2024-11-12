@@ -1,4 +1,4 @@
-part of '../parental_control_widget.dart';
+part of '../../parental_control_widget.dart';
 
 /// Thông tin hiển thị của trẻ trong bản đồ
 class ChildInfo {

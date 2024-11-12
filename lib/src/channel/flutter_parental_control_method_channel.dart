@@ -1,6 +1,8 @@
+library parental_control;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'core/app_constants.dart';
+import '../core/app_constants.dart';
 import 'flutter_parental_control_platform_interface.dart';
 
 class MethodChannelFlutterParentalControl
@@ -28,6 +30,15 @@ class MethodChannelFlutterParentalControl
     return data.map((e) => Map<String, dynamic>.from(e as Map)).toList();
   }
 
+  /// Lấy thời gian sử dụng của thiết bị
+  @override
+  Future<int> getDeviceUsage() async {
+    final data =
+        await methodChannel.invokeMethod(AppConstants.deviceUsageMethod);
+    return data;
+  }
+
+  /// Lấy thông tin vị trí của thiết bị
   @override
   Future<Map<String, dynamic>> getLocation() async {
     final result =

@@ -1,18 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:flutter_parental_control/core/app_constants.dart';
+import 'package:flutter_parental_control/src/core/app_constants.dart';
 import 'package:geolocator/geolocator.dart';
-import 'flutter_parental_control_platform_interface.dart';
+import 'src/channel/flutter_parental_control_platform_interface.dart';
 
-part 'model/app_usage_info.dart';
-part 'model/device_info.dart';
-part 'model/app_detail.dart';
-part 'model/app_installed_info.dart';
-part 'model/web_history.dart';
-part 'model/app_block.dart';
-part 'model/schedule.dart';
-part 'model/monitor_setting.dart';
+part 'src/model/app_usage_info.dart';
+part 'src/model/device_info.dart';
+part 'src/model/app_detail.dart';
+part 'src/model/app_installed_info.dart';
+part 'src/model/web_history.dart';
+part 'src/model/app_block.dart';
+part 'src/model/schedule.dart';
+part 'src/model/monitor_setting.dart';
 
 class ParentalControl {
   /// Lấy thông tin thiết bị, có sự khác nhau giữa Android và Ios
@@ -49,6 +49,18 @@ class ParentalControl {
     try {
       _checkPlatform(false);
       await FlutterParentalControlPlatform.instance.askParent(function);
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  /// Lấy thời gian sử dụng của thiết bị
+  static Future<int> getDeviceUsage() async {
+    try {
+      _checkPlatform(false);
+      final deviceUsage =
+          await FlutterParentalControlPlatform.instance.getDeviceUsage();
+      return deviceUsage;
     } catch (_) {
       rethrow;
     }
@@ -267,6 +279,8 @@ class ParentalControl {
         return 2;
       case Permission.usageState:
         return 3;
+      case Permission.deviceAdmin:
+        return 4;
     }
   }
 
@@ -285,8 +299,4 @@ class ParentalControl {
 }
 
 ///  Tạo enum cho các trường hợp xin quyền trên [Android]
-enum Permission {
-  accessibility,
-  overlay,
-  usageState,
-}
+enum Permission { accessibility, overlay, usageState, deviceAdmin }

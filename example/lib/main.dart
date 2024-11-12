@@ -37,10 +37,7 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
   }
 
   Future<void> android() async {
-    ParentalControl.setListAppBlocked([
-      AppBlock(packageName: 'com.android.camera2', timeLimit: 0),
-      AppBlock(packageName: 'com.android.contacts', timeLimit: 1440),
-    ]);
+    // ParentalControl.requestPermission(Permission.deviceAdmin);
   }
 
   Future<void> ios() async {
@@ -74,7 +71,7 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             ),
             ElevatedButton(
                 onPressed: () async {
-                  await ParentalControl.getDeviceInfo();
+                  await ParentalControl.requestPermission(Permission.deviceAdmin);
                 },
                 child: const Text("Lấy thông tin từ native"))
           ],

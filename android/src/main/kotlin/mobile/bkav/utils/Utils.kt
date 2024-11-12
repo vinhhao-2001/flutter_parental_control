@@ -55,6 +55,7 @@ class Utils {
         return stream.toByteArray()
     }
 
+    // Lấy thời gian sử dụng của thiết bị
     fun appUsageTime(context: Context, startTime: Long, endTime: Long): List<UsageStats> {
         val usageStatsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
@@ -84,7 +85,6 @@ class Utils {
         // Trả về thời gian sử dụng của ứng dụng theo đơn vị phút
         return appUsageStats?.totalTimeInForeground?.div(1000)?.div(60)?.toInt() ?: 0
     }
-
 
     // Lấy tên ứng dụng này
     fun getApplicationName(context: Context): String {

@@ -1,6 +1,7 @@
 package mobile.bkav.utils
 
 import android.app.AppOpsManager
+import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -8,10 +9,10 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.text.TextUtils
-
+import mobile.bkav.receiver.AdminReceiver
 import mobile.bkav.service.AccessibilityService
 
-class RequestPermissions(private val context: Context) {
+class RequestPermissions(val context: Context) {
 
     // Hàm yêu cầu quyền truy cập trợ năng
     fun requestAccessibilityPermission(): Boolean {
@@ -47,7 +48,38 @@ class RequestPermissions(private val context: Context) {
         } else true
     }
 
+    // xin quyền cài đặt thiết bị
+    fun requestDeviceAdminPermission(): Boolean {
+        val devicePolicyManager =
+            context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        val adminComponent = ComponentName(context, AdminReceiver::class.java)
+        return if (!devicePolicyManager.isAdminActive(adminComponent)) {
+            openPermissionSettings(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN, null)
+            false
+        } else true
+    }
 
+    fun requestAdminPermission(): Boolean {
+        val devicePolicyManager =
+            context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        val componentName = ComponentName(context, AdminReceiver::class.java)
+
+        return if (!devicePolicyManager.isAdminActive(componentName)) {
+            println("asad========")
+            val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
+                putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName)
+                putExtra(
+                    DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                    "Device Admin Permission required for this app."
+                )
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+            false
+        } else {
+            true
+        }
+    }
 
     // Kiểm tra quyền trợ năng
     private fun isAccessibilityPermissionGranted(): Boolean {
@@ -67,6 +99,7 @@ class RequestPermissions(private val context: Context) {
         }
         return false
     }
+
 
     private fun openPermissionSettings(settingAction: String, uri: Uri? = null): Boolean {
         // Hàm mở cài đặt để yêu cầu quyền

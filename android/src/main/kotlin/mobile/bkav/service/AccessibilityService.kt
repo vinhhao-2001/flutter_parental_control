@@ -36,7 +36,6 @@ class AccessibilityService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         event?.let { accessibilityEvent ->
             val packageName = accessibilityEvent.packageName?.toString() ?: return
-
             when (accessibilityEvent.eventType) {
                 AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> handleBrowserEvent(
                     accessibilityEvent
@@ -97,7 +96,7 @@ class AccessibilityService : AccessibilityService() {
                     overlay.askParentBtn
                 ) {
                     // Xử lý khi nhấn nút
-                    // Đang test gọi dậy ứng dụng để tạo kệnh Flutter- native
+                    // Đang test gọi dậy ứng dụng để tạo kệnh Flutter - native
                     // có lỗi do kệnh mới không trao đổi được dữ liệu với kênh cũ
                     // có thể do channel được khai báo từ sớm
                     Utils().openApp(applicationContext)

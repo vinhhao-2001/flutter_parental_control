@@ -27,6 +27,7 @@ object DBHelper {
     }
 
     fun isAppBlocked(context: Context, appName: String): Boolean {
+        // Kiểm tra xem ứng dụng bị chặn không
         Realm.getDefaultInstance().use { realm ->
             val app: BlockedApp = realm.where(BlockedApp::class.java)
                 .equalTo(AppConstants.APP_NAME, appName)
@@ -38,6 +39,14 @@ object DBHelper {
         }
     }
 
+    fun getTimeAppLimit(appName: String): Int? {
+        Realm.getDefaultInstance().use { realm ->
+            val app: BlockedApp = realm.where(BlockedApp::class.java)
+                .equalTo(AppConstants.APP_NAME, appName)
+                .findFirst() ?: return null
+            return app.timeLimit
+        }
+    }
 
     fun insertListWebBlock(webList: List<String>) {
         // Thêm danh sách tên website bị chặn vào DB
@@ -54,12 +63,14 @@ object DBHelper {
         }
     }
 
+
     fun isUrlBlocked(webUrl: String): Boolean {
         // Kiểm tra URL có bị chặn hay không
         Realm.getDefaultInstance().use { realm ->
             val blockedWebsites = realm.where(BlockedWebsite::class.java).findAll()
             return blockedWebsites.any { blockedSite ->
-                webUrl.contains(blockedSite.websiteUrl, ignoreCase = true)
+                val keywords = blockedSite.websiteUrl.split(" ")
+                keywords.all { keyword -> webUrl.contains(keyword, ignoreCase = true) }
             }
         }
     }
@@ -105,12 +116,11 @@ object DBHelper {
     }
 
     fun getOverlayView(isBlock: Boolean): OverlayView? {
-        // Lấy overlay view theo id
+        // Lấy overlay view theo id,
         val id = if (isBlock) 1 else 0
-        Realm.getDefaultInstance().use { realm ->
-            return realm.where(OverlayView::class.java).equalTo(AppConstants.ID, id)
-                .findFirst()
-        }
+        val realm = Realm.getDefaultInstance()
+        return realm.where(OverlayView::class.java).equalTo(AppConstants.ID, id)
+            .findFirst()
     }
 }
 
@@ -174,3 +184,8 @@ open class OverlayView : RealmObject() {
     var askParentBtn: String? = null
     var overlayViewList: RealmList<OverlayView>? = RealmList()
 }
+
+//open class UsageDevice : RealmObject() {
+//    @PrimaryKey
+//    var id: ObjectId = ObjectId()
+//}
