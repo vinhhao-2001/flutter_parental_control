@@ -92,6 +92,7 @@ class ParentalControl {
 
   /// Lấy thời gian sử dụng trong thiết bị
   /// [day] là số ngày lấy thời gian sử dụng
+  /// Không truyền tham số thì thời gian mặc định là 1 ngày
   static Future<List<AppUsageInfo>> getAppUsageInfo({int? day}) async {
     try {
       _checkPlatform(false);

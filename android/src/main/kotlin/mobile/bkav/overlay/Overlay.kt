@@ -26,7 +26,9 @@ class Overlay(private val context: Context) {
             blockView = View.inflate(context, R.layout.remove_my_app, null)
         }
         val backButton = blockView?.findViewById<View>(R.id.homeBtn)
+
         backButton?.setOnClickListener {
+            // Xử lý xự kiện đóng màn hình chặn
             (context as AccessibilityService).performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
             //dừng 2s
             Thread.sleep(500)
@@ -62,7 +64,7 @@ class Overlay(private val context: Context) {
                 Utils().getId(
                     it1, it)
             } }
-            val backButton = blockView?.findViewById<View>(backId!!)
+            val backButton = backId?.let { blockView?.findViewById<View>(it) }
             val askParentBtn = askParentId?.let { blockView?.findViewById<View>(it) }
 
             backButton?.setOnClickListener {

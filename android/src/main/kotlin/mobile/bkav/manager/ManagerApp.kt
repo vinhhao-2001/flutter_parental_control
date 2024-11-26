@@ -82,6 +82,7 @@ class ManagerApp {
     }
 
     // Thời gian sử dụng của thiết bị
+    // Tính theo millisecond
     fun getDeviceUsage(context: Context): Long {
         val launcherApps = getLauncherAppPackages(context)
         val calendar = Calendar.getInstance()
@@ -94,7 +95,6 @@ class ManagerApp {
             if (!launcherApps.contains(usageState.packageName)) continue
             totalTime += usageState.totalTimeInForeground
         }
-        println(totalTime)
         return  totalTime
     }
 

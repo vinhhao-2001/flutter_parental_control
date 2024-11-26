@@ -71,7 +71,8 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             ),
             ElevatedButton(
                 onPressed: () async {
-                  await ParentalControl.requestPermission(Permission.deviceAdmin);
+                  await ParentalControl.requestPermission(
+                      Permission.deviceAdmin);
                 },
                 child: const Text("Lấy thông tin từ native"))
           ],
