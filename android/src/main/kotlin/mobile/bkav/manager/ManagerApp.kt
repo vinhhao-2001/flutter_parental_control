@@ -45,6 +45,25 @@ class ManagerApp {
         }
         return appDetailList
     }
+
+
+    // Thời gian sử dụng của thiết bị
+    // Tính theo millisecond
+    fun getDeviceUsage(context: Context): Long {
+        val launcherApps = getLauncherAppPackages(context)
+        val calendar = Calendar.getInstance()
+        val startTime = getStartOfDay(calendar)
+        val endTime = getEndOfDay(calendar)
+        var totalTime = 0L
+
+        val usageStatsList = Utils().appUsageTime(context, startTime, endTime)
+        for (usageState in usageStatsList) {
+            if (!launcherApps.contains(usageState.packageName)) continue
+            totalTime += usageState.totalTimeInForeground
+        }
+        return totalTime
+    }
+
     // Lấy thời gian sử dụng của các ứng dụng dùng UsageState
     fun getAppUsageInfo(context: Context): Map<String, Map<Long, Long>> {
         val launcherApps = getLauncherAppPackages(context)
@@ -81,23 +100,6 @@ class ManagerApp {
         return appUsageInfoMap
     }
 
-    // Thời gian sử dụng của thiết bị
-    // Tính theo millisecond
-    fun getDeviceUsage(context: Context): Long {
-        val launcherApps = getLauncherAppPackages(context)
-        val calendar = Calendar.getInstance()
-        val startTime = getStartOfDay(calendar)
-        val endTime = getEndOfDay(calendar)
-        var totalTime = 0L
-
-        val usageStatsList = Utils().appUsageTime(context, startTime, endTime)
-        for (usageState in usageStatsList){
-            if (!launcherApps.contains(usageState.packageName)) continue
-            totalTime += usageState.totalTimeInForeground
-        }
-        return  totalTime
-    }
-
     // Lấy thời gian sử dụng của các ứng dụng dùng UsageEvent
     fun getAppUsageInfo(context: Context, day: Int): Map<String, Map<Long, Long>> {
         val launcherApps = getLauncherAppPackages(context)
@@ -106,8 +108,8 @@ class ManagerApp {
         val calendar = Calendar.getInstance()
 
         for (i in 0 until day) {
-            val startDay = getStartOfDay(calendar) // Thời gian bắt đầu ngày 0h00
-            val endDay = getEndOfDay(calendar) // Thời gian kết thúc ngày 23h59
+            val startDay = getStartOfDay(calendar)
+            val endDay = getEndOfDay(calendar)
             val usageStatsManager = getUsageStatsManager(context) ?: return emptyMap()
 
             val usageEvents = usageStatsManager.queryEvents(startDay, endDay)
@@ -117,6 +119,27 @@ class ManagerApp {
         }
         return usageByAppMap
     }
+
+    fun getAppUsageInDay(context: Context): Map<String, Map<Long, Long>> {
+        val launcherApps = getLauncherAppPackages(context)
+        val usageByQuarterHourMap = mutableMapOf<String, MutableMap<Long, Long>>()
+        // Tạo khoảng thời điểm để lấy thời gian sử dụng
+        val calendar = Calendar.getInstance()
+        val endTime = calendar.timeInMillis
+        var startTime = getStartOfDay(calendar)
+
+        val usageStatsManager = getUsageStatsManager(context) ?: return emptyMap()
+
+        while (startTime < endTime) {
+            val nextQuarterHour = startTime + 15 * 60 * 1000
+            val usageEvents = usageStatsManager.queryEvents(startTime, nextQuarterHour)
+
+            calculateUsageTime(usageEvents, launcherApps, usageByQuarterHourMap, startTime)
+            startTime = nextQuarterHour
+        }
+        return usageByQuarterHourMap
+    }
+
 
     // Hàm lấy thời gian bắt đầu của ngày
     private fun getStartOfDay(calendar: Calendar): Long {

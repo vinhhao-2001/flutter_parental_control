@@ -12,6 +12,7 @@ class AppConstants {
   static const String deviceUsageMethod = 'getDeviceUsageMethod';
   static const String locationMethod = 'getLocationMethod';
   static const String appUsageMethod = 'getAppUsageInfoMethod';
+  static const String getToDayUsage = 'getTodayUsageMethod';
   static const String blockAppMethod = 'blockAppMethod';
   static const String blockWebMethod = 'blockWebsiteMethod';
   static const String startServiceMethod = 'startServiceMethod';

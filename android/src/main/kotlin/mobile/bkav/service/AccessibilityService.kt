@@ -60,13 +60,13 @@ class AccessibilityService : AccessibilityService() {
         }
     }
 
-
     private fun handleLauncherEvent(accessibilityEvent: AccessibilityEvent) {
         // Kiểm tra sự kiện khi người dùng nhấn vào ứng dụng ở màn hình chính
         val contentDescription = accessibilityEvent.contentDescription?.toString() ?: return
 
         // Kiểm tra sự kiện người dùng muốn xóa ứng dụng
         if (accessibilityEvent.eventType == AccessibilityEvent.TYPE_VIEW_LONG_CLICKED) {
+            // Lấy tên của ứng dụng của bạn
             val appName = Utils().getApplicationName(context = applicationContext)
             if (contentDescription.contains(appName)) {
                 val overlay = DBHelper.getOverlayView(false)
@@ -76,8 +76,7 @@ class AccessibilityService : AccessibilityService() {
                         overlay.backBtnId,
                         overlay.askParentBtn
                     ) {
-                        Utils().openApp(applicationContext)
-                        channel.invokeMethod(AppConstants.ASK_PARENT_METHOD, null)
+                        askParent(packageName, appName)
                     }
                 } else {
                     Overlay(this).showOverlay(false)
@@ -86,7 +85,8 @@ class AccessibilityService : AccessibilityService() {
         }
 
         // Kiểm tra nếu ứng dụng bị chặn
-        if (DBHelper.isAppBlocked(context = applicationContext, contentDescription)) {
+        val packageName = DBHelper.isAppBlocked(context = applicationContext, contentDescription)
+        if (packageName != null) {
             // Hiển thị màn hình chặn
             val overlay = DBHelper.getOverlayView(true)
             if (overlay != null) {
@@ -95,17 +95,11 @@ class AccessibilityService : AccessibilityService() {
                     overlay.backBtnId,
                     overlay.askParentBtn
                 ) {
-                    // Xử lý khi nhấn nút
-                    // Đang test gọi dậy ứng dụng để tạo kệnh Flutter - native
-                    // có lỗi do kệnh mới không trao đổi được dữ liệu với kênh cũ
-                    // có thể do channel được khai báo từ sớm
-                    Utils().openApp(applicationContext)
-                    channel.invokeMethod(AppConstants.ASK_PARENT_METHOD, null)
+                    askParent(packageName, appName = contentDescription)
                 }
             } else {
                 Overlay(this).showOverlay(true) {
-                    Utils().openApp(applicationContext)
-                    channel.invokeMethod(AppConstants.ASK_PARENT_METHOD, null)
+                    askParent(packageName, appName = contentDescription)
                 }
             }
         }
@@ -156,5 +150,17 @@ class AccessibilityService : AccessibilityService() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         applicationContext.startActivity(intent)
+    }
+
+    private fun askParent(packageName: String, appName: String) {
+        // Xử lý khi nhấn nút
+        // Đang test gọi dậy ứng dụng để tạo kệnh Flutter - native
+        // có lỗi do kệnh mới không trao đổi được dữ liệu với kênh cũ
+        // có thể do channel được khai báo từ sớm
+        channel.invokeMethod(
+            AppConstants.ASK_PARENT_METHOD,
+            mapOf(AppConstants.PACKAGE_NAME to packageName, AppConstants.APP_NAME to appName),
+        )
+        Utils().openApp(applicationContext)
     }
 }

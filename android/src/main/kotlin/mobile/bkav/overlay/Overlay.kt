@@ -21,6 +21,9 @@ class Overlay(private val context: Context) {
             askParentBtn = blockView?.findViewById(R.id.askParentBtn)
             askParentBtn?.setOnClickListener {
                 // Xử lý khi có sự kiện hỏi ý kiến của phụ huynh
+                onAskParentClick?.invoke()
+                Thread.sleep(500)
+                Utils().removeBlockScreen(windowManager, blockView)
             }
         } else {
             blockView = View.inflate(context, R.layout.remove_my_app, null)

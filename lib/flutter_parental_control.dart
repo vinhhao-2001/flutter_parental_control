@@ -44,8 +44,10 @@ class ParentalControl {
 
   /// các phần chỉ dùng được trên [Android]
   /// Lắng nghe khi có có sự kiện nhấn nút hỏi phụ huynh
+
   /// [askParent] Bị mất kết nối khi chạy ở nền
-  static Future<void> askParent(Function function) async {
+  static Future<void> askParent(
+      Function(String packageName, String appName) function) async {
     try {
       _checkPlatform(false);
       await FlutterParentalControlPlatform.instance.askParent(function);
@@ -98,6 +100,27 @@ class ParentalControl {
       _checkPlatform(false);
       final data = await FlutterParentalControlPlatform.instance
           .getAppUsageInfo(day: day);
+      List<AppUsageInfo> listApp = data.entries.map((entry) {
+        String packageName = entry.key;
+        Map<int, int> usageMap = Map<int, int>.from(entry.value);
+        List<DailyUsage> usageTime = usageMap.entries.map((usageEntry) {
+          return DailyUsage(date: usageEntry.key, timeUsed: usageEntry.value);
+        }).toList();
+
+        return AppUsageInfo(packageName: packageName, usageTime: usageTime);
+      }).toList();
+      return listApp;
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  /// Lấy thời gian sử dụng trong ngày của thiết bị
+  static Future<List<AppUsageInfo>> getTodayUsage() async {
+    try {
+      _checkPlatform(false);
+      final data =
+          await FlutterParentalControlPlatform.instance.getTodayUsage();
       List<AppUsageInfo> listApp = data.entries.map((entry) {
         String packageName = entry.key;
         Map<int, int> usageMap = Map<int, int>.from(entry.value);
@@ -261,7 +284,7 @@ class ParentalControl {
     }
   }
 
-  /// Các hàm chỉ dùng trong [plugin]
+  /// Các hàm chỉ dùng trong file [flutter_parental_control.dart]
   /// Hàm kiểm tra xem platform có phải ios hoặc android không
   static void _checkPlatform(bool isIos) {
     if ((isIos && !Platform.isIOS) || (!isIos && !Platform.isAndroid)) {

@@ -26,19 +26,21 @@ object DBHelper {
         }
     }
 
-    fun isAppBlocked(context: Context, appName: String): Boolean {
+    fun isAppBlocked(context: Context, appName: String): String? {
         // Kiểm tra xem ứng dụng bị chặn không
         Realm.getDefaultInstance().use { realm ->
             val app: BlockedApp = realm.where(BlockedApp::class.java)
                 .equalTo(AppConstants.APP_NAME, appName)
-                .findFirst() ?: return false
+                .findFirst() ?: return null
             val timeLimit = app.timeLimit
-            if (timeLimit == 0) return true
+            if (timeLimit == 0) return app.packageName
             val timeUse = Utils().getAppUsageTimeInMinutes(context, app.packageName)
-            return timeUse >= timeLimit
+            if (timeUse >= timeLimit) return app.packageName
+            return null
         }
     }
 
+    // Lấy thời gian sử dụng giới hạn của ứng dụng
     fun getTimeAppLimit(appName: String): Int? {
         Realm.getDefaultInstance().use { realm ->
             val app: BlockedApp = realm.where(BlockedApp::class.java)
@@ -132,7 +134,7 @@ open class BlockedApp : RealmObject() {
     @Index
     var appName: String = AppConstants.EMPTY
     var packageName: String = AppConstants.EMPTY
-    var timeLimit: Int = 0 // 24 hours in minutes
+    var timeLimit: Int = 0 // Bị chặn
     private var blockedAppList: RealmList<BlockedApp>? = RealmList()
 
     // Chuyển map thành object

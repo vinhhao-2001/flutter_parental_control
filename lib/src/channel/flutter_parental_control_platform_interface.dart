@@ -22,6 +22,7 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
     throw UnimplementedError('getDeviceInfo() has not been implemented.');
   }
 
+  /// Các phần hiện tại đang chỉ hỗ trợ cho [Android]
   Future<List<Map<String, dynamic>>> getAppDetailInfo() {
     throw UnimplementedError('getAppDetailInfo() has not been implemented.');
   }
@@ -34,13 +35,16 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
     throw UnimplementedError('getLocation() has not been implemented.');
   }
 
-  /// Các phần hiện tại đang chỉ hỗ trợ cho [Android]
   Future<bool> requestPermission(int type) {
     throw UnimplementedError('requestPermission() has not been implemented.');
   }
 
   Future<Map<String, dynamic>> getAppUsageInfo({day}) {
     throw UnimplementedError('getAppUsageInfo() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> getTodayUsage() {
+    throw UnimplementedError('getAppUsageInDay() has not been implemented.');
   }
 
   Future<void> setListAppBlocked(List<Map<String, dynamic>> listApp) {
@@ -55,7 +59,8 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
     throw UnimplementedError('startService() has not been implemented.');
   }
 
-  Future<void> askParent(Function function) {
+  Future<void> askParent(
+      Function(String packageName, String appName) function) {
     throw 'askParent() has not been implemented.';
   }
 

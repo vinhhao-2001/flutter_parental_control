@@ -86,7 +86,7 @@ class Utils {
         return appUsageStats?.totalTimeInForeground?.div(1000)?.div(60)?.toInt() ?: 0
     }
 
-    // Lấy tên ứng dụng này
+    // Lấy tên ứng dụng của bạn
     fun getApplicationName(context: Context): String {
         val applicationInfo = context.applicationInfo
         val stringId = applicationInfo.labelRes

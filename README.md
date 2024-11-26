@@ -12,9 +12,8 @@ Plugin yêu cầu phiên bản dart 3.5.0 trở lên.
 Để cài đặt plugin này, hãy làm theo các bước sau:
 
 1. **Thêm phụ thuộc:**
-
    Mở tệp `pubspec.yaml` trong dự án Flutter của bạn và thêm đoạn code sau:
-   ```yaml
+```yaml
    dependencies:
      flutter:
        sdk: flutter
@@ -23,8 +22,8 @@ Plugin yêu cầu phiên bản dart 3.5.0 trở lên.
        git:
          url: https://github.com/vinhhao-2001/flutter_parental_control.git
          ref: 0.0.1 # Chọn phiên bản phù hợp
-2. **Chạy lệnh:**
-   
+```
+2. **Chạy lệnh:** 
     Mở terminal và chạy lệnh sau để tải về các gói phụ thuộc:
     ```bash
     flutter pub get
@@ -51,9 +50,10 @@ Khi gặp lỗi build.gradle thì có thể thử các cách sau:
    
 ### Cách 2. **Cập nhật tệp `android/build.gradle` và `app/build.gradle`:**
    Nếu cách trên không được thì thử cách này:
+Bước 1:
    Mở tệp `build.gradle` trong thư mục `android` của dự án và thêm dòng code bên dưới.
    Nếu chưa có phần `buildscript` thì thêm cả đoạn code bên dưới vào phần đầu của file:
-    ```groovy
+   ```groovy
     buildscript {
       repositories {
          google()
@@ -65,8 +65,9 @@ Khi gặp lỗi build.gradle thì có thể thử các cách sau:
       }
    }
    ```
-   Mở tệp `build.gradle` trong thư mục `android/app` của dự án và sửa lại đoạn code sau:
-    ```groovy
+Bước 2:
+Mở tệp `build.gradle` trong thư mục `android/app` của dự án và sửa lại đoạn code sau:
+```groovy
    plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -75,19 +76,19 @@ Khi gặp lỗi build.gradle thì có thể thử các cách sau:
     id "realm-android"
     id "dev.flutter.flutter-gradle-plugin"
    }
-   ```
+```
    
 ## Sử dụng
 
 ### Để sử dụng chức năng Google Map cần thêm API Key vào `AndroidManifest.xml` và `AppDelegate.swift`:
 Android:
-   ```xml
+```xml
         <application>
         <!--        Thêm API key vào đây-->
         <meta-data android:name="com.google.android.geo.API_KEY"
         android:value="YOUR_API_KEY"/>
         </application>
-   ```
+```
 iOS:
    ```swift
     GMSServices.provideAPIKey("YOUR_API_KEY")

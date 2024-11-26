@@ -29,6 +29,7 @@ class AppConstants {
         const val GET_DEVICE_INFO = "getDeviceInfoMethod"
         const val GET_APP_DETAIL = "getAppDetailMethod"
         const val GET_DEVICE_USAGE = "getDeviceUsageMethod"
+        const val GET_TODAY_USAGE = "getTodayUsageMethod"
         const val BLOCK_APP_METHOD = "blockAppMethod"
         const val BLOCK_WEBSITE_METHOD = "blockWebsiteMethod"
         const val START_SERVICE = "startServiceMethod"

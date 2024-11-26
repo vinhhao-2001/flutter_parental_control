@@ -22,6 +22,7 @@ class MethodChannelFlutterParentalControl
     return Map<String, dynamic>.from(result);
   }
 
+  /// Các phần chỉ có trên [Android]
   /// Lấy danh sách chứa thông tin các ứng dụng
   @override
   Future<List<Map<String, dynamic>>> getAppDetailInfo() async {
@@ -56,9 +57,14 @@ class MethodChannelFlutterParentalControl
 
   /// Sự kiện hỏi ý kiến của phụ huynh
   @override
-  Future<void> askParent(Function function) async {
-    methodChannel.setMethodCallHandler((MethodCall call) async {
-      if (call.method == AppConstants.askParentMethod) () => function;
+  Future<void> askParent(
+      Function(String packageName, String appName) function) async {
+    methodChannel.setMethodCallHandler((call) async {
+      if (call.method == AppConstants.askParentMethod) {
+        final packageName = call.arguments[AppConstants.packageName];
+        final appName = call.arguments[AppConstants.appName];
+        function(packageName, appName);
+      }
     });
   }
 
@@ -67,6 +73,13 @@ class MethodChannelFlutterParentalControl
   Future<Map<String, dynamic>> getAppUsageInfo({day}) async {
     final result = await methodChannel
         .invokeMethod(AppConstants.appUsageMethod, {AppConstants.day: day});
+    return Map<String, dynamic>.from(result);
+  }
+
+  // Lấy thời gian sử dụng của các ứng dụng trong ngày
+  @override
+  Future<Map<String, dynamic>> getTodayUsage() async {
+    final result = await methodChannel.invokeMethod(AppConstants.getToDayUsage);
     return Map<String, dynamic>.from(result);
   }
 
