@@ -30,6 +30,7 @@ class LoggingServicePage extends StatefulWidget {
 class _LoggingServicePageState extends State<LoggingServicePage> {
   final TextEditingController _controller = TextEditingController();
   late DeviceInfo deviceInfo;
+  List<AppUsage> a = [];
 
   @override
   void initState() {
@@ -75,12 +76,24 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             ),
             ElevatedButton(
                 onPressed: () async {
-                  await ParentalControl.requestPermission(
-                      Permission.accessibility);
-                  await ParentalControl.setListAppBlocked(
-                      [AppBlock(packageName: 'com.android.camera2')]);
+                  a = await ParentalControl.getAppUsageInfo(day: 30);
+                  setState(() {});
+                  // _chooseTimeRequest('packageName', 'appName');
+                  // await ParentalControl.requestPermission(
+                  //     Permission.accessibility);
+                  // await ParentalControl.setListAppBlocked(
+                  //     [AppBlock(packageName: 'com.android.camera2')]);
                 },
-                child: const Text("Lấy thông tin từ native"))
+                child: const Text("Lấy thông tin từ native")),
+            a.isNotEmpty
+                ? Expanded(
+                    child: ListView.builder(
+                        itemCount: a.length,
+                        itemBuilder: (context, index) => ListTile(
+                              title: Text(a[index].packageName),
+                              subtitle: Text(a[index].timeUsed.toString()),
+                            )))
+                : const SizedBox.shrink()
           ],
         ),
       ),
@@ -88,87 +101,171 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
   }
 
   void _chooseTimeRequest(String packageName, String appName) {
-    int selectedHour = 0;
-    int selectedMinute = 0;
     showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return StatefulBuilder(
+      context: context,
+      builder: (context) {
+        int selectedHour = 1;
+        int selectedMinute = 0;
+
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: StatefulBuilder(
             builder: (context, setState) {
-              return AlertDialog(
-                contentPadding: const EdgeInsets.all(20),
-                title: Text("Yêu cầu sử dụng $appName trong thời gian"),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // tiêu đề
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 24, right: 24, bottom: 8, left: 24),
+                    child: Text(
+                      'Yêu cầu sử dụng $appName trong thời gian:',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.w400),
+                    ),
+                  ),
+                  // mô tả thời gian chọn
+                  Container(
+                    decoration: const BoxDecoration(
+                        border: Border(
+                            bottom:
+                                BorderSide(color: Colors.black12, width: 0.5))),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        const Text(
+                          'Thời gian',
+                          style: TextStyle(fontSize: 16, color: Colors.black),
+                        ),
+                        Text(
+                          formatTimeDisplay(selectedHour, selectedMinute),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.orange,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    height: 150,
+                    child: Row(
+                      children: [
+                        // Giờ
                         Expanded(
                           child: CupertinoPicker(
                             scrollController: FixedExtentScrollController(
-                                initialItem: selectedHour),
-                            looping: true,
-                            itemExtent: 32.0,
-                            onSelectedItemChanged: (int value) =>
-                                setState(() => selectedHour = value),
-                            children: List<Widget>.generate(
-                                24,
-                                (int index) =>
-                                    Center(child: Text(index.toString()))),
+                              initialItem: selectedHour,
+                            ),
+                            itemExtent: 30,
+                            magnification: 1.3,
+                            useMagnifier: true,
+                            onSelectedItemChanged: (value) {
+                              setState(() {
+                                selectedHour = value;
+                              });
+                            },
+                            children: List.generate(24, (index) {
+                              return Center(
+                                child: Text(
+                                  '$index',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: index == selectedHour
+                                        ? Colors.black
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              );
+                            }),
                           ),
                         ),
                         const Text('Giờ'),
-                        const Text(':'),
+                        // Phút
                         Expanded(
                           child: CupertinoPicker(
                             scrollController: FixedExtentScrollController(
-                              initialItem: selectedMinute,
-                            ),
-                            looping: true,
-                            itemExtent: 32.0,
-                            onSelectedItemChanged: (int value) =>
-                                setState(() => selectedMinute = value),
-                            children: List<Widget>.generate(
-                                60,
-                                (int index) => Center(
-                                    child: Text(
-                                        index.toString().padLeft(2, '0')))),
+                                initialItem: selectedMinute),
+                            itemExtent: 32,
+                            magnification: 1.2,
+                            useMagnifier: true,
+                            onSelectedItemChanged: (value) {
+                              setState(() {
+                                selectedMinute = value;
+                              });
+                            },
+                            children: List.generate(60, (index) {
+                              return Center(
+                                child: Text(
+                                  '$index',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: index == selectedMinute
+                                        ? Colors.black
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              );
+                            }),
                           ),
                         ),
                         const Text('Phút'),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    // Dialog buttons
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.grey),
+                          ),
                           child: const Text(
-                            'Huỷ',
+                            'Huỷ bỏ',
                             style: TextStyle(color: Colors.black),
                           ),
                         ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text(
-                            'Xong',
-                            style: TextStyle(color: Colors.black),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
                           ),
+                          child: const Text('Đồng ý'),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               );
             },
-          );
-        });
+          ),
+        );
+      },
+    );
+  }
+
+  String formatTimeDisplay(int hour, int minute) {
+    if (hour == 0 && minute == 0) {
+      return '0 phút';
+    } else if (hour == 0) {
+      return '$minute phút';
+    } else if (minute == 0) {
+      return '$hour giờ';
+    } else {
+      return '$hour giờ $minute phút';
+    }
   }
 }

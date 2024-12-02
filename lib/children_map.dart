@@ -14,8 +14,8 @@ part 'src/model/location_info.dart';
 
 /// Widget là bản đồ hiển thị  vị trí của trẻ
 /// Hiển thị phạm vi an toàn của trẻ
-class ChildLocationWidget extends StatefulWidget {
-  const ChildLocationWidget({
+class ChildrenMap extends StatefulWidget {
+  const ChildrenMap({
     super.key,
     this.childInfo,
     this.safeZoneInfo,
@@ -44,10 +44,10 @@ class ChildLocationWidget extends StatefulWidget {
   final Function(List<LatLng>)? safeZonePointsFunc;
 
   @override
-  State<ChildLocationWidget> createState() => _ChildLocationWidgetState();
+  State<ChildrenMap> createState() => _ChildrenMapState();
 }
 
-class _ChildLocationWidgetState extends State<ChildLocationWidget> {
+class _ChildrenMapState extends State<ChildrenMap> {
   /// Điều khiển camera bằng [_mapController]
   GoogleMapController? _mapController;
 

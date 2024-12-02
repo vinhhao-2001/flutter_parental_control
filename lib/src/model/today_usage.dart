@@ -1,22 +1,24 @@
 part of 'package:flutter_parental_control/flutter_parental_control.dart';
 
 /// Thông tin thời gian sử dụng các ứng dụng
-class AppUsageInfo {
+class TodayUsage {
   final String packageName;
-  final List<DailyUsage> usageTime;
+  final List<TimeUsage> usageTime;
 
-  AppUsageInfo({
+  TodayUsage({
     required this.packageName,
     required this.usageTime,
   });
 
-  /// Chuyển danh sách thời gian sử dụng theo ngày thành map
-
   /// Chuyển đổi dữ liệu nhận được thành đối tượng
-  factory AppUsageInfo.fromMap(Map<String, dynamic> map) {
-    return AppUsageInfo(
-      packageName: map[AppConstants.packageName],
-      usageTime: map[AppConstants.usageTime],
+  factory TodayUsage.fromMap(String packageName, Map<int, int> usageMap) {
+    List<TimeUsage> usageTime = usageMap.entries.map((entry) {
+      return TimeUsage(time: entry.key, timeUsed: entry.value);
+    }).toList();
+
+    return TodayUsage(
+      packageName: packageName,
+      usageTime: usageTime,
     );
   }
 
@@ -34,7 +36,7 @@ class AppUsageInfo {
   Map<String, int> toUsageMap() {
     return {
       for (var dailyUsage in usageTime)
-        dailyUsage.date.toString(): dailyUsage.timeUsed,
+        dailyUsage.time.toString(): dailyUsage.timeUsed,
     };
   }
 
@@ -45,16 +47,16 @@ class AppUsageInfo {
       ];
 }
 
-/// Thời gian sử dụng trong 1 ngày
-class DailyUsage {
-  final int date;
+/// Thời gian sử dụng trong khoảng thời gian
+class TimeUsage {
+  final int time;
   final int timeUsed;
 
-  DailyUsage({
-    required this.date,
+  TimeUsage({
+    required this.time,
     required this.timeUsed,
   });
   Map<String, dynamic> toMap() {
-    return {date.toString(): timeUsed};
+    return {time.toString(): timeUsed};
   }
 }

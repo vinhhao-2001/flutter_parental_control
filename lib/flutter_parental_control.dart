@@ -5,7 +5,7 @@ import 'package:flutter_parental_control/src/core/app_constants.dart';
 import 'package:geolocator/geolocator.dart';
 import 'src/channel/flutter_parental_control_platform_interface.dart';
 
-part 'src/model/app_usage_info.dart';
+part 'src/model/today_usage.dart';
 part 'src/model/device_info.dart';
 part 'src/model/app_detail.dart';
 part 'src/model/app_installed_info.dart';
@@ -13,6 +13,7 @@ part 'src/model/web_history.dart';
 part 'src/model/app_block.dart';
 part 'src/model/schedule.dart';
 part 'src/model/monitor_setting.dart';
+part 'src/model/app_usage.dart';
 
 class ParentalControl {
   /// Lấy thông tin thiết bị, có sự khác nhau giữa Android và Ios
@@ -95,42 +96,29 @@ class ParentalControl {
   /// Lấy thời gian sử dụng trong thiết bị
   /// [day] là số ngày lấy thời gian sử dụng
   /// Không truyền tham số thì thời gian mặc định là 1 ngày
-  static Future<List<AppUsageInfo>> getAppUsageInfo({int? day}) async {
-    try {
-      _checkPlatform(false);
-      final data = await FlutterParentalControlPlatform.instance
-          .getAppUsageInfo(day: day);
-      List<AppUsageInfo> listApp = data.entries.map((entry) {
-        String packageName = entry.key;
-        Map<int, int> usageMap = Map<int, int>.from(entry.value);
-        List<DailyUsage> usageTime = usageMap.entries.map((usageEntry) {
-          return DailyUsage(date: usageEntry.key, timeUsed: usageEntry.value);
-        }).toList();
-
-        return AppUsageInfo(packageName: packageName, usageTime: usageTime);
-      }).toList();
-      return listApp;
-    } catch (_) {
-      rethrow;
-    }
+  static Future<List<AppUsage>> getAppUsageInfo({int? day}) async {
+    _checkPlatform(false);
+    final data =
+        await FlutterParentalControlPlatform.instance.getAppUsageInfo(day: day);
+    return data.entries
+        .map((entry) => AppUsage(packageName: entry.key, timeUsed: entry.value))
+        .toList();
   }
 
   /// Lấy thời gian sử dụng trong ngày của thiết bị
-  static Future<List<AppUsageInfo>> getTodayUsage() async {
+  static Future<List<TodayUsage>> getTodayUsage() async {
     try {
       _checkPlatform(false);
+
+      /// data đang có dạng {packageName: {date: timeUsed, ...},...}
       final data =
           await FlutterParentalControlPlatform.instance.getTodayUsage();
-      List<AppUsageInfo> listApp = data.entries.map((entry) {
-        String packageName = entry.key;
-        Map<int, int> usageMap = Map<int, int>.from(entry.value);
-        List<DailyUsage> usageTime = usageMap.entries.map((usageEntry) {
-          return DailyUsage(date: usageEntry.key, timeUsed: usageEntry.value);
-        }).toList();
-
-        return AppUsageInfo(packageName: packageName, usageTime: usageTime);
+      return data.entries.map((entry) {
+        return TodayUsage.fromMap(
+          entry.key,
+          Map<int, int>.from(entry.value),
+        );
       }).toList();
-      return listApp;
     } catch (_) {
       rethrow;
     }

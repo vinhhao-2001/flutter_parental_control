@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_parental_control/flutter_parental_control.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter_parental_control/parental_control_widget.dart';
+import 'package:flutter_parental_control/children_map.dart';
 
 class ChildLocationScreen extends StatefulWidget {
   const ChildLocationScreen({super.key});
@@ -32,7 +32,7 @@ class _ChildLocationScreenState extends State<ChildLocationScreen> {
       body: Column(
         children: [
           Expanded(
-            child: ChildLocationWidget(
+            child: ChildrenMap(
               childInfo: ChildInfo(childName: 'Trẻ', childRoute: childRoute),
               safeZoneInfo: SafeZoneInfo(
                 safeZoneName: 'Safe Zone',
@@ -72,8 +72,8 @@ class _ChildLocationScreenState extends State<ChildLocationScreen> {
     final location = await ParentalControl.getLocation();
     double a = DateTime.now().second.toDouble();
     final childLocation = LocationInfo(
-      latitude: location.latitude + a/100,
-      longitude: location.longitude - a/150,
+      latitude: location.latitude + a / 100,
+      longitude: location.longitude - a / 150,
       timestamp: location.timestamp,
     );
     final add = await getAddress(childLocation);

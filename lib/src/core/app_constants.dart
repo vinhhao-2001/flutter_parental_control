@@ -53,7 +53,6 @@ class AppConstants {
   static const String isInstalled = 'isInstalled';
   static const String usageTime = 'usageTime';
   static const String timeLimit = 'timeLimit';
-  static const String date = 'date';
   static const String timeUsed = 'timeUsed';
 
   static const String name = 'name';
