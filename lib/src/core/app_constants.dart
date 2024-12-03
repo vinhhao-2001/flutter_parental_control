@@ -1,8 +1,5 @@
 class AppConstants {
   static const String empty = '';
-  static const String safeZone = 'Safe Zone';
-  static const String done = 'Done';
-  static const String update = 'Update';
 
   /// Method
   static const String methodChannel = 'flutter_parental_control_method';

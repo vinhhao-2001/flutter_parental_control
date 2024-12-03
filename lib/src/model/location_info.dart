@@ -1,19 +1,19 @@
 part of '../../children_map.dart';
 
 class LocationInfo extends LatLng {
-  final DateTime? timestamp;
+  final DateTime timestamp;
 
   const LocationInfo({
     required double latitude,
     required double longitude,
-    this.timestamp,
+    required this.timestamp,
   }) : super(latitude, longitude);
 
   Map<String, dynamic> toMap() {
     return {
       'latitude': latitude,
       'longitude': longitude,
-      if (timestamp != null) 'timestamp': timestamp!.toIso8601String(),
+      'timestamp': timestamp.toIso8601String(),
     };
   }
 

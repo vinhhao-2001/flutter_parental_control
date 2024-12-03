@@ -11,9 +11,12 @@ class ChildLocationScreen extends StatefulWidget {
 }
 
 class _ChildLocationScreenState extends State<ChildLocationScreen> {
-  List<LocationInfo> childRoute = [
-    const LocationInfo(latitude: 30.5, longitude: 104.5),
-    const LocationInfo(latitude: 31, longitude: 106)
+  List<LocationInfo> childLocation = [
+    LocationInfo(
+      latitude: 21.022419825704425,
+      longitude: 105.78732491534295,
+      timestamp: DateTime.now().subtract(const Duration(minutes: 2)),
+    ),
   ];
   String address = "loading...";
 
@@ -32,8 +35,14 @@ class _ChildLocationScreenState extends State<ChildLocationScreen> {
       body: Column(
         children: [
           Expanded(
-            child: ChildrenMap(
-              childInfo: ChildInfo(childName: 'Trẻ', childRoute: childRoute),
+            child: ChildrenMapView(
+              childInfo: ChildInfo(
+                  childName: 'Trẻ',
+                  childLocation: LocationInfo(
+                    latitude: 21.022419825704425,
+                    longitude: 105.78732491534295,
+                    timestamp: DateTime.now(),
+                  )),
               safeZoneInfo: SafeZoneInfo(
                 safeZoneName: 'Safe Zone',
                 safeZone: [
@@ -42,9 +51,10 @@ class _ChildLocationScreenState extends State<ChildLocationScreen> {
                   const LatLng(21.02619022753218, 105.8126801997423),
                 ],
               ),
-              childLocationFunc: updateChildLocationFunc,
-              safeZoneButton: SafeZoneButton('Xác nhận', 'Vùng an toàn'),
+              childLocationFunc: updateChildLocation(),
               safeZonePointsFunc: safeZonePointsFunc,
+              moveCamera: 'Vị trí của trẻ',
+              mapType: MapType.normal,
             ),
           ),
           Padding(
@@ -68,19 +78,26 @@ class _ChildLocationScreenState extends State<ChildLocationScreen> {
   }
 
   // hàm demo cập nhật vị trí của trẻ
-  Future<LocationInfo> updateChildLocationFunc() async {
-    final location = await ParentalControl.getLocation();
-    double a = DateTime.now().second.toDouble();
-    final childLocation = LocationInfo(
-      latitude: location.latitude + a / 100,
-      longitude: location.longitude - a / 150,
-      timestamp: location.timestamp,
-    );
-    final add = await getAddress(childLocation);
-    setState(() {
-      address = '${add.subAdminArea}, ${add.adminArea}, ${add.country}';
-    });
-    return childLocation;
+  // Hàm cập nhật vị trí của trẻ và lắng nghe mỗi 5 giây
+  Stream<LocationInfo> updateChildLocation() async* {
+    while (true) {
+      await Future.delayed(const Duration(seconds: 5)); // Chờ 5 giây
+      final location = await ParentalControl.getLocation();
+      double a = DateTime.now().second.toDouble();
+
+      final childLocation = LocationInfo(
+        latitude: location.latitude + a / 100,
+        longitude: location.longitude - a / 150,
+        timestamp: location.timestamp,
+      );
+      final add = await ChildMap.getAddress(childLocation);
+
+      setState(() {
+        address = '${add.subAdminArea}, ${add.adminArea}, ${add.country}';
+      });
+
+      yield childLocation;
+    }
   }
 
   // hàm demo sử dụng các điểm của phạm vi an toàn
