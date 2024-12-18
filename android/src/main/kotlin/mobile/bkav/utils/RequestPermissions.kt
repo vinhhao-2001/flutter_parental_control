@@ -8,6 +8,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.provider.Settings.Secure
 import android.text.TextUtils
 import mobile.bkav.receiver.AdminReceiver
 import mobile.bkav.service.AccessibilityService
@@ -35,6 +36,7 @@ class RequestPermissions(val context: Context) {
     }
 
     // Hàm yêu cầu quyền truy cập thông tin sử dụng
+    @Suppress("DEPRECATION")
     fun requestUsageStatsPermissions(): Boolean {
         val appOpsManager = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         val mode = appOpsManager.checkOpNoThrow(
@@ -48,33 +50,24 @@ class RequestPermissions(val context: Context) {
         } else true
     }
 
-    // xin quyền cài đặt thiết bị
-    fun requestDeviceAdminPermission(): Boolean {
-        val devicePolicyManager =
-            context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        val adminComponent = ComponentName(context, AdminReceiver::class.java)
-        return if (!devicePolicyManager.isAdminActive(adminComponent)) {
-            openPermissionSettings(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN, null)
-            false
-        } else true
-    }
-
+    // Xin quyền admin
     fun requestAdminPermission(): Boolean {
         val devicePolicyManager =
             context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
         val componentName = ComponentName(context, AdminReceiver::class.java)
 
         return if (!devicePolicyManager.isAdminActive(componentName)) {
-            println("asad========")
-            val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
-                putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName)
-                putExtra(
-                    DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                    "Device Admin Permission required for this app."
-                )
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(intent)
+//            val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
+//                putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName)
+//                putExtra(
+//                    DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+//                    "Device Admin Permission required for this app."
+//                )
+//                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//            }
+//            context.startActivity(intent)
+
+            openPermissionSettings(Settings.ACTION_SECURITY_SETTINGS)
             false
         } else {
             true

@@ -20,9 +20,11 @@ class AppConstants {
   static const String getWebHistory = 'getWebHistoryMethod';
   static const String overlayMethod = 'overlayMethod';
   static const String askParentMethod = 'askParentMethod';
+  static const String lockDevice = 'lockDevice';
 
   /// key data channel
   static const String blockApps = 'blockApps';
+  static const String addNew = 'addNew';
   static const String blockWeb = 'blockWebsites';
   static const String typePermission = 'typePermission';
 
@@ -43,6 +45,7 @@ class AppConstants {
   static const String packageName = 'packageName';
   static const String appName = 'appName';
   static const String appIcon = 'appIcon';
+  static const String appCategory = 'category';
   static const String versionName = 'versionName';
   static const String versionCode = 'versionCode';
   static const String timeInstall = 'timeInstall';

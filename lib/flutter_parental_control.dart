@@ -1,19 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_parental_control/src/core/app_constants.dart';
 import 'package:geolocator/geolocator.dart';
+
 import 'src/channel/flutter_parental_control_platform_interface.dart';
 
-part 'src/model/today_usage.dart';
-part 'src/model/device_info.dart';
+part 'src/model/app_block.dart';
 part 'src/model/app_detail.dart';
 part 'src/model/app_installed_info.dart';
-part 'src/model/web_history.dart';
-part 'src/model/app_block.dart';
-part 'src/model/schedule.dart';
-part 'src/model/monitor_setting.dart';
 part 'src/model/app_usage.dart';
+part 'src/model/device_info.dart';
+part 'src/model/monitor_setting.dart';
+part 'src/model/schedule.dart';
+part 'src/model/today_usage.dart';
+part 'src/model/web_history.dart';
 
 class ParentalControl {
   /// Lấy thông tin thiết bị, có sự khác nhau giữa Android và Ios
@@ -47,6 +50,9 @@ class ParentalControl {
   /// Lắng nghe khi có có sự kiện nhấn nút hỏi phụ huynh
 
   /// [askParent] Bị mất kết nối khi chạy ở nền
+  /// ParentalControl.askParent((packageName, appName) async {
+  /// code
+  /// });
   static Future<void> askParent(
       Function(String packageName, String appName) function) async {
     try {
@@ -57,7 +63,18 @@ class ParentalControl {
     }
   }
 
+  /// Khoá sử dụng màn hình
+  static Future<void> lockDevice() async {
+    try {
+      _checkPlatform(false);
+      await FlutterParentalControlPlatform.instance.lockDevice();
+    } catch (_) {
+      rethrow;
+    }
+  }
+
   /// Lấy thời gian sử dụng của thiết bị
+  /// Thời gian trả về [millisecond]
   static Future<int> getDeviceUsage() async {
     try {
       _checkPlatform(false);
@@ -69,7 +86,7 @@ class ParentalControl {
     }
   }
 
-  /// Lấy danh sách chứa thông tin của các ứng dụng
+  /// Lấy danh sách chứa thông tin cơ bản của các ứng dụng
   static Future<List<AppDetail>> getListAppDetail() async {
     try {
       _checkPlatform(false);
@@ -81,7 +98,7 @@ class ParentalControl {
     }
   }
 
-  /// Kiểm tra các quyền trợ năng
+  /// Kiểm tra và xin các quyền cho ứng dụng
   static Future<bool> requestPermission(Permission type) async {
     try {
       _checkPlatform(false);
@@ -94,8 +111,8 @@ class ParentalControl {
   }
 
   /// Lấy thời gian sử dụng trong thiết bị
-  /// [day] là số ngày lấy thời gian sử dụng
-  /// Không truyền tham số thì thời gian mặc định là 1 ngày
+  /// [day] là số ngày lấy thời gian sử dụng, Không truyền tham số thì thời gian mặc định là 1 ngày
+  /// Giá trị trả về [millisecond]
   static Future<List<AppUsage>> getAppUsageInfo({int? day}) async {
     _checkPlatform(false);
     final data =
@@ -106,6 +123,7 @@ class ParentalControl {
   }
 
   /// Lấy thời gian sử dụng trong ngày của thiết bị
+  /// Giá trị trả về [millisecond]
   static Future<List<TodayUsage>> getTodayUsage() async {
     try {
       _checkPlatform(false);
@@ -125,7 +143,9 @@ class ParentalControl {
   }
 
   /// Thiết lập danh sách ứng dụng bị giới hạn
-  static Future<void> setListAppBlocked(List<AppBlock> listApp) async {
+  /// [addNew] cho biết có thêm mới không hay là thay thế
+  static Future<void> setListAppBlocked(List<AppBlock> listApp,
+      {bool addNew = false}) async {
     try {
       _checkPlatform(false);
       final listAppBlock = listApp.map((app) => app.toMap()).toList();
@@ -137,7 +157,9 @@ class ParentalControl {
   }
 
   /// Thiết lập danh sách nội dung web bị giới hạn
-  static Future<void> setListWebBlocked(List<String> listWeb) async {
+  /// [addNew] cho biết có thêm mới không hay là thay thế
+  static Future<void> setListWebBlocked(List<String> listWeb,
+      {bool addNew = false}) async {
     try {
       _checkPlatform(false);
       await FlutterParentalControlPlatform.instance.setListWebBlocked(listWeb);
@@ -151,12 +173,16 @@ class ParentalControl {
     try {
       _checkPlatform(false);
       await FlutterParentalControlPlatform.instance.startService();
+      debugPrint("Server enabled");
     } catch (_) {
       rethrow;
     }
   }
 
   /// Lắng nghe và lấy thông tin ứng dụng bị cài đặt hoặc gỡ bỏ
+  /// ParentalControl.listenAppInstalledInfo().listen((app) {
+  ///    code
+  /// });
   static Stream<AppInstalledInfo> listenAppInstalledInfo() {
     try {
       _checkPlatform(false);
@@ -169,6 +195,7 @@ class ParentalControl {
   }
 
   /// Lấy lịch sử duyệt web trên trình duyệt
+  /// Chỉ lưu lịch sử từ sau khi bật trợ năng
   static Future<List<WebHistory>> getWebHistory() async {
     try {
       _checkPlatform(false);

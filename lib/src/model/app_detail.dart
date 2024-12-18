@@ -5,6 +5,7 @@ class AppDetail {
   final String packageName;
   final String appName;
   final String appIcon;
+  final String appCategory;
   final String versionName;
   final int versionCode;
   final int timeInstall;
@@ -14,6 +15,7 @@ class AppDetail {
     required this.packageName,
     required this.appName,
     required this.appIcon,
+    required this.appCategory,
     required this.versionCode,
     required this.versionName,
     required this.timeInstall,
@@ -36,10 +38,11 @@ class AppDetail {
       packageName: map[AppConstants.packageName],
       appName: map[AppConstants.appName],
       appIcon: iconBase64,
-      versionName: map[AppConstants.versionName],
-      versionCode: map[AppConstants.versionCode],
-      timeInstall: map[AppConstants.timeInstall],
-      timeUpdate: map[AppConstants.timeUpdate],
+      appCategory: map[AppConstants.appCategory] ?? '',
+      versionName: map[AppConstants.versionName] ?? '',
+      versionCode: map[AppConstants.versionCode] ?? '',
+      timeInstall: map[AppConstants.timeInstall] ?? '',
+      timeUpdate: map[AppConstants.timeUpdate] ?? '',
     );
   }
 
@@ -49,6 +52,7 @@ class AppDetail {
       AppConstants.appName: appName,
       AppConstants.packageName: packageName,
       AppConstants.appIcon: appIcon,
+      AppConstants.appCategory: appCategory,
       AppConstants.versionName: versionName,
       AppConstants.versionCode: versionCode,
       AppConstants.timeInstall: timeInstall,
@@ -61,6 +65,7 @@ class AppDetail {
         AppConstants.appName,
         AppConstants.packageName,
         AppConstants.appIcon,
+        AppConstants.appCategory,
         AppConstants.versionName,
         AppConstants.versionCode,
         AppConstants.timeInstall,

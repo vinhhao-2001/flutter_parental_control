@@ -68,6 +68,11 @@ class MethodChannelFlutterParentalControl
     });
   }
 
+  @override
+  Future<void> lockDevice() async {
+    await methodChannel.invokeMethod(AppConstants.lockDevice);
+  }
+
   /// Lấy thông tin thời gian sử dụng các ứng dụng
   @override
   Future<Map<String, dynamic>> getAppUsageInfo({day}) async {
@@ -85,16 +90,22 @@ class MethodChannelFlutterParentalControl
 
   /// Tạo danh sách các ứng dụng bị chặn
   @override
-  Future<void> setListAppBlocked(List<Map<String, dynamic>> listApp) async {
-    await methodChannel.invokeMethod(
-        AppConstants.blockAppMethod, {AppConstants.blockApps: listApp});
+  Future<void> setListAppBlocked(List<Map<String, dynamic>> listApp,
+      {bool addNew = false}) async {
+    await methodChannel.invokeMethod(AppConstants.blockAppMethod, {
+      AppConstants.blockApps: listApp,
+      AppConstants.addNew: addNew,
+    });
   }
 
   /// Tạo danh sách các trang web bị chặn
   @override
-  Future<void> setListWebBlocked(List<String> listWeb) async {
-    await methodChannel.invokeMethod(
-        AppConstants.blockWebMethod, {AppConstants.blockWeb: listWeb});
+  Future<void> setListWebBlocked(List<String> listWeb,
+      {bool addNew = false}) async {
+    await methodChannel.invokeMethod(AppConstants.blockWebMethod, {
+      AppConstants.blockWeb: listWeb,
+      AppConstants.addNew: addNew,
+    });
   }
 
   /// Khởi động dịch vụ lắng nghe ứng dụng gỡ bỏ hoặc cài đặt

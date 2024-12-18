@@ -47,11 +47,12 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
     throw UnimplementedError('getAppUsageInDay() has not been implemented.');
   }
 
-  Future<void> setListAppBlocked(List<Map<String, dynamic>> listApp) {
+  Future<void> setListAppBlocked(List<Map<String, dynamic>> listApp,
+      {bool addNew = false}) {
     throw UnimplementedError('setListAppBlocked() has not been implemented.');
   }
 
-  Future<void> setListWebBlocked(List<String> listWeb) {
+  Future<void> setListWebBlocked(List<String> listWeb, {bool addNew = false}) {
     throw UnimplementedError('setListWebBlocked() has not been implemented.');
   }
 
@@ -62,6 +63,10 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
   Future<void> askParent(
       Function(String packageName, String appName) function) {
     throw 'askParent() has not been implemented.';
+  }
+
+  Future<void> lockDevice() {
+    throw UnimplementedError('lockDevice() has not been implemented.');
   }
 
   Stream<Map<String, dynamic>> listenAppInstalled() {

@@ -38,15 +38,18 @@ class AppConstants {
         const val REQUEST_PERMISSION = "permissionMethod"
         const val OVERLAY_METHOD = "overlayMethod"
         const val ASK_PARENT_METHOD = "askParentMethod"
+        const val LOCK_DEVICE = "lockDevice"
 
         // key
         const val REALM_NAME = "realm-db"
         const val BLOCK_APPS = "blockApps"
+        const val ADD_NEW = "addNew"
         const val BLOCK_WEBSITES = "blockWebsites"
         const val TYPE_PERMISSION = "typePermission"
         const val APP_NAME = "appName"
         const val PACKAGE_NAME = "packageName"
         const val APP_ICON = "appIcon"
+        const val APP_CATEGORY = "category"
         const val IS_INSTALLED = "isInstalled"
         const val TIME_LIMIT = "timeLimit"
         const val DAY = "day"

@@ -26,6 +26,21 @@ object DBHelper {
         }
     }
 
+    fun insertNewAppBlock(context: Context, appList: List<Map<String, Any>>) {
+        // Thêm danh sách tên ứng dụng bị chặn vào DB
+        Realm.getDefaultInstance().use { realm ->
+            realm.executeTransaction {
+                appList.forEach { map ->
+                    // Chuyển map thành object để lưu vào Realm
+                    val app = BlockedApp().fromMap(context, map)
+                    if (app != null)
+                        realm.copyToRealmOrUpdate(app)
+                }
+            }
+        }
+    }
+
+
     fun isAppBlocked(context: Context, appName: String): String? {
         // Kiểm tra xem ứng dụng bị chặn không
         Realm.getDefaultInstance().use { realm ->
@@ -65,6 +80,19 @@ object DBHelper {
         }
     }
 
+    fun insertNewWebBlock(webList: List<String>) {
+        // Thêm danh sách tên website bị chặn vào DB
+        Realm.getDefaultInstance().use { realm ->
+            realm.executeTransaction {
+                webList.forEach { webUrl ->
+                    it.copyToRealmOrUpdate(BlockedWebsite().apply {
+                        this.websiteUrl = webUrl
+                        blockedWebsiteList = RealmList()
+                    })
+                }
+            }
+        }
+    }
 
     fun isUrlBlocked(webUrl: String): Boolean {
         // Kiểm tra URL có bị chặn hay không
@@ -129,11 +157,10 @@ object DBHelper {
 // Các model tương ứng với các bảng trong DB
 open class BlockedApp : RealmObject() {
     @PrimaryKey
-    var id: ObjectId = ObjectId()
-
+    var packageName: String = AppConstants.EMPTY
     @Index
     var appName: String = AppConstants.EMPTY
-    var packageName: String = AppConstants.EMPTY
+
     var timeLimit: Int = 0 // Bị chặn
     private var blockedAppList: RealmList<BlockedApp>? = RealmList()
 
@@ -186,8 +213,3 @@ open class OverlayView : RealmObject() {
     var askParentBtn: String? = null
     var overlayViewList: RealmList<OverlayView>? = RealmList()
 }
-
-//open class UsageDevice : RealmObject() {
-//    @PrimaryKey
-//    var id: ObjectId = ObjectId()
-//}

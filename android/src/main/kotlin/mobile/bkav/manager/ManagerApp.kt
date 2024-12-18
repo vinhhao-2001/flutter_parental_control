@@ -4,6 +4,7 @@ import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import mobile.bkav.utils.AppConstants
@@ -25,11 +26,17 @@ class ManagerApp {
                     packageManager.getApplicationLabel(packageInfo.applicationInfo).toString()
                 val icon = packageManager.getApplicationIcon(packageInfo.applicationInfo)
                 val appIcon = Utils().drawableToByteArray(icon)
+                val category = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    ApplicationInfo.getCategoryTitle(context, packageInfo.applicationInfo.category)
+                } else {
+                   null
+                }
 
                 val appDetail = mapOf(
                     AppConstants.PACKAGE_NAME to packageInfo.packageName,
                     AppConstants.APP_NAME to appName,
                     AppConstants.APP_ICON to appIcon,
+                    AppConstants.APP_CATEGORY to category.toString(),
                     AppConstants.VERSION_CODE to if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         packageInfo.longVersionCode
                     } else {
@@ -95,7 +102,7 @@ class ManagerApp {
         }
 
         val calendar = Calendar.getInstance()
-        calendar.add(Calendar.DAY_OF_YEAR, -days+1)
+        calendar.add(Calendar.DAY_OF_YEAR, -days + 1)
 
         val startTime = getStartOfDay(calendar)
         val endTime = getEndOfDay(calendar)

@@ -1,5 +1,7 @@
 package mobile.bkav.flutter_parental_control
 
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.NonNull
@@ -13,8 +15,9 @@ import io.realm.RealmConfiguration
 import mobile.bkav.db_helper.DBHelper
 import mobile.bkav.manager.ManagerApp
 import mobile.bkav.models.DeviceInfo
+import mobile.bkav.receiver.AdminReceiver
 import mobile.bkav.service.AccessibilityService
-import mobile.bkav.service.InstallAppService
+import mobile.bkav.service.ListenService
 import mobile.bkav.utils.AppConstants
 import mobile.bkav.utils.RequestPermissions
 
@@ -76,8 +79,8 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
             }
 
             AppConstants.START_SERVICE -> {
-                // Bắt đầu lắng nghe ứng dụng được cài đặt, gỡ bỏ
-                val serviceIntent = Intent(context, InstallAppService::class.java)
+                // Bắt đầu lắng nghe ứng dụng được cài đặt, gỡ bỏ, nghe thiết bị được bật
+                val serviceIntent = Intent(context, ListenService::class.java)
                 context.startService(serviceIntent)
                 result.success(AppConstants.EMPTY)
             }
@@ -93,7 +96,13 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                 val blockApps =
                     call.argument<List<Map<String, Any>>>(AppConstants.BLOCK_APPS)
                         ?: emptyList<Map<String, Any>>()
-                DBHelper.insertListAppBlock(context, blockApps)
+                val addNew = call.argument<Boolean>(AppConstants.ADD_NEW) ?: false
+                if (addNew) {
+                    DBHelper.insertNewAppBlock(context, blockApps)
+                } else {
+                    DBHelper.insertListAppBlock(context, blockApps)
+                }
+
                 result.success(AppConstants.EMPTY)
             }
 
@@ -101,6 +110,12 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                 // Thêm trang web bị chặn vào danh sách trang web bị chặn
                 val blockWebsites =
                     call.argument<List<String>>(AppConstants.BLOCK_WEBSITES) ?: emptyList<String>()
+                val addNew = call.argument<Boolean>(AppConstants.ADD_NEW) ?: false
+                if (addNew) {
+                    DBHelper.insertNewWebBlock(blockWebsites)
+                } else {
+                    DBHelper.insertListWebBlock(blockWebsites)
+                }
                 DBHelper.insertListWebBlock(blockWebsites)
                 result.success(AppConstants.EMPTY)
             }
@@ -122,6 +137,16 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                 // Lấy lịch sử duyệt web
                 val webHistoryList = DBHelper.getWebHistory()
                 result.success(webHistoryList)
+            }
+
+            AppConstants.LOCK_DEVICE -> {
+                val devicePolicyManager =
+                    context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+                val componentName = ComponentName(context, AdminReceiver::class.java)
+                if (devicePolicyManager.isAdminActive(componentName)) {
+
+                    devicePolicyManager.lockNow()
+                }
             }
 
             AppConstants.REQUEST_PERMISSION -> {
