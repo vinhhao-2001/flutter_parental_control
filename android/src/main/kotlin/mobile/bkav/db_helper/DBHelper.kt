@@ -9,6 +9,7 @@ import io.realm.annotations.PrimaryKey
 import mobile.bkav.utils.AppConstants
 import mobile.bkav.utils.Utils
 import org.bson.types.ObjectId
+import java.util.Calendar
 
 object DBHelper {
     fun insertListAppBlock(context: Context, appList: List<Map<String, Any>>) {
@@ -40,7 +41,6 @@ object DBHelper {
         }
     }
 
-
     fun isAppBlocked(context: Context, appName: String): String? {
         // Kiểm tra xem ứng dụng bị chặn không
         Realm.getDefaultInstance().use { realm ->
@@ -56,11 +56,11 @@ object DBHelper {
     }
 
     // Lấy thời gian sử dụng giới hạn của ứng dụng
-    fun getTimeAppLimit(appName: String): Int? {
+    fun getTimeAppLimit(appName: String): Int {
         Realm.getDefaultInstance().use { realm ->
             val app: BlockedApp = realm.where(BlockedApp::class.java)
                 .equalTo(AppConstants.APP_NAME, appName)
-                .findFirst() ?: return null
+                .findFirst() ?: return 0
             return app.timeLimit
         }
     }
@@ -73,7 +73,6 @@ object DBHelper {
                 webList.forEach { webUrl ->
                     it.copyToRealmOrUpdate(BlockedWebsite().apply {
                         this.websiteUrl = webUrl
-                        blockedWebsiteList = RealmList()
                     })
                 }
             }
@@ -87,7 +86,6 @@ object DBHelper {
                 webList.forEach { webUrl ->
                     it.copyToRealmOrUpdate(BlockedWebsite().apply {
                         this.websiteUrl = webUrl
-                        blockedWebsiteList = RealmList()
                     })
                 }
             }
@@ -139,7 +137,6 @@ object DBHelper {
                     this.overlayView = overlayView
                     this.backBtnId = nameBackButtonId
                     this.askParentBtn = nameAskParentBtnId
-                    this.overlayViewList = RealmList()
                 })
             }
         }
@@ -152,17 +149,88 @@ object DBHelper {
         return realm.where(OverlayView::class.java).equalTo(AppConstants.ID, id)
             .findFirst()
     }
+
+    fun insertTimeAllowed(
+        timeAllowed: Int? = null,
+        timePeriod: List<Map<String, Any>>? = null
+    ) {
+        Realm.getDefaultInstance().use { realm ->
+            realm.executeTransaction { transactionRealm ->
+                val device = transactionRealm.where(TimeAllowedDevice::class.java)
+                    .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW)
+                    .findFirst()
+
+                val timePeriodList = timePeriod?.map { periodMap ->
+                    TimePeriod().apply {
+                        startTime = (periodMap["startTime"] as? Int) ?: 0
+                        endTime = (periodMap["endTime"] as? Int) ?: 0
+                    }
+                }
+
+                if (device != null) {
+                    // Cập nhật đối tượng tồn tại
+                    if (timeAllowed != null) device.timeAllowed = timeAllowed
+                    if (timePeriodList != null) {
+                        device.timePeriod.clear()
+                        device.timePeriod.addAll(timePeriodList)
+                    }
+                } else {
+                    // Tạo mới đối tượng nếu không tồn tại
+                    transactionRealm.copyToRealmOrUpdate(TimeAllowedDevice().apply {
+                        if (timeAllowed != null) this.timeAllowed = timeAllowed
+                        if (timePeriodList != null) {
+                            this.timePeriod.addAll(timePeriodList)
+                        }
+                    })
+                }
+            }
+        }
+    }
+
+    fun isTimeAllowedValid(): Boolean? {
+        Realm.getDefaultInstance().use { realm ->
+            val device = realm.where(TimeAllowedDevice::class.java)
+                .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW)
+                .findFirst()
+
+            if (device == null) return null
+
+            val currentTime = getCurrentMinutesOfDay()
+            val isInAnyPeriod = device.timePeriod.any { period ->
+                currentTime in period.startTime..period.endTime
+            }
+
+            return device.timeAllowed > 0 && isInAnyPeriod
+        }
+    }
+
+    fun getTimeAllow(): Int? {
+        Realm.getDefaultInstance().use { realm ->
+            val device = realm.where(TimeAllowedDevice::class.java)
+                .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW)
+                .findFirst()
+
+            return device?.timeAllowed
+        }
+    }
+
+
+    // Hàm trợ giúp để lấy số phút hiện tại trong ngày
+    private fun getCurrentMinutesOfDay(): Int {
+        val calendar = Calendar.getInstance()
+        return calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
+    }
 }
 
 // Các model tương ứng với các bảng trong DB
 open class BlockedApp : RealmObject() {
     @PrimaryKey
     var packageName: String = AppConstants.EMPTY
+
     @Index
     var appName: String = AppConstants.EMPTY
 
     var timeLimit: Int = 0 // Bị chặn
-    private var blockedAppList: RealmList<BlockedApp>? = RealmList()
 
     // Chuyển map thành object
     fun fromMap(context: Context, map: Map<String, Any>): BlockedApp? {
@@ -172,9 +240,23 @@ open class BlockedApp : RealmObject() {
             this.appName = appName
             this.packageName = map[AppConstants.PACKAGE_NAME] as String
             this.timeLimit = map[AppConstants.TIME_LIMIT] as Int
-            blockedAppList = RealmList()
         }
     }
+}
+
+open class TimePeriod(
+    @PrimaryKey
+    var id: ObjectId = ObjectId(),
+    var startTime: Int = 0,  // Thời gian bắt đầu
+    var endTime: Int = 0     // Thời gian kết thúc
+) : RealmObject()
+
+
+open class TimeAllowedDevice : RealmObject() {
+    @PrimaryKey
+    var id: String = AppConstants.TIME_ALLOW
+    var timeAllowed: Int = 1440
+    var timePeriod: RealmList<TimePeriod> = RealmList()
 }
 
 open class BlockedWebsite : RealmObject() {
@@ -183,7 +265,6 @@ open class BlockedWebsite : RealmObject() {
 
     @Index
     var websiteUrl: String = AppConstants.EMPTY
-    var blockedWebsiteList: RealmList<BlockedWebsite>? = RealmList()
 }
 
 open class WebHistory : RealmObject() {
@@ -211,5 +292,4 @@ open class OverlayView : RealmObject() {
     var overlayView: String = AppConstants.EMPTY
     var backBtnId: String = AppConstants.EMPTY
     var askParentBtn: String? = null
-    var overlayViewList: RealmList<OverlayView>? = RealmList()
 }

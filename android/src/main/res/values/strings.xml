@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_limit">Đã hết thời gian sử dụng ứng dụng</string>
+    <string name="device_limit">Đã hết thời gian sử dụng màn hình</string>
     <string name="back_home">Trở về</string>
+    <string name="off_device">Tắt máy</string>
     <string name="text_app_limit">Ứng dụng đã bị giới hạn</string>
     <string name="text_ask_parent">Xin thêm thời gian sử dụng</string>
     <string name="text_remove_app">Chỉ phụ huynh mới có quyền xoá ứng dụng</string>

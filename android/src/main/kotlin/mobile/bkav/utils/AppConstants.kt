@@ -37,6 +37,7 @@ class AppConstants {
         const val GET_WEB_HISTORY = "getWebHistoryMethod"
         const val REQUEST_PERMISSION = "permissionMethod"
         const val OVERLAY_METHOD = "overlayMethod"
+        const val SET_DEVICE_TIME_ALLOW = "setDeviceTimeAllowMethod"
         const val ASK_PARENT_METHOD = "askParentMethod"
         const val LOCK_DEVICE = "lockDevice"
 
@@ -58,6 +59,8 @@ class AppConstants {
         const val OVERLAY_VIEW = "overlayView";
         const val BACK_BTN = "backButton";
         const val ASK_PARENT_BTN = "askParentBtn"
+        const val TIME_ALLOW = "timeAllowed"
+        const val TIME_PERIOD = "timePeriod"
 
         // key device info
         const val SYSTEM_NAME = "systemName"

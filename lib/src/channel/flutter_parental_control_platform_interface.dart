@@ -69,6 +69,11 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
     throw UnimplementedError('lockDevice() has not been implemented.');
   }
 
+  Future<void> setTimeAllowDevice(
+      {int? timeAllowed, List<Map<String, dynamic>>? listTimePeriod}) {
+    throw UnimplementedError('setTimeAllowDevice() has not been implemented.');
+  }
+
   Stream<Map<String, dynamic>> listenAppInstalled() {
     throw UnimplementedError('listenAppInstalled() has not been implemented.');
   }

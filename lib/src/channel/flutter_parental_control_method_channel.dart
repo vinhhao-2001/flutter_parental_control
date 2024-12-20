@@ -68,9 +68,20 @@ class MethodChannelFlutterParentalControl
     });
   }
 
+  /// Tắt màn hình
   @override
   Future<void> lockDevice() async {
     await methodChannel.invokeMethod(AppConstants.lockDevice);
+  }
+
+  /// Cài đặt thời gian và khoảng thời gian sử dụng cho thiết bị
+  @override
+  Future<void> setTimeAllowDevice(
+      {int? timeAllowed, List<Map<String, dynamic>>? listTimePeriod}) async {
+    await methodChannel.invokeMethod(AppConstants.deviceTimeAllow, {
+      AppConstants.timeAllow: timeAllowed,
+      AppConstants.timePeriod: listTimePeriod,
+    });
   }
 
   /// Lấy thông tin thời gian sử dụng các ứng dụng

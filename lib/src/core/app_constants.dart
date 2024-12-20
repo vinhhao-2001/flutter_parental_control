@@ -21,12 +21,15 @@ class AppConstants {
   static const String overlayMethod = 'overlayMethod';
   static const String askParentMethod = 'askParentMethod';
   static const String lockDevice = 'lockDevice';
+  static const String deviceTimeAllow = 'setDeviceTimeAllowMethod';
 
   /// key data channel
   static const String blockApps = 'blockApps';
   static const String addNew = 'addNew';
   static const String blockWeb = 'blockWebsites';
   static const String typePermission = 'typePermission';
+  static const String timeAllow = 'timeAllowed';
+  static const String timePeriod = 'timePeriod';
 
   /// key map
   static const String systemName = 'systemName';

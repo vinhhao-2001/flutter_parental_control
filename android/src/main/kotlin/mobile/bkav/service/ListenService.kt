@@ -31,7 +31,6 @@ class ListenService : Service() {
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_PACKAGE_ADDED)
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
-        filter.addAction(Intent.ACTION_SCREEN_ON)
         filter.addDataScheme(AppConstants.PACKAGE)
         registerReceiver(listenReceiver, filter)
     }
@@ -64,17 +63,6 @@ class ListenService : Service() {
                         val appInstalledInfo =
                             AppInstalledInfo(false, packageName, AppConstants.EMPTY, byteArrayOf())
                         FlutterParentalControlPlugin.eventSink?.success(appInstalledInfo.toMap())
-                    }
-
-                    Intent.ACTION_SCREEN_ON -> {
-                        println("Tắt máy")
-                        val devicePolicyManager =
-                            context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-                        val componentName = ComponentName(context, AdminReceiver::class.java)
-                        if (devicePolicyManager.isAdminActive(componentName)) {
-
-                            devicePolicyManager.lockNow()
-                        }
                     }
                 }
             }

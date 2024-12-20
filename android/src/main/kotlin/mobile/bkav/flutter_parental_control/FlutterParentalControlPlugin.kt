@@ -4,6 +4,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.annotation.NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
@@ -144,8 +145,9 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                     context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
                 val componentName = ComponentName(context, AdminReceiver::class.java)
                 if (devicePolicyManager.isAdminActive(componentName)) {
-
                     devicePolicyManager.lockNow()
+                }else{
+                    Log.d("LOCK_DEVICE", "Need Device Admin Permission")
                 }
             }
 
@@ -173,6 +175,13 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                     DBHelper.insertOverlayView(id, overlayView, backBtn, askParentBtn)
                 }
                 result.success(AppConstants.EMPTY)
+            }
+
+            AppConstants.SET_DEVICE_TIME_ALLOW -> {
+                val timeAllow = call.argument<Int?>(AppConstants.TIME_ALLOW)
+                val timePeriod = call.argument<List<Map<String, Any>>>(AppConstants.TIME_PERIOD)
+                println("allow: $timeAllow    period: $timePeriod")
+                DBHelper.insertTimeAllowed(timeAllow, timePeriod)
             }
 
             else -> {

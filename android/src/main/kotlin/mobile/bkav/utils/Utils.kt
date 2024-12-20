@@ -1,6 +1,6 @@
 package mobile.bkav.utils
 
-import android.app.usage.UsageEvents
+import android.accessibilityservice.AccessibilityService
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.content.Context
@@ -166,7 +166,9 @@ class Utils {
     }
 
     // Loại bỏ cửa sổ hiện thị của overlay
-    fun removeBlockScreen(windowManager: WindowManager?, view: View?) {
+    fun removeBlockScreen(context: Context, windowManager: WindowManager?, view: View?) {
+        (context as AccessibilityService).performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
+        Thread.sleep(500)
         if (windowManager != null && view != null) {
             windowManager.removeView(view)
         }

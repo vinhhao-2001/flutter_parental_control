@@ -7,7 +7,13 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodChannel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import mobile.bkav.db_helper.DBHelper
+import mobile.bkav.manager.ManagerApp
 import mobile.bkav.models.SupportedBrowserConfig
 import mobile.bkav.overlay.Overlay
 import mobile.bkav.utils.AppConstants
@@ -21,6 +27,43 @@ class AccessibilityService : AccessibilityService() {
     private var currentBrowserPackageName: String = AppConstants.EMPTY
     private var currentUrl: String = AppConstants.EMPTY
     private lateinit var channel: MethodChannel
+
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+    override fun onServiceConnected() {
+        // Xử lý khi service đươc kết nối
+        super.onServiceConnected()
+        flutterPluginBinding?.let { binding: FlutterPlugin.FlutterPluginBinding ->
+            channel = MethodChannel(binding.binaryMessenger, AppConstants.METHOD_CHANNEL)
+        }
+        val overlay = Overlay(this)
+        var timeUsed: Long
+        val timeAllow = DBHelper.getTimeAllow()
+        coroutineScope.launch {
+            while (true) {
+                timeUsed = ManagerApp().getDeviceUsage(this@AccessibilityService)
+
+                if (timeAllow != null) {
+                    // Đã cài đặt thời gian
+                    if (timeAllow*60000 > timeUsed) {
+                        // Chờ đến thời gian mới
+                        delay(timeAllow-timeUsed)
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            overlay.showExpiredTimeOverlay()
+                        }
+                        break
+                    }
+                } else {
+                    break
+                }
+            }
+        }
+    }
+
+    override fun onInterrupt() {
+        // Xử lý khi service bị ngắt
+    }
 
     companion object {
         // Biến tĩnh để lưu FlutterPluginBinding
@@ -37,26 +80,15 @@ class AccessibilityService : AccessibilityService() {
         event?.let { accessibilityEvent ->
             val packageName = accessibilityEvent.packageName?.toString() ?: return
             when (accessibilityEvent.eventType) {
+                // Giám sát sự kiện trình duyệt
                 AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> handleBrowserEvent(
                     accessibilityEvent
                 )
-
+                // Sự kiện khi ở trong màn hình chính
                 else -> if (packageName == AppConstants.LAUNCHER_PACKAGE) {
                     handleLauncherEvent(accessibilityEvent)
                 }
             }
-        }
-    }
-
-    override fun onInterrupt() {
-        // Xử lý khi service bị ngắt
-    }
-
-    override fun onServiceConnected() {
-        // Xử lý khi service đươc kết nối
-        super.onServiceConnected()
-        flutterPluginBinding?.let { binding: FlutterPlugin.FlutterPluginBinding ->
-            channel = MethodChannel(binding.binaryMessenger, AppConstants.METHOD_CHANNEL)
         }
     }
 
@@ -106,6 +138,7 @@ class AccessibilityService : AccessibilityService() {
     }
 
     // Hàm xử lý sự kiện khi người dùng mở trình duyệt
+    @Suppress("DEPRECATION")
     private fun handleBrowserEvent(accessibilityEvent: AccessibilityEvent) {
         // Kiểm tra sự kiện khi người dùng mở trình duyệt
         val parentNodeInfo: AccessibilityNodeInfo = accessibilityEvent.source ?: return

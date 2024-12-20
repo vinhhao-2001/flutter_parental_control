@@ -73,6 +73,19 @@ class ParentalControl {
     }
   }
 
+  /// Cài đặt thời gian và khoảng thời gian sử dụng cho thiết bị
+  /// [timeAllowed] là phút, [listTimePeriod] dạng : [{"startTime":0,"endTime":60}]
+  static Future<void> setTimeAllowDevice(
+      {int? timeAllowed, List<Map<String, dynamic>>? listTimePeriod}) async {
+    try {
+      _checkPlatform(false);
+      await FlutterParentalControlPlatform.instance.setTimeAllowDevice(
+          timeAllowed: timeAllowed, listTimePeriod: listTimePeriod);
+    } catch (_) {
+      rethrow;
+    }
+  }
+
   /// Lấy thời gian sử dụng của thiết bị
   /// Thời gian trả về [millisecond]
   static Future<int> getDeviceUsage() async {
@@ -150,7 +163,7 @@ class ParentalControl {
       _checkPlatform(false);
       final listAppBlock = listApp.map((app) => app.toMap()).toList();
       await FlutterParentalControlPlatform.instance
-          .setListAppBlocked(listAppBlock);
+          .setListAppBlocked(listAppBlock, addNew: addNew);
     } catch (_) {
       rethrow;
     }
@@ -162,7 +175,8 @@ class ParentalControl {
       {bool addNew = false}) async {
     try {
       _checkPlatform(false);
-      await FlutterParentalControlPlatform.instance.setListWebBlocked(listWeb);
+      await FlutterParentalControlPlatform.instance
+          .setListWebBlocked(listWeb, addNew: addNew);
     } catch (_) {
       rethrow;
     }

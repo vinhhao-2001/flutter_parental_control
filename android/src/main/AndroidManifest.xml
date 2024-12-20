@@ -27,10 +27,6 @@
     <uses-permission
         android:name="android.permission.BIND_DEVICE_ADMIN"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-
 
     <application>
         <!--service lắng nghe ứng dụng được cài đặt hoặc gỡ bỏ-->
