@@ -187,20 +187,18 @@ object DBHelper {
         }
     }
 
-    fun isTimeAllowedValid(): Boolean? {
+    fun isTimeAllowedValid(): Boolean {
         Realm.getDefaultInstance().use { realm ->
             val device = realm.where(TimeAllowedDevice::class.java)
                 .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW)
                 .findFirst()
 
-            if (device == null) return null
+            if (device == null || device.timePeriod == null) return true
 
             val currentTime = getCurrentMinutesOfDay()
-            val isInAnyPeriod = device.timePeriod.any { period ->
+            return device.timePeriod.any { period ->
                 currentTime in period.startTime..period.endTime
             }
-
-            return device.timeAllowed > 0 && isInAnyPeriod
         }
     }
 

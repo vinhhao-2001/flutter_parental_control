@@ -30,6 +30,16 @@ class AccessibilityService : AccessibilityService() {
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
+    companion object {
+        // Biến tĩnh để lưu FlutterPluginBinding
+        private var flutterPluginBinding: FlutterPlugin.FlutterPluginBinding? = null
+
+        // Phương thức tĩnh để nhận FlutterPluginBinding
+        fun setFlutterPluginBinding(binding: FlutterPlugin.FlutterPluginBinding) {
+            flutterPluginBinding = binding
+        }
+    }
+
     override fun onServiceConnected() {
         // Xử lý khi service đươc kết nối
         super.onServiceConnected()
@@ -39,15 +49,17 @@ class AccessibilityService : AccessibilityService() {
         val overlay = Overlay(this)
         var timeUsed: Long
         val timeAllow = DBHelper.getTimeAllow()
+
+        // Kiểm tra còn được phép sử dụng không
         coroutineScope.launch {
             while (true) {
                 timeUsed = ManagerApp().getDeviceUsage(this@AccessibilityService)
-
                 if (timeAllow != null) {
                     // Đã cài đặt thời gian
-                    if (timeAllow*60000 > timeUsed) {
+                    val periodValid = DBHelper.isTimeAllowedValid()
+                    if (timeAllow * 60000 > timeUsed && periodValid) {
                         // Chờ đến thời gian mới
-                        delay(timeAllow-timeUsed)
+                        delay(timeAllow * 60000 - timeUsed)
                     } else {
                         withContext(Dispatchers.Main) {
                             overlay.showExpiredTimeOverlay()
@@ -63,16 +75,6 @@ class AccessibilityService : AccessibilityService() {
 
     override fun onInterrupt() {
         // Xử lý khi service bị ngắt
-    }
-
-    companion object {
-        // Biến tĩnh để lưu FlutterPluginBinding
-        private var flutterPluginBinding: FlutterPlugin.FlutterPluginBinding? = null
-
-        // Phương thức tĩnh để nhận FlutterPluginBinding
-        fun setFlutterPluginBinding(binding: FlutterPlugin.FlutterPluginBinding) {
-            flutterPluginBinding = binding
-        }
     }
 
     // Xử lý sự kiện Accessibility

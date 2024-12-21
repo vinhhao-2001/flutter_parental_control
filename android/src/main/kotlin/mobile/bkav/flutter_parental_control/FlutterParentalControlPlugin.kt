@@ -180,7 +180,6 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
             AppConstants.SET_DEVICE_TIME_ALLOW -> {
                 val timeAllow = call.argument<Int?>(AppConstants.TIME_ALLOW)
                 val timePeriod = call.argument<List<Map<String, Any>>>(AppConstants.TIME_PERIOD)
-                println("allow: $timeAllow    period: $timePeriod")
                 DBHelper.insertTimeAllowed(timeAllow, timePeriod)
             }
 
