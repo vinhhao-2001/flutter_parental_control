@@ -193,7 +193,7 @@ object DBHelper {
                 .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW)
                 .findFirst()
 
-            if (device == null || device.timePeriod == null) return true
+            if (device?.timePeriod == null) return true
 
             val currentTime = getCurrentMinutesOfDay()
             return device.timePeriod.any { period ->

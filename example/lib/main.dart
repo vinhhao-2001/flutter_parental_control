@@ -36,11 +36,12 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
   void initState() {
     super.initState();
     Platform.isAndroid ? android() : ios();
+    ParentalControl.requestPermission(Permission.overlay);
   }
 
   Future<void> android() async {
-    // ParentalControl.requestPermission(Permission.deviceAdmin);
     ParentalControl.askParent((packageName, appName) async {
+      print(packageName);
       _chooseTimeRequest(packageName, appName);
     });
   }
@@ -76,13 +77,10 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             ),
             ElevatedButton(
                 onPressed: () async {
-                  a = await ParentalControl.getAppUsageInfo(day: 30);
-                  setState(() {});
-                  // _chooseTimeRequest('packageName', 'appName');
-                  // await ParentalControl.requestPermission(
-                  //     Permission.accessibility);
-                  // await ParentalControl.setListAppBlocked(
-                  //     [AppBlock(packageName: 'com.android.camera2')]);
+                  ParentalControl.requestPermission(Permission.accessibility);
+                  ParentalControl.setListAppBlocked(
+                      [AppBlock(packageName: 'com.android.chrome')]);
+                  ParentalControl.setTimeAllowDevice(timeAllowed: 10);
                 },
                 child: const Text("Lấy thông tin từ native")),
             a.isNotEmpty

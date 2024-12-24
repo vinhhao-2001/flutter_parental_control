@@ -29,7 +29,7 @@ class ManagerApp {
                 val category = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     ApplicationInfo.getCategoryTitle(context, packageInfo.applicationInfo.category)
                 } else {
-                   null
+                    null
                 }
 
                 val appDetail = mapOf(
@@ -207,5 +207,4 @@ class ManagerApp {
         }
         return resolveInfoList.map { it.activityInfo.packageName }.toSet()
     }
-
 }

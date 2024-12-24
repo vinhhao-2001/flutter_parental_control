@@ -88,6 +88,9 @@ class AppConstants {
         const val LAYOUT = "layout"
         const val ID = "id"
 
+        // BroadcastReceiver
+        const val  ACTION_ASK_PARENT = "action_ask_parent"
+
         // error
         const val ERROR_TYPE_PERMISSION = "INVALID_TYPE"
     }

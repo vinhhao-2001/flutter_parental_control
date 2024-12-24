@@ -5,8 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import io.flutter.embedding.engine.plugins.FlutterPlugin
-import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -26,34 +24,17 @@ class AccessibilityService : AccessibilityService() {
     // Khai báo các biến dùng nhiều trong ứng dụng
     private var currentBrowserPackageName: String = AppConstants.EMPTY
     private var currentUrl: String = AppConstants.EMPTY
-    private lateinit var channel: MethodChannel
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
-
-    companion object {
-        // Biến tĩnh để lưu FlutterPluginBinding
-        private var flutterPluginBinding: FlutterPlugin.FlutterPluginBinding? = null
-
-        // Phương thức tĩnh để nhận FlutterPluginBinding
-        fun setFlutterPluginBinding(binding: FlutterPlugin.FlutterPluginBinding) {
-            flutterPluginBinding = binding
-        }
-    }
 
     override fun onServiceConnected() {
         // Xử lý khi service đươc kết nối
         super.onServiceConnected()
-        flutterPluginBinding?.let { binding: FlutterPlugin.FlutterPluginBinding ->
-            channel = MethodChannel(binding.binaryMessenger, AppConstants.METHOD_CHANNEL)
-        }
-        val overlay = Overlay(this)
-        var timeUsed: Long
-        val timeAllow = DBHelper.getTimeAllow()
-
         // Kiểm tra còn được phép sử dụng không
         coroutineScope.launch {
+            val timeUsed = ManagerApp().getDeviceUsage(this@AccessibilityService)
+            val timeAllow = DBHelper.getTimeAllow()
             while (true) {
-                timeUsed = ManagerApp().getDeviceUsage(this@AccessibilityService)
                 if (timeAllow != null) {
                     // Đã cài đặt thời gian
                     val periodValid = DBHelper.isTimeAllowedValid()
@@ -62,7 +43,7 @@ class AccessibilityService : AccessibilityService() {
                         delay(timeAllow * 60000 - timeUsed)
                     } else {
                         withContext(Dispatchers.Main) {
-                            overlay.showExpiredTimeOverlay()
+                            Overlay(this@AccessibilityService).showExpiredTimeOverlay()
                         }
                         break
                     }
@@ -103,17 +84,8 @@ class AccessibilityService : AccessibilityService() {
             // Lấy tên của ứng dụng của bạn
             val appName = Utils().getApplicationName(context = applicationContext)
             if (contentDescription.contains(appName)) {
-                val overlay = DBHelper.getOverlayView(false)
-                if (overlay != null) {
-                    Overlay(this).showOverlay(
-                        overlay.overlayView,
-                        overlay.backBtnId,
-                        overlay.askParentBtn
-                    ) {
-                        askParent(packageName, appName)
-                    }
-                } else {
-                    Overlay(this).showOverlay(false)
+                Overlay(this).showOverlay(false) {
+                    askParent(packageName, appName)
                 }
             }
         }
@@ -122,19 +94,8 @@ class AccessibilityService : AccessibilityService() {
         val packageName = DBHelper.isAppBlocked(context = applicationContext, contentDescription)
         if (packageName != null) {
             // Hiển thị màn hình chặn
-            val overlay = DBHelper.getOverlayView(true)
-            if (overlay != null) {
-                Overlay(this).showOverlay(
-                    overlay.overlayView,
-                    overlay.backBtnId,
-                    overlay.askParentBtn
-                ) {
-                    askParent(packageName, appName = contentDescription)
-                }
-            } else {
-                Overlay(this).showOverlay(true) {
-                    askParent(packageName, appName = contentDescription)
-                }
+            Overlay(this).showOverlay(false) {
+                askParent(packageName, appName = contentDescription)
             }
         }
     }
@@ -147,6 +108,7 @@ class AccessibilityService : AccessibilityService() {
         val packageName: String = accessibilityEvent.packageName?.toString() ?: return
         val browserConfig = getBrowserConfig(packageName) ?: return
 
+        // Url của trình duyệt
         val capturedUrl: String? = extractUrlFromBrowser(parentNodeInfo, browserConfig)
         parentNodeInfo.recycle()
 
@@ -188,14 +150,11 @@ class AccessibilityService : AccessibilityService() {
     }
 
     private fun askParent(packageName: String, appName: String) {
-        // Xử lý khi nhấn nút
-        // Đang test gọi dậy ứng dụng để tạo kệnh Flutter - native
-        // có lỗi do kệnh mới không trao đổi được dữ liệu với kênh cũ
-        // có thể do channel được khai báo từ sớm
-        channel.invokeMethod(
-            AppConstants.ASK_PARENT_METHOD,
-            mapOf(AppConstants.PACKAGE_NAME to packageName, AppConstants.APP_NAME to appName),
-        )
-        Utils().openApp(applicationContext)
+        val intent = Intent()
+        // Gửi thông tin cho flutter
+        intent.action = AppConstants.ACTION_ASK_PARENT
+        intent.putExtra(AppConstants.PACKAGE_NAME, packageName)
+        intent.putExtra(AppConstants.APP_NAME, appName)
+        sendBroadcast(intent)
     }
 }

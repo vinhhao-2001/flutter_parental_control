@@ -101,6 +101,7 @@ class Utils {
             val intent = context.packageManager.getLaunchIntentForPackage(packageName)
             if (intent != null) {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.addFlags(Intent.FLAG_FROM_BACKGROUND)
                 context.startActivity(intent)
             }
         } catch (e: Exception) {
@@ -129,14 +130,14 @@ class Utils {
     }
 
     // Lấy view từ ứng dụng
-    fun getView(viewName: String, context: Context): View {
+    fun getView(context: Context, viewName: String): View {
         val layoutId =
             context.resources.getIdentifier(viewName, AppConstants.LAYOUT, context.packageName)
         return LayoutInflater.from(context).inflate(layoutId, null)
     }
 
     // Lấy id trong view của ứng dụng
-    fun getId(idName: String, context: Context): Int {
+    fun getId(context: Context, idName: String): Int {
         return context.resources.getIdentifier(idName, AppConstants.ID, context.packageName)
     }
 
@@ -171,8 +172,14 @@ class Utils {
     }
 
     // Loại bỏ cửa sổ hiện thị của overlay
-    fun removeBlockScreen(context: Context, windowManager: WindowManager?, view: View?) {
+    fun removeBlockScreen(
+        context: Context,
+        windowManager: WindowManager?,
+        view: View?,
+        isOpen: Boolean = false
+    ) {
         (context as AccessibilityService).performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
+        if (isOpen) Utils().openApp(context)
         Thread.sleep(500)
         if (windowManager != null && view != null) {
             windowManager.removeView(view)

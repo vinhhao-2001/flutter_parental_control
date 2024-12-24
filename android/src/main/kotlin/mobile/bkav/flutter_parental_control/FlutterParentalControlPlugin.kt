@@ -1,9 +1,12 @@
 package mobile.bkav.flutter_parental_control
 
 import android.app.admin.DevicePolicyManager
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
 import android.util.Log
 import androidx.annotation.NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -17,7 +20,6 @@ import mobile.bkav.db_helper.DBHelper
 import mobile.bkav.manager.ManagerApp
 import mobile.bkav.models.DeviceInfo
 import mobile.bkav.receiver.AdminReceiver
-import mobile.bkav.service.AccessibilityService
 import mobile.bkav.service.ListenService
 import mobile.bkav.utils.AppConstants
 import mobile.bkav.utils.RequestPermissions
@@ -38,8 +40,6 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
         context = flutterPluginBinding.applicationContext
         initRealm() // Khởi tạo Realm
 
-        AccessibilityService.setFlutterPluginBinding(flutterPluginBinding)
-
         // Khởi tạo MethodChannel và EventChannel
         methodChannel =
             MethodChannel(flutterPluginBinding.binaryMessenger, AppConstants.METHOD_CHANNEL)
@@ -56,6 +56,13 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                 eventSink = null
             }
         })
+
+        val filter = IntentFilter(AppConstants.ACTION_ASK_PARENT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.registerReceiver(broadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            context.registerReceiver(broadcastReceiver, filter)
+        }
     }
 
     // Hàm thực hiện khi plugin bị hủy
@@ -146,7 +153,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                 val componentName = ComponentName(context, AdminReceiver::class.java)
                 if (devicePolicyManager.isAdminActive(componentName)) {
                     devicePolicyManager.lockNow()
-                }else{
+                } else {
                     Log.d("LOCK_DEVICE", "Need Device Admin Permission")
                 }
             }
@@ -198,5 +205,22 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
             .allowQueriesOnUiThread(true)
             .build()
         Realm.setDefaultConfiguration(config)
+    }
+
+    private val broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val packageName = intent.getStringExtra(AppConstants.PACKAGE_NAME)
+            val appName = intent.getStringExtra(AppConstants.APP_NAME)
+            if (packageName != null && appName != null) {
+
+                methodChannel.invokeMethod(
+                    AppConstants.ASK_PARENT_METHOD,
+                    mapOf(
+                        AppConstants.PACKAGE_NAME to packageName,
+                        AppConstants.APP_NAME to appName,
+                    )
+                )
+            }
+        }
     }
 }
