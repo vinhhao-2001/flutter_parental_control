@@ -2,6 +2,7 @@ package mobile.bkav.service
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -21,6 +22,8 @@ import mobile.bkav.utils.Utils
 // Dịch vụ trợ năng
 class AccessibilityService : AccessibilityService() {
 
+    private var homePackageName: String = AppConstants.EMPTY
+
     // Khai báo các biến dùng nhiều trong ứng dụng
     private var currentBrowserPackageName: String = AppConstants.EMPTY
     private var currentUrl: String = AppConstants.EMPTY
@@ -31,6 +34,12 @@ class AccessibilityService : AccessibilityService() {
         // Xử lý khi service đươc kết nối
         super.onServiceConnected()
         // Kiểm tra còn được phép sử dụng không
+        val pm = this.packageManager
+        val intent = Intent(Intent.ACTION_MAIN)
+        intent.addCategory(Intent.CATEGORY_HOME)
+
+        val resolveInfo = pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        homePackageName = resolveInfo?.activityInfo?.packageName.toString()
         coroutineScope.launch {
             val timeUsed = ManagerApp().getDeviceUsage(this@AccessibilityService)
             val timeAllow = DBHelper.getTimeAllow()
@@ -68,7 +77,7 @@ class AccessibilityService : AccessibilityService() {
                     accessibilityEvent
                 )
                 // Sự kiện khi ở trong màn hình chính
-                else -> if (packageName == AppConstants.LAUNCHER_PACKAGE) {
+                else -> if (packageName == homePackageName) {
                     handleLauncherEvent(accessibilityEvent)
                 }
             }
@@ -85,6 +94,7 @@ class AccessibilityService : AccessibilityService() {
             val appName = Utils().getApplicationName(context = applicationContext)
             if (contentDescription.contains(appName)) {
                 Overlay(this).showOverlay(false) {
+                    Utils().openApp(applicationContext)
                     askParent(packageName, appName)
                 }
             }
@@ -94,7 +104,8 @@ class AccessibilityService : AccessibilityService() {
         val packageName = DBHelper.isAppBlocked(context = applicationContext, contentDescription)
         if (packageName != null) {
             // Hiển thị màn hình chặn
-            Overlay(this).showOverlay(false) {
+            Overlay(this).showOverlay(true) {
+                Utils().openApp(applicationContext)
                 askParent(packageName, appName = contentDescription)
             }
         }

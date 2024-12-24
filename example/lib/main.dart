@@ -78,9 +78,8 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             ElevatedButton(
                 onPressed: () async {
                   ParentalControl.requestPermission(Permission.accessibility);
-                  ParentalControl.setListAppBlocked(
-                      [AppBlock(packageName: 'com.android.chrome')]);
-                  ParentalControl.setTimeAllowDevice(timeAllowed: 10);
+                  ParentalControl.setOverlayView(true, 'block_view',
+                      backBtnId: 'backBlockAppBtn',askParentBtnId: 'askParentBtn');
                 },
                 child: const Text("Lấy thông tin từ native")),
             a.isNotEmpty

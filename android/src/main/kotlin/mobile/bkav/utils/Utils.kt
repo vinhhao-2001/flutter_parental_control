@@ -101,7 +101,6 @@ class Utils {
             val intent = context.packageManager.getLaunchIntentForPackage(packageName)
             if (intent != null) {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                intent.addFlags(Intent.FLAG_FROM_BACKGROUND)
                 context.startActivity(intent)
             }
         } catch (e: Exception) {
@@ -178,8 +177,7 @@ class Utils {
         view: View?,
         isOpen: Boolean = false
     ) {
-        (context as AccessibilityService).performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
-        if (isOpen) Utils().openApp(context)
+        if (!isOpen) (context as AccessibilityService).performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
         Thread.sleep(500)
         if (windowManager != null && view != null) {
             windowManager.removeView(view)

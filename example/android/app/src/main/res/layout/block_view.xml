@@ -33,7 +33,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="40dp"
         android:background="#FFDAB9"
-        android:text="Hỏi phụ huynh"
+        android:text="Hỏi phụ huynh mà "
         android:textColor="#BF360C"
         android:textSize="16sp"
         android:textStyle="italic" />

@@ -6,7 +6,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.view.View
 import android.view.WindowManager
-import io.realm.Realm.getApplicationContext
 import mobile.bkav.R
 import mobile.bkav.db_helper.DBHelper
 import mobile.bkav.receiver.AdminReceiver
@@ -22,6 +21,7 @@ class Overlay(private val context: Context) {
         val backButton: View?
         val askParentBtn: View?
         val overlay = DBHelper.getOverlayView(isBlock)
+        // Lấy các thông tin của màn hình chặn
         if (overlay != null) {
             // trường hợp có overlay trong db
             overlayView = Utils().getView(context, overlay.overlayView)
@@ -36,85 +36,20 @@ class Overlay(private val context: Context) {
             backButton = overlayView?.findViewById(R.id.homeBtn)
             askParentBtn = overlayView?.findViewById(R.id.askParentBtn)
         }
+
+        // Hiển thị màn hình chặn
+        val layoutParams = Utils().getLayoutParams()
+        windowManager?.addView(overlayView, layoutParams)
+
         backButton?.setOnClickListener {
             Utils().removeBlockScreen(context, windowManager, overlayView)
         }
         askParentBtn?.setOnClickListener {
-            Utils().removeBlockScreen(context, windowManager, overlayView)
             // Xử lý khi có sự kiện hỏi ý kiến của phụ huynh
             onAskParentClick?.invoke()
+            Utils().removeBlockScreen(context, windowManager, overlayView, true)
         }
-    }
 
-//    // Hàm hiển thị overlay mặc định
-//    fun showOverlay(isBlock: Boolean, onAskParentClick: (() -> Unit?)? = null) {
-//        windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-//        var askParentBtn: View? = null
-//        if (isBlock) {
-//            overlayView = View.inflate(context, R.layout.open_app_blocked, null)
-//            askParentBtn = overlayView?.findViewById(R.id.askParentBtn)
-//            askParentBtn?.setOnClickListener {
-//                Utils().removeBlockScreen(context, windowManager, overlayView)
-//                // Xử lý khi có sự kiện hỏi ý kiến của phụ huynh
-//                onAskParentClick?.invoke()
-//            }
-//        } else {
-//            overlayView = View.inflate(context, R.layout.remove_my_app, null)
-//        }
-//        val backButton = overlayView?.findViewById<View>(R.id.homeBtn)
-//
-//        backButton?.setOnClickListener {
-//            Utils().removeBlockScreen(context, windowManager, overlayView)
-//        }
-//
-//        askParentBtn?.setOnClickListener {
-//            // Xử lý khi có sự kiện hỏi ý kiến của phụ huynh
-//            onAskParentClick?.invoke()
-//            Utils().removeBlockScreen(context, windowManager, overlayView, true)
-//        }
-//
-//        val layoutParams = Utils().getLayoutParams()
-//        // Thêm view vào màn hình
-//        windowManager?.addView(overlayView, layoutParams)
-//    }
-
-    // Hàm hiển thị overlay của người dùng tự thêm vào
-    fun showOverlay(
-        nameOverlayView: String,
-        nameBackButtonId: String,
-        askParentButtonId: String? = null,
-        onAskParentClick: (() -> Unit?)? = null,
-    ) {
-        // Nếu blockViewName không phải là null, lấy view người dùng tự thêm vào
-        overlayView = getApplicationContext()?.let { Utils().getView(it, nameOverlayView) }
-        if (overlayView != null) {
-            windowManager =
-                context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            val backId = getApplicationContext()?.let { Utils().getId(it, nameBackButtonId) }
-            val askParentId = getApplicationContext()?.let {
-                askParentButtonId?.let { it1 ->
-                    Utils().getId(
-                        it, it1
-                    )
-                }
-            }
-
-            val backButton = backId?.let { overlayView?.findViewById<View>(it) }
-            val askParentBtn = askParentId?.let { overlayView?.findViewById<View>(it) }
-
-            backButton?.setOnClickListener {
-                Utils().removeBlockScreen(context, windowManager, overlayView)
-            }
-            askParentBtn?.setOnClickListener {
-                // Xử lý khi có sự kiện hỏi ý kiến của phụ huynh
-                Utils().removeBlockScreen(context, windowManager, overlayView, true)
-                onAskParentClick?.invoke()
-            }
-
-            val layoutParams = Utils().getLayoutParams()
-            // Thêm view vào màn hình
-            windowManager?.addView(overlayView, layoutParams)
-        }
     }
 
     // hết thời gian sử dụng màn hình thiết bị
@@ -126,8 +61,8 @@ class Overlay(private val context: Context) {
             val askParentBtn = overlayView?.findViewById<View>(R.id.askParentBtn)
             askParentBtn?.setOnClickListener {
                 // Xử lý khi có sự kiện hỏi ý kiến của phụ huynh
-                onAskParentClick?.invoke()
                 Utils().removeBlockScreen(context, windowManager, overlayView)
+                onAskParentClick?.invoke()
                 overlayView = null
                 windowManager = null
             }
