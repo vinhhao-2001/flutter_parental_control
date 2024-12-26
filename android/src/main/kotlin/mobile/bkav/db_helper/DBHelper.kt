@@ -11,11 +11,13 @@ import mobile.bkav.utils.Utils
 import org.bson.types.ObjectId
 
 object DBHelper {
-    fun insertListAppBlock(context: Context, appList: List<Map<String, Any>>) {
-        // Thêm danh sách tên ứng dụng bị chặn vào DB
+    // Thêm danh sách tên ứng dụng bị chặn vào DB
+    fun insertAppBlock(context: Context, appList: List<Map<String, Any>>, addNew: Boolean = false) {
         Realm.getDefaultInstance().use { realm ->
             realm.executeTransaction {
-                realm.delete(BlockedApp::class.java)
+                if (!addNew) {
+                    realm.delete(BlockedApp::class.java)
+                }
                 appList.forEach { map ->
                     // Chuyển map thành object để lưu vào Realm
                     val app = BlockedApp().fromMap(context, map)
@@ -26,22 +28,8 @@ object DBHelper {
         }
     }
 
-    fun insertNewAppBlock(context: Context, appList: List<Map<String, Any>>) {
-        // Thêm danh sách tên ứng dụng bị chặn vào DB
-        Realm.getDefaultInstance().use { realm ->
-            realm.executeTransaction {
-                appList.forEach { map ->
-                    // Chuyển map thành object để lưu vào Realm
-                    val app = BlockedApp().fromMap(context, map)
-                    if (app != null)
-                        realm.copyToRealmOrUpdate(app)
-                }
-            }
-        }
-    }
-
+    // Kiểm tra xem ứng dụng bị chặn không
     fun isAppBlocked(context: Context, appName: String): String? {
-        // Kiểm tra xem ứng dụng bị chặn không
         Realm.getDefaultInstance().use { realm ->
             val app: BlockedApp = realm.where(BlockedApp::class.java)
                 .equalTo(AppConstants.APP_NAME, appName)
@@ -64,11 +52,13 @@ object DBHelper {
         }
     }
 
-    fun insertListWebBlock(webList: List<String>) {
-        // Thêm danh sách tên website bị chặn vào DB
+    // Thêm danh sách tên website bị chặn vào DB
+    fun insertWebBlock(webList: List<String>, addNew: Boolean = false) {
         Realm.getDefaultInstance().use { realm ->
             realm.executeTransaction {
-                realm.delete(BlockedWebsite::class.java)
+                if (!addNew) {
+                    realm.delete(BlockedWebsite::class.java)
+                }
                 webList.forEach { webUrl ->
                     it.copyToRealmOrUpdate(BlockedWebsite().apply {
                         this.websiteUrl = webUrl
@@ -78,21 +68,8 @@ object DBHelper {
         }
     }
 
-    fun insertNewWebBlock(webList: List<String>) {
-        // Thêm danh sách tên website bị chặn vào DB
-        Realm.getDefaultInstance().use { realm ->
-            realm.executeTransaction {
-                webList.forEach { webUrl ->
-                    it.copyToRealmOrUpdate(BlockedWebsite().apply {
-                        this.websiteUrl = webUrl
-                    })
-                }
-            }
-        }
-    }
-
+    // Kiểm tra URL có bị chặn hay không
     fun isUrlBlocked(webUrl: String): Boolean {
-        // Kiểm tra URL có bị chặn hay không
         Realm.getDefaultInstance().use { realm ->
             val blockedWebsites = realm.where(BlockedWebsite::class.java).findAll()
             return blockedWebsites.any { blockedSite ->
@@ -102,8 +79,8 @@ object DBHelper {
         }
     }
 
+    // Thêm lịch sử duyệt web của trẻ vào DB
     fun insertWebHistory(searchQuery: String) {
-        // Thêm lịch sử duyệt web của trẻ vào DB
         Realm.getDefaultInstance().use { realm ->
             realm.executeTransaction {
                 realm.copyToRealmOrUpdate(WebHistory().apply {
@@ -114,21 +91,21 @@ object DBHelper {
         }
     }
 
+    // Lấy danh sách lịch sử duyệt web của trẻ
     fun getWebHistory(): List<Map<String, Any>> {
-        // Lấy danh sách lịch sử duyệt web của trẻ
         Realm.getDefaultInstance().use { realm ->
             val webHistoryList = realm.where(WebHistory::class.java).findAll()
             return webHistoryList.map { it.toMap() }
         }
     }
 
+    // Thêm overlay view vào DB
     fun insertOverlayView(
         id: Boolean,
         overlayView: String,
         nameBackButtonId: String,
         nameAskParentBtnId: String? = null,
     ) {
-        // Thêm overlay view vào DB
         Realm.getDefaultInstance().use { realm ->
             realm.executeTransaction {
                 realm.copyToRealmOrUpdate(OverlayView().apply {
@@ -141,14 +118,15 @@ object DBHelper {
         }
     }
 
+    // Lấy overlay view theo id,
     fun getOverlayView(isBlock: Boolean): OverlayView? {
-        // Lấy overlay view theo id,
         val id = if (isBlock) 1 else 0
         val realm = Realm.getDefaultInstance()
         return realm.where(OverlayView::class.java).equalTo(AppConstants.ID, id)
             .findFirst()
     }
 
+    // Thêm thời gian cho phép sử dụng thiết bị trong ngày
     fun insertTimeAllowed(
         timeAllowed: Int? = null,
         timePeriod: List<Map<String, Any>>? = null
@@ -186,6 +164,7 @@ object DBHelper {
         }
     }
 
+    // Kiểm tra hiện tại có trong khoảng thời gian được sử dụng
     fun timePeriodValid(): Pair<Long, Boolean> {
         Realm.getDefaultInstance().use { realm ->
             val device = realm.where(TimeAllowedDevice::class.java)
@@ -217,6 +196,7 @@ object DBHelper {
         }
     }
 
+    // Kiểm tra tổng thời gian được sử dụng trong ngày
     fun getTimeAllow(timeUsed: Long): Pair<Long, Boolean> {
         Realm.getDefaultInstance().use { realm ->
             val device = realm.where(TimeAllowedDevice::class.java)
@@ -236,9 +216,7 @@ object DBHelper {
             }
         }
     }
-
 }
-
 
 // Các model tương ứng với các bảng trong DB
 open class BlockedApp : RealmObject() {
@@ -247,7 +225,6 @@ open class BlockedApp : RealmObject() {
 
     @Index
     var appName: String = AppConstants.EMPTY
-
     var timeLimit: Int = 0 // Bị chặn
 
     // Chuyển map thành object
@@ -268,7 +245,6 @@ open class TimePeriod(
     var startTime: Int = 0,  // Thời gian bắt đầu
     var endTime: Int = 0     // Thời gian kết thúc
 ) : RealmObject()
-
 
 open class TimeAllowedDevice : RealmObject() {
     @PrimaryKey

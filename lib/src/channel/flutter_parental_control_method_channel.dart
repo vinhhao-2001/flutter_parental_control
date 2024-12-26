@@ -22,7 +22,23 @@ class MethodChannelFlutterParentalControl
     return Map<String, dynamic>.from(result);
   }
 
+  /// Lấy thông tin vị trí của thiết bị
+  @override
+  Future<Map<String, dynamic>> getLocation() async {
+    final result =
+        await methodChannel.invokeMethod(AppConstants.locationMethod);
+    return Map<String, dynamic>.from(result);
+  }
+
   /// Các phần chỉ có trên [Android]
+  /// Yêu cầu các quyền dành cho [Android]
+  @override
+  Future<bool> requestPermission(int type) async {
+    final result = await methodChannel.invokeMethod(
+        AppConstants.permissionMethod, {AppConstants.typePermission: type});
+    return result ?? false;
+  }
+
   /// Lấy danh sách chứa thông tin các ứng dụng
   @override
   Future<List<Map<String, dynamic>>> getAppDetailInfo() async {
@@ -37,22 +53,6 @@ class MethodChannelFlutterParentalControl
     final data =
         await methodChannel.invokeMethod(AppConstants.deviceUsageMethod);
     return data;
-  }
-
-  /// Lấy thông tin vị trí của thiết bị
-  @override
-  Future<Map<String, dynamic>> getLocation() async {
-    final result =
-        await methodChannel.invokeMethod(AppConstants.locationMethod);
-    return Map<String, dynamic>.from(result);
-  }
-
-  /// Yêu cầu các quyền dành cho [Android]
-  @override
-  Future<bool> requestPermission(int type) async {
-    final result = await methodChannel.invokeMethod(
-        AppConstants.permissionMethod, {AppConstants.typePermission: type});
-    return result ?? false;
   }
 
   /// Sự kiện hỏi ý kiến của phụ huynh
@@ -92,7 +92,7 @@ class MethodChannelFlutterParentalControl
     return Map<String, dynamic>.from(result);
   }
 
-  // Lấy thời gian sử dụng của các ứng dụng trong ngày
+  /// Lấy thời gian sử dụng của các ứng dụng trong ngày
   @override
   Future<Map<String, dynamic>> getTodayUsage() async {
     final result = await methodChannel.invokeMethod(AppConstants.getToDayUsage);

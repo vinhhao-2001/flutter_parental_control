@@ -1,20 +1,17 @@
 package mobile.bkav.service
 
 import android.app.Service
-import android.app.admin.DevicePolicyManager
 import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.IBinder
 import mobile.bkav.flutter_parental_control.FlutterParentalControlPlugin
 import mobile.bkav.models.AppInstalledInfo
-import mobile.bkav.receiver.AdminReceiver
 import mobile.bkav.utils.AppConstants
 import mobile.bkav.utils.Utils
 
-class ListenService : Service() {
+class AppInstallService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // Bắt đầu service
@@ -32,16 +29,16 @@ class ListenService : Service() {
         filter.addAction(Intent.ACTION_PACKAGE_ADDED)
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
         filter.addDataScheme(AppConstants.PACKAGE)
-        registerReceiver(listenReceiver, filter)
+        registerReceiver(appInstallReceiver, filter)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(listenReceiver)
+        unregisterReceiver(appInstallReceiver)
     }
 
     // Hàm thực hiện khi có ứng dụng được cài đặt hoặc gỡ bỏ
-    private val listenReceiver = object : BroadcastReceiver() {
+    private val appInstallReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val action = intent?.action
             val packageName = intent?.data?.schemeSpecificPart

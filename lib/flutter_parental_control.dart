@@ -47,53 +47,13 @@ class ParentalControl {
   }
 
   /// các phần chỉ dùng được trên [Android]
-  /// Lắng nghe khi có có sự kiện nhấn nút hỏi phụ huynh
-
-  /// [askParent] Bị mất kết nối khi chạy ở nền
-  /// ParentalControl.askParent((packageName, appName) async {
-  /// code
-  /// });
-  static Future<void> askParent(
-      Function(String packageName, String appName) function) async {
+  /// Kiểm tra và xin các quyền cho ứng dụng
+  static Future<bool> requestPermission(Permission type) async {
     try {
       _checkPlatform(false);
-      await FlutterParentalControlPlatform.instance.askParent(function);
-    } catch (_) {
-      rethrow;
-    }
-  }
-
-  /// Khoá sử dụng màn hình
-  static Future<void> lockDevice() async {
-    try {
-      _checkPlatform(false);
-      await FlutterParentalControlPlatform.instance.lockDevice();
-    } catch (_) {
-      rethrow;
-    }
-  }
-
-  /// Cài đặt thời gian và khoảng thời gian sử dụng cho thiết bị
-  /// [timeAllowed] là phút, [listTimePeriod] dạng : [{"startTime":0,"endTime":60}]
-  static Future<void> setTimeAllowDevice(
-      {int? timeAllowed, List<Map<String, dynamic>>? listTimePeriod}) async {
-    try {
-      _checkPlatform(false);
-      await FlutterParentalControlPlatform.instance.setTimeAllowDevice(
-          timeAllowed: timeAllowed, listTimePeriod: listTimePeriod);
-    } catch (_) {
-      rethrow;
-    }
-  }
-
-  /// Lấy thời gian sử dụng của thiết bị
-  /// Thời gian trả về [millisecond]
-  static Future<int> getDeviceUsage() async {
-    try {
-      _checkPlatform(false);
-      final deviceUsage =
-          await FlutterParentalControlPlatform.instance.getDeviceUsage();
-      return deviceUsage;
+      final result = await FlutterParentalControlPlatform.instance
+          .requestPermission(_permissionInt(type));
+      return result;
     } catch (_) {
       rethrow;
     }
@@ -111,20 +71,40 @@ class ParentalControl {
     }
   }
 
-  /// Kiểm tra và xin các quyền cho ứng dụng
-  static Future<bool> requestPermission(Permission type) async {
+  /// Cần cấp quyền [Permission.usageState] để lấy thời gian sử dụng dưới đây:
+  /// Lấy thời gian sử dụng của thiết bị
+  /// Thời gian trả về [millisecond]
+  static Future<int> getDeviceUsage() async {
     try {
       _checkPlatform(false);
-      final result = await FlutterParentalControlPlatform.instance
-          .requestPermission(_permissionInt(type));
-      return result;
+      final deviceUsage =
+          await FlutterParentalControlPlatform.instance.getDeviceUsage();
+      return deviceUsage;
     } catch (_) {
       rethrow;
     }
   }
 
-  /// Lấy thời gian sử dụng trong thiết bị
-  /// [day] là số ngày lấy thời gian sử dụng, Không truyền tham số thì thời gian mặc định là 1 ngày
+  /// Lấy thời gian sử dụng trong ngày của thiết bị mỗi 15 phút
+  /// Giá trị trả về [millisecond]
+  static Future<List<TodayUsage>> getTodayUsage() async {
+    try {
+      _checkPlatform(false);
+      final data =
+          await FlutterParentalControlPlatform.instance.getTodayUsage();
+      return data.entries.map((entry) {
+        return TodayUsage.fromMap(
+          entry.key,
+          Map<int, int>.from(entry.value),
+        );
+      }).toList();
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  /// Lấy tổng thời gian sử dụng của các ứng dụng
+  /// [day] là số ngày lấy thời gian sử dụng, mặc định là ngày hiện tại
   /// Giá trị trả về [millisecond]
   static Future<List<AppUsage>> getAppUsageInfo({int? day}) async {
     _checkPlatform(false);
@@ -135,21 +115,16 @@ class ParentalControl {
         .toList();
   }
 
-  /// Lấy thời gian sử dụng trong ngày của thiết bị
-  /// Giá trị trả về [millisecond]
-  static Future<List<TodayUsage>> getTodayUsage() async {
+  /// Cần cấp quyền [Permission.accessibility] để có thể thực thi các cài đặt
+  /// Và quyền [Permission.overlay] để hiển thị màn hình chặn
+  /// Cài đặt thời gian và khoảng thời gian sử dụng cho thiết bị
+  /// [timeAllowed] là phút, [listTimePeriod] dạng : [{"startTime":0,"endTime":60},{}..]
+  static Future<void> setTimeAllowDevice(
+      {int? timeAllowed, List<Map<String, dynamic>>? listTimePeriod}) async {
     try {
       _checkPlatform(false);
-
-      /// data đang có dạng {packageName: {date: timeUsed, ...},...}
-      final data =
-          await FlutterParentalControlPlatform.instance.getTodayUsage();
-      return data.entries.map((entry) {
-        return TodayUsage.fromMap(
-          entry.key,
-          Map<int, int>.from(entry.value),
-        );
-      }).toList();
+      await FlutterParentalControlPlatform.instance.setTimeAllowDevice(
+          timeAllowed: timeAllowed, listTimePeriod: listTimePeriod);
     } catch (_) {
       rethrow;
     }
@@ -182,6 +157,44 @@ class ParentalControl {
     }
   }
 
+  /// Lấy lịch sử duyệt web trên trình duyệt
+  static Future<List<WebHistory>> getWebHistory() async {
+    try {
+      _checkPlatform(false);
+      final result =
+          await FlutterParentalControlPlatform.instance.getWebHistory();
+      return result.map((app) => WebHistory.fromMap(app)).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Lắng nghe khi có có sự kiện nhấn nút hỏi phụ huynh
+  /// [askParent] Bị mất kết nối khi chạy ở nền
+  /// ParentalControl.askParent((packageName, appName) async {
+  /// function
+  /// });
+  static Future<void> askParent(
+      Function(String packageName, String appName) function) async {
+    try {
+      _checkPlatform(false);
+      await FlutterParentalControlPlatform.instance.askParent(function);
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  /// Tắt màn hình thiết bị
+  /// Cần cấp quyền [Permission.deviceAdmin]
+  static Future<void> lockDevice() async {
+    try {
+      _checkPlatform(false);
+      await FlutterParentalControlPlatform.instance.lockDevice();
+    } catch (_) {
+      rethrow;
+    }
+  }
+
   /// Khởi chạy dịch vụ lắng nghe ứng dụng được cài đặt hoặc gỡ bỏ
   static Future<void> startService() async {
     try {
@@ -194,6 +207,7 @@ class ParentalControl {
   }
 
   /// Lắng nghe và lấy thông tin ứng dụng bị cài đặt hoặc gỡ bỏ
+  /// Chỉ hoạt động sau khi gọi [startService]
   /// ParentalControl.listenAppInstalledInfo().listen((app) {
   ///    code
   /// });
@@ -208,20 +222,7 @@ class ParentalControl {
     }
   }
 
-  /// Lấy lịch sử duyệt web trên trình duyệt
-  /// Chỉ lưu lịch sử từ sau khi bật trợ năng
-  static Future<List<WebHistory>> getWebHistory() async {
-    try {
-      _checkPlatform(false);
-      final result =
-          await FlutterParentalControlPlatform.instance.getWebHistory();
-      return result.map((app) => WebHistory.fromMap(app)).toList();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Thiết view của người dùng plugin cho ứng dụng đó
+  /// Tạo overlay khi chặn ứng dụng hoặc cấm gỡ bỏ ứng dụng
   /// Sử dụng khi ứng dụng được khởi tạo hoặc trước khi bật dịch vụ trợ năng
   static Future<void> setOverlayView(
     /// isBlock = true là giao diện chặn sử dụng ứng dụng
@@ -313,7 +314,7 @@ class ParentalControl {
     }
   }
 
-  /// Các hàm chỉ dùng trong file [flutter_parental_control.dart]
+  /// Các hàm private của [flutter_parental_control.dart]
   /// Hàm kiểm tra xem platform có phải ios hoặc android không
   static void _checkPlatform(bool isIos) {
     if ((isIos && !Platform.isIOS) || (!isIos && !Platform.isAndroid)) {

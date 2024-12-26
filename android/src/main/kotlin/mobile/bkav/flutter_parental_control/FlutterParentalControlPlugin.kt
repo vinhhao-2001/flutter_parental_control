@@ -20,7 +20,7 @@ import mobile.bkav.db_helper.DBHelper
 import mobile.bkav.manager.ManagerApp
 import mobile.bkav.models.DeviceInfo
 import mobile.bkav.receiver.AdminReceiver
-import mobile.bkav.service.ListenService
+import mobile.bkav.service.AppInstallService
 import mobile.bkav.utils.AppConstants
 import mobile.bkav.utils.RequestPermissions
 
@@ -44,7 +44,6 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
         methodChannel =
             MethodChannel(flutterPluginBinding.binaryMessenger, AppConstants.METHOD_CHANNEL)
         methodChannel.setMethodCallHandler(this)
-
         val eventChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, AppConstants.EVENT_CHANNEL)
         eventChannel.setStreamHandler(object : EventChannel.StreamHandler {
@@ -57,8 +56,9 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
             }
         })
 
+        // Khởi tạo broadcast
         val filter = IntentFilter(AppConstants.ACTION_ASK_PARENT)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.registerReceiver(broadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
         } else {
             context.registerReceiver(broadcastReceiver, filter)
@@ -74,79 +74,84 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
     // Hàm thực hiện khi có yêu cầu từ Flutter
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: MethodChannel.Result) {
         when (call.method) {
+            // Yêu cầu các quyền cho ứng dụng
+            AppConstants.REQUEST_PERMISSION -> {
+                val type = call.argument<Int>(AppConstants.TYPE_PERMISSION)
+                val requestPermissions = RequestPermissions(context)
+                when (type) {
+                    1 -> result.success(requestPermissions.requestAccessibilityPermission())
+                    2 -> result.success(requestPermissions.requestOverlayPermission())
+                    3 -> result.success(requestPermissions.requestUsageStatsPermissions())
+                    4 -> result.success(requestPermissions.requestAdminPermission())
+                    else -> result.error(AppConstants.ERROR_TYPE_PERMISSION, null, null)
+                }
+            }
+
+            // Gửi các thông tin thiết bị cho Flutter
             AppConstants.GET_DEVICE_INFO -> {
-                // Lấy thông tin thiết bị
                 val deviceInfo = DeviceInfo.getDeviceInfo(context)
                 result.success(deviceInfo)
             }
 
+            // Gửi thông tin các ứng dụng được cài đặt ra Flutter
             AppConstants.GET_APP_DETAIL -> {
-                // Lấy thông tin các ứng dụng được cài đặt
                 val appDetailInfo = ManagerApp().getAppDetailInfo(context)
                 result.success(appDetailInfo)
             }
 
-            AppConstants.START_SERVICE -> {
-                // Bắt đầu lắng nghe ứng dụng được cài đặt, gỡ bỏ, nghe thiết bị được bật
-                val serviceIntent = Intent(context, ListenService::class.java)
-                context.startService(serviceIntent)
-                result.success(AppConstants.EMPTY)
-            }
-
+            // Gửi tổng thời gian sử dụng của thiết bị trong ngày ra Flutter
             AppConstants.GET_DEVICE_USAGE -> {
-                // Lấy thời gian sử dụng của thiết bị trong ngày
                 val deviceUsage = ManagerApp().getDeviceUsage(context)
                 result.success(deviceUsage)
             }
 
-            AppConstants.BLOCK_APP_METHOD -> {
-                // Thêm ứng dụng bị chặn vào danh sách ứng dụng bị chặn
-                val blockApps =
-                    call.argument<List<Map<String, Any>>>(AppConstants.BLOCK_APPS)
-                        ?: emptyList<Map<String, Any>>()
-                val addNew = call.argument<Boolean>(AppConstants.ADD_NEW) ?: false
-                if (addNew) {
-                    DBHelper.insertNewAppBlock(context, blockApps)
-                } else {
-                    DBHelper.insertListAppBlock(context, blockApps)
-                }
-
-                result.success(AppConstants.EMPTY)
+            // Gửi thời gian sử dụng thiết bị trong ngày theo phút ra Flutter
+            AppConstants.GET_TODAY_USAGE -> {
+                val appUsageInfoList = ManagerApp().getTodayUsage(context)
+                result.success(appUsageInfoList)
             }
 
-            AppConstants.BLOCK_WEBSITE_METHOD -> {
-                // Thêm trang web bị chặn vào danh sách trang web bị chặn
-                val blockWebsites =
-                    call.argument<List<String>>(AppConstants.BLOCK_WEBSITES) ?: emptyList<String>()
-                val addNew = call.argument<Boolean>(AppConstants.ADD_NEW) ?: false
-                if (addNew) {
-                    DBHelper.insertNewWebBlock(blockWebsites)
-                } else {
-                    DBHelper.insertListWebBlock(blockWebsites)
-                }
-                DBHelper.insertListWebBlock(blockWebsites)
-                result.success(AppConstants.EMPTY)
-            }
-
+            // Gửi tổng thời gian sử dụng của từng ứng dụng ra Flutter
             AppConstants.GET_APP_USAGE_INFO -> {
-                // Lấy thông tin sử dụng ứng dụng
                 val day = call.argument<Int>(AppConstants.DAY) ?: 1
                 val appUsageInfoList = ManagerApp().getAppUsageStats(context, day)
                 result.success(appUsageInfoList)
             }
 
-            AppConstants.GET_TODAY_USAGE -> {
-                // Lấy thời gian sử dụng thiết bị trong ngày
-                val appUsageInfoList = ManagerApp().getTodayUsage(context)
-                result.success(appUsageInfoList)
+            // Lấy thời gian và khoảng thời gian được phép sử dụng trong ngày
+            AppConstants.SET_DEVICE_TIME_ALLOW -> {
+                val timeAllow = call.argument<Int?>(AppConstants.TIME_ALLOW) ?: null
+                val timePeriod =
+                    call.argument<List<Map<String, Any>>>(AppConstants.TIME_PERIOD) ?: null
+                DBHelper.insertTimeAllowed(timeAllow, timePeriod)
             }
 
+            // Lấy danh sách ứng dụng bị chặn
+            AppConstants.BLOCK_APP_METHOD -> {
+                val blockApps =
+                    call.argument<List<Map<String, Any>>>(AppConstants.BLOCK_APPS)
+                        ?: emptyList<Map<String, Any>>()
+                val addNew = call.argument<Boolean>(AppConstants.ADD_NEW) ?: false
+                DBHelper.insertAppBlock(context, blockApps, addNew)
+                result.success()
+            }
+
+            // Lấy danh sách trang web bị chặn
+            AppConstants.BLOCK_WEBSITE_METHOD -> {
+                val blockWebsites =
+                    call.argument<List<String>>(AppConstants.BLOCK_WEBSITES) ?: emptyList<String>()
+                val addNew = call.argument<Boolean>(AppConstants.ADD_NEW) ?: false
+                DBHelper.insertWebBlock(blockWebsites, addNew)
+                result.success()
+            }
+
+            // Gửi lịch sử duyệt web ra Flutter
             AppConstants.GET_WEB_HISTORY -> {
-                // Lấy lịch sử duyệt web
                 val webHistoryList = DBHelper.getWebHistory()
                 result.success(webHistoryList)
             }
 
+            // Khoá màn hình thiết bị
             AppConstants.LOCK_DEVICE -> {
                 val devicePolicyManager =
                     context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
@@ -158,22 +163,8 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                 }
             }
 
-            AppConstants.REQUEST_PERMISSION -> {
-                // Yêu cầu quyền cho ứng dụng
-                val type = call.argument<Int>(AppConstants.TYPE_PERMISSION)
-                val requestPermissions = RequestPermissions(context)
-
-                when (type) {
-                    1 -> result.success(requestPermissions.requestAccessibilityPermission())
-                    2 -> result.success(requestPermissions.requestOverlayPermission())
-                    3 -> result.success(requestPermissions.requestUsageStatsPermissions())
-                    4 -> result.success(requestPermissions.requestAdminPermission())
-                    else -> result.error(AppConstants.ERROR_TYPE_PERMISSION, null, null)
-                }
-            }
-
+            // lấy thông tin của overlay
             AppConstants.OVERLAY_METHOD -> {
-                // lấy thông tin overlay từ flutter và lưu vào db
                 val id = call.argument<Boolean>(AppConstants.ID)
                 val overlayView = call.argument<String>(AppConstants.OVERLAY_VIEW)
                 val backBtn = call.argument<String>(AppConstants.BACK_BTN)
@@ -181,13 +172,14 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                 if (id != null && overlayView != null && backBtn != null) {
                     DBHelper.insertOverlayView(id, overlayView, backBtn, askParentBtn)
                 }
-                result.success(AppConstants.EMPTY)
+                result.success()
             }
 
-            AppConstants.SET_DEVICE_TIME_ALLOW -> {
-                val timeAllow = call.argument<Int?>(AppConstants.TIME_ALLOW)?:null
-                val timePeriod = call.argument<List<Map<String, Any>>>(AppConstants.TIME_PERIOD)?:null
-                DBHelper.insertTimeAllowed(timeAllow, timePeriod)
+            // Kích hoạt dịch vụ lắng nghe ứng dụng được cài đặt, gỡ bỏ
+            AppConstants.START_SERVICE -> {
+                val serviceIntent = Intent(context, AppInstallService::class.java)
+                context.startService(serviceIntent)
+                result.success()
             }
 
             else -> {
@@ -196,6 +188,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
+    // Khởi tạo realmDB
     private fun initRealm() {
         Realm.init(context)
         val config = RealmConfiguration.Builder()
@@ -207,12 +200,12 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
         Realm.setDefaultConfiguration(config)
     }
 
+    // Tạo broadcast để đưa thông tin yêu cầu phụ huynh từ service -> Flutter
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val packageName = intent.getStringExtra(AppConstants.PACKAGE_NAME)
             val appName = intent.getStringExtra(AppConstants.APP_NAME)
             if (packageName != null && appName != null) {
-
                 methodChannel.invokeMethod(
                     AppConstants.ASK_PARENT_METHOD,
                     mapOf(

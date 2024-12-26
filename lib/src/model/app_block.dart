@@ -6,7 +6,7 @@ class AppBlock {
 
   AppBlock({
     required this.packageName,
-    this.timeLimit = 0,
+    this.timeLimit = 0, // mặc định là bị chặn
   });
 
   factory AppBlock.fromMap(Map<String, dynamic> map) {

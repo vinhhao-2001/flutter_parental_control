@@ -31,7 +31,7 @@
     <application>
         <!--service lắng nghe ứng dụng được cài đặt hoặc gỡ bỏ-->
         <service
-            android:name=".service.ListenService"
+            android:name=".service.AppInstallService"
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="specialUse"
