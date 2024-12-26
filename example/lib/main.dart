@@ -37,6 +37,7 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
     super.initState();
     Platform.isAndroid ? android() : ios();
     ParentalControl.requestPermission(Permission.overlay);
+    ParentalControl.requestPermission(Permission.usageState);
   }
 
   Future<void> android() async {
@@ -78,8 +79,7 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             ElevatedButton(
                 onPressed: () async {
                   ParentalControl.requestPermission(Permission.accessibility);
-                  ParentalControl.setOverlayView(true, 'block_view',
-                      backBtnId: 'backBlockAppBtn',askParentBtnId: 'askParentBtn');
+                  ParentalControl.setTimeAllowDevice(timeAllowed: 10);
                 },
                 child: const Text("Lấy thông tin từ native")),
             a.isNotEmpty

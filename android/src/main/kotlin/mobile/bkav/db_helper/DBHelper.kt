@@ -9,7 +9,6 @@ import io.realm.annotations.PrimaryKey
 import mobile.bkav.utils.AppConstants
 import mobile.bkav.utils.Utils
 import org.bson.types.ObjectId
-import java.util.Calendar
 
 object DBHelper {
     fun insertListAppBlock(context: Context, appList: List<Map<String, Any>>) {
@@ -187,38 +186,59 @@ object DBHelper {
         }
     }
 
-    fun isTimeAllowedValid(): Boolean {
+    fun timePeriodValid(): Pair<Long, Boolean> {
         Realm.getDefaultInstance().use { realm ->
             val device = realm.where(TimeAllowedDevice::class.java)
                 .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW)
                 .findFirst()
+            val currentTime = Utils().getCurrentMinutesOfDay()
 
-            if (device?.timePeriod == null) return true
+            // Nếu không có khoảng thời gian thì ngày mai kiểm tra
+            if (device?.timePeriod.isNullOrEmpty()) return Pair((1440 - currentTime) * 60000, true)
 
-            val currentTime = getCurrentMinutesOfDay()
-            return device.timePeriod.any { period ->
+            // Kiểm tra thời gian hiện tại có nằm trong khoảng thời gian được phép hay không
+            val inPeriod = device?.timePeriod?.any { period ->
                 currentTime in period.startTime..period.endTime
+            }
+
+            if (inPeriod == true) {
+                // TH trong khoảng thời gian được sử dụng
+                val endTime = device.timePeriod.firstOrNull { period ->
+                    currentTime in period.startTime..period.endTime
+                }?.endTime?.toLong() ?: 0L
+                return Pair((endTime - currentTime) * 60000, true)
+            } else {
+                // TH không trong thời gian được sử dụng
+                val nextStartTime = device?.timePeriod
+                    ?.filter { it.startTime > currentTime }
+                    ?.minByOrNull { it.startTime }?.startTime ?: 1440
+                return Pair((nextStartTime - currentTime) * 60000, false)
             }
         }
     }
 
-    fun getTimeAllow(): Int? {
+    fun getTimeAllow(timeUsed: Long): Pair<Long, Boolean> {
         Realm.getDefaultInstance().use { realm ->
             val device = realm.where(TimeAllowedDevice::class.java)
                 .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW)
                 .findFirst()
 
-            return device?.timeAllowed
+            val currentTime = Utils().getCurrentMinutesOfDay()
+            if (device?.timeAllowed != null) {
+                val remainingTime = device.timeAllowed * 60000 - timeUsed
+                return if (remainingTime > 0) {
+                    Pair(remainingTime, true)
+                } else {
+                    Pair((1440 - currentTime) * 60000, false)
+                }
+            } else {
+                return Pair((1440 - currentTime) * 60000, true)
+            }
         }
     }
 
-
-    // Hàm trợ giúp để lấy số phút hiện tại trong ngày
-    private fun getCurrentMinutesOfDay(): Int {
-        val calendar = Calendar.getInstance()
-        return calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
-    }
 }
+
 
 // Các model tương ứng với các bảng trong DB
 open class BlockedApp : RealmObject() {

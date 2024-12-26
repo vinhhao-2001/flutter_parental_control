@@ -86,6 +86,12 @@ class Utils {
         return appUsageStats?.totalTimeInForeground?.div(1000)?.div(60)?.toInt() ?: 0
     }
 
+    //Lấy thời gian hiện tại trong ngày(theo phút)
+    fun getCurrentMinutesOfDay(): Long {
+        val calendar = Calendar.getInstance()
+        return calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE).toLong()
+    }
+
     // Lấy tên ứng dụng của bạn
     fun getApplicationName(context: Context): String {
         val applicationInfo = context.applicationInfo

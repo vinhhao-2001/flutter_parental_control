@@ -4,6 +4,8 @@ import android.accessibilityservice.AccessibilityService
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.view.WindowManager
 import mobile.bkav.R
@@ -53,12 +55,14 @@ class Overlay(private val context: Context) {
     }
 
     // hết thời gian sử dụng màn hình thiết bị
-    fun showExpiredTimeOverlay(onAskParentClick: (() -> Unit?)? = null) {
+    fun showExpiredTimeOverlay(delayTime: Long, onAskParentClick: (() -> Unit?)? = null) {
         if (windowManager == null && overlayView == null) {
             windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             overlayView = View.inflate(context, R.layout.overlay_off_device, null)
 
             val askParentBtn = overlayView?.findViewById<View>(R.id.askParentBtn)
+            val offDevice = overlayView?.findViewById<View>(R.id.offDeviceBtn)
+
             askParentBtn?.setOnClickListener {
                 // Xử lý khi có sự kiện hỏi ý kiến của phụ huynh
                 Utils().removeBlockScreen(context, windowManager, overlayView)
@@ -67,7 +71,6 @@ class Overlay(private val context: Context) {
                 windowManager = null
             }
 
-            val offDevice = overlayView?.findViewById<View>(R.id.offDeviceBtn)
             offDevice?.setOnClickListener {
                 // Xử lý xự kiện tắt máy
                 (context as AccessibilityService).performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
@@ -78,9 +81,17 @@ class Overlay(private val context: Context) {
                     devicePolicyManager.lockNow()
                 }
             }
+
             val layoutParams = Utils().getLayoutParams()
             // Thêm view vào màn hình
             windowManager?.addView(overlayView, layoutParams)
+
+            val handler = Handler(Looper.getMainLooper())
+            handler.postDelayed({
+                Utils().removeBlockScreen(context, windowManager, overlayView)
+                overlayView = null
+                windowManager = null
+            }, delayTime)
         }
     }
 }

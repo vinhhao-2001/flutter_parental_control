@@ -22,45 +22,22 @@ import mobile.bkav.utils.Utils
 // Dịch vụ trợ năng
 class AccessibilityService : AccessibilityService() {
 
-    private var homePackageName: String = AppConstants.EMPTY
-
     // Khai báo các biến dùng nhiều trong ứng dụng
+    private var homePackageName: String = AppConstants.EMPTY
     private var currentBrowserPackageName: String = AppConstants.EMPTY
     private var currentUrl: String = AppConstants.EMPTY
-
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     override fun onServiceConnected() {
-        // Xử lý khi service đươc kết nối
         super.onServiceConnected()
-        // Kiểm tra còn được phép sử dụng không
+        // Xử lý khi service đươc kết nối
         val pm = this.packageManager
         val intent = Intent(Intent.ACTION_MAIN)
         intent.addCategory(Intent.CATEGORY_HOME)
-
         val resolveInfo = pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
         homePackageName = resolveInfo?.activityInfo?.packageName.toString()
-        coroutineScope.launch {
-            val timeUsed = ManagerApp().getDeviceUsage(this@AccessibilityService)
-            val timeAllow = DBHelper.getTimeAllow()
-            while (true) {
-                if (timeAllow != null) {
-                    // Đã cài đặt thời gian
-                    val periodValid = DBHelper.isTimeAllowedValid()
-                    if (timeAllow * 60000 > timeUsed && periodValid) {
-                        // Chờ đến thời gian mới
-                        delay(timeAllow * 60000 - timeUsed)
-                    } else {
-                        withContext(Dispatchers.Main) {
-                            Overlay(this@AccessibilityService).showExpiredTimeOverlay()
-                        }
-                        break
-                    }
-                } else {
-                    break
-                }
-            }
-        }
+
+        checkTimeDeviceAllow()
     }
 
     override fun onInterrupt() {
@@ -167,5 +144,28 @@ class AccessibilityService : AccessibilityService() {
         intent.putExtra(AppConstants.PACKAGE_NAME, packageName)
         intent.putExtra(AppConstants.APP_NAME, appName)
         sendBroadcast(intent)
+    }
+
+    // Kiểm tra còn thời gian được phép sử dụng không
+    private fun checkTimeDeviceAllow() {
+        coroutineScope.launch {
+            val timeUsed = ManagerApp().getDeviceUsage(this@AccessibilityService)
+            val timeAllow = DBHelper.getTimeAllow(timeUsed)
+            val timePeriod = DBHelper.timePeriodValid()
+            while (true) {
+                if (timeAllow.second && timePeriod.second) {
+                    if (timeAllow.first > timePeriod.first) {
+                        delay(timePeriod.first)
+                    } else {
+                        delay(timeAllow.first)
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Overlay(this@AccessibilityService).showExpiredTimeOverlay(timePeriod.first)
+                    }
+                    break
+                }
+            }
+        }
     }
 }
