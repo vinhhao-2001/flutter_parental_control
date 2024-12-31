@@ -1,6 +1,7 @@
 package mobile.bkav.manager
 
 import android.app.usage.UsageEvents
+import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
@@ -16,7 +17,7 @@ class ManagerApp {
     @Suppress("DEPRECATION")
     fun getAppDetailInfo(context: Context): List<Map<String, Any>> {
         val packageManager = context.packageManager
-        val listApp = getLauncherAppPackages(context)
+        val listApp = getListPackageName(context)
         val appDetailList = mutableListOf<Map<String, Any>>()
 
         for (packageName in listApp) {
@@ -54,16 +55,16 @@ class ManagerApp {
         return appDetailList
     }
 
-    // Thời gian sử dụng của thiết bị
+    // Thời gian sử dụng trong ngày của thiết bị dùng usageState
     // Tính theo millisecond
     fun getDeviceUsage(context: Context): Long {
-        val launcherApps = getLauncherAppPackages(context)
+        val launcherApps = getListPackageName(context)
         val calendar = Calendar.getInstance()
         val startTime = getStartOfDay(calendar)
         val endTime = getEndOfDay(calendar)
         var totalTime = 0L
 
-        val usageStatsList = Utils().appUsageTime(context, startTime, endTime)
+        val usageStatsList = appUsageTime(context, startTime, endTime)
         for (usageState in usageStatsList) {
             if (!launcherApps.contains(usageState.packageName)) continue
             totalTime += usageState.totalTimeInForeground
@@ -71,17 +72,20 @@ class ManagerApp {
         return totalTime
     }
 
-    // Lấy thời gian sử dụng trong ngày hôm nay
-    fun getTodayUsage(context: Context): Map<String, Map<Long, Long>> {
-        val launcherApps = getLauncherAppPackages(context)
+    // Lấy thời gian sử dụng trong ngày của từng ứng dụng dùng usageEvents
+    // Trả về mỗi 15 phút
+    fun getTodayUsageEvents(context: Context): Map<String, Map<Long, Long>> {
+        val launcherApps = getListPackageName(context)
         val usageByQuarterHourMap = mutableMapOf<String, MutableMap<Long, Long>>()
-        // Tạo khoảng thời điểm để lấy thời gian sử dụng
+
+        // Tạo khoảng thời gian để lấy thời gian sử dụng
         val calendar = Calendar.getInstance()
         val endTime = calendar.timeInMillis
         var startTime = getStartOfDay(calendar)
 
         val usageStatsManager = getUsageStatsManager(context) ?: return emptyMap()
 
+        // Lặp qua từng khoảng thời gian 15 phút trong ngày
         while (startTime < endTime) {
             val nextQuarterHour = startTime + 15 * 60 * 1000
             val usageEvents = usageStatsManager.queryEvents(startTime, nextQuarterHour)
@@ -92,7 +96,50 @@ class ManagerApp {
         return usageByQuarterHourMap
     }
 
-    //  Lấy danh sách thời gian sử dụng trong ngày
+    // Lấy thời gian sử dụng trong ngày của từng ứng dụng dùng usageStats
+    fun getTodayUsageStats(context: Context): Map<String, Map<Long, Long>> {
+        val launcherApps = getListPackageName(context) // Lấy danh sách các ứng dụng hợp lệ
+        val usageByQuarterHourMap = mutableMapOf<String, MutableMap<Long, Long>>()
+
+        val usageStatsManager = getUsageStatsManager(context) ?: return emptyMap()
+
+        // Lấy thời gian hiện tại và đầu ngày
+        val calendar = Calendar.getInstance()
+        val endTime = calendar.timeInMillis
+        var startTime = getStartOfDay(calendar)
+
+        // Lặp qua từng khoảng thời gian 15 phút
+        while (startTime < endTime) {
+            val nextQuarterHour = startTime + 15 * 60 * 1000
+            val usageStatsList = appUsageTime(context, startTime, nextQuarterHour)
+            // Xử lý từng ứng dụng trong danh sách
+            usageStatsList.forEach { usageStats ->
+                if (launcherApps.contains(usageStats.packageName)) {
+                    val timeSpent = usageStats.totalTimeInForeground
+                    val appUsageMap =
+                        usageByQuarterHourMap.getOrPut(usageStats.packageName) { mutableMapOf() }
+                    val currentTimeSpent = appUsageMap[startTime] ?: 0L
+                    appUsageMap[startTime] = currentTimeSpent + timeSpent
+                }
+            }
+            startTime = nextQuarterHour
+        }
+        return usageByQuarterHourMap
+    }
+
+    // Lấy thời gian sử dụng trong ngày hiện tại của 1 ứng dụng dùng usageStats
+    fun getAppUsageTimeInMinutes(context: Context, packageName: String): Int {
+        val calendar = Calendar.getInstance()
+        val endTime = getEndOfDay(calendar)
+        val startTime = getStartOfDay(calendar)
+        val usageStatsList = appUsageTime(context, startTime, endTime)
+        val appUsageStats = usageStatsList.find { it.packageName == packageName }
+
+        // Trả về thời gian sử dụng của ứng dụng theo đơn vị phút
+        return appUsageStats?.totalTimeInForeground?.div(1000)?.div(60)?.toInt() ?: 0
+    }
+
+    //  Lấy tổng thời gian sử dụng của từng ứng dụng trong [day] ngày dùng usageState
     fun getAppUsageStats(context: Context, days: Int): Map<String, Long> {
         val usageStatsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
@@ -100,30 +147,22 @@ class ManagerApp {
         } else {
             return emptyMap()
         }
-
         val calendar = Calendar.getInstance()
-        calendar.add(Calendar.DAY_OF_YEAR, -days + 1)
-
-        val startTime = getStartOfDay(calendar)
         val endTime = getEndOfDay(calendar)
-
-
+        calendar.add(Calendar.DAY_OF_YEAR, -days + 1)
+        val startTime = getStartOfDay(calendar)
         // Lấy danh sách UsageStats tổng hợp
         val aggregatedStats = usageStatsManager.queryAndAggregateUsageStats(startTime, endTime)
-
         // Chuyển kết quả thành Map<String, Long> với thời gian sử dụng của mỗi ứng dụng
         val usageMap = mutableMapOf<String, Long>()
         for ((packageName, usageStats) in aggregatedStats) {
-
             val totalTimeInForeground = usageStats.totalTimeInForeground
             if (totalTimeInForeground > 0) {
                 usageMap[packageName] = totalTimeInForeground
             }
         }
-
         return usageMap
     }
-
 
     // Hàm lấy thời gian bắt đầu của ngày
     private fun getStartOfDay(calendar: Calendar): Long {
@@ -143,22 +182,13 @@ class ManagerApp {
         return calendar.timeInMillis
     }
 
-    // Hàm lấy UsageStatsManager
-    private fun getUsageStatsManager(context: Context): UsageStatsManager? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-        } else {
-            null // API<22 không được hỗ trợ
-        }
-    }
 
-    // Hàm tính toán thời gian sử dụng cho từng ứng dụng
-    @Suppress("DEPRECATION")
+    // Hàm tính toán thời gian sử dụng cho từng ứng dụng dùng usageEvents
     private fun calculateUsageTime(
         usageEvents: UsageEvents,
         launcherApps: Set<String>,
-        usageMap: MutableMap<String, MutableMap<Long, Long>>, // Thay đổi kiểu
-        currentDay: Long // Thời gian bắt đầu của ngày hiện tại
+        usageMap: MutableMap<String, MutableMap<Long, Long>>,
+        currentDay: Long
     ) {
         var currentForegroundApp: String? = null
         var lastForegroundStartTime = 0L
@@ -170,7 +200,7 @@ class ManagerApp {
 
             when (event.eventType) {
                 // Xử lý sự kiện khi ứng dụng chuyển sang chế độ foreground
-                UsageEvents.Event.MOVE_TO_FOREGROUND -> {
+                UsageEvents.Event.ACTIVITY_RESUMED -> {
                     if (launcherApps.contains(event.packageName)) {
                         currentForegroundApp = event.packageName
                         lastForegroundStartTime = event.timeStamp
@@ -179,7 +209,7 @@ class ManagerApp {
                     }
                 }
                 // Xử lý sự kiện khi ứng dụng chuyển sang chế độ background
-                UsageEvents.Event.MOVE_TO_BACKGROUND -> {
+                UsageEvents.Event.ACTIVITY_PAUSED -> {
                     currentForegroundApp?.let { packageName ->
                         if (packageName == event.packageName) {
                             val timeSpent = event.timeStamp - lastForegroundStartTime
@@ -196,8 +226,18 @@ class ManagerApp {
         }
     }
 
-    // Lấy danh sách ứng dụng trên thiết bị
-    private fun getLauncherAppPackages(context: Context): Set<String> {
+    // Lấy danh sách các ứng dụng đang sử dụng trong khoảng thời gian dùng usageStats
+    private fun appUsageTime(context: Context, startTime: Long, endTime: Long): List<UsageStats> {
+        val usageStatsManager = getUsageStatsManager(context)
+        return usageStatsManager?.queryUsageStats(
+            UsageStatsManager.INTERVAL_BEST,
+            startTime,
+            endTime
+        ) ?: emptyList()
+    }
+
+    // Lấy packageName của các ứng dụng trên thiết bị
+    private fun getListPackageName(context: Context): Set<String> {
         val intent = Intent(Intent.ACTION_MAIN, null)
         intent.addCategory(Intent.CATEGORY_LAUNCHER)
         val resolveInfoList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -206,5 +246,14 @@ class ManagerApp {
             context.packageManager.queryIntentActivities(intent, 0)
         }
         return resolveInfoList.map { it.activityInfo.packageName }.toSet()
+    }
+
+    // Hàm lấy UsageStatsManager
+    private fun getUsageStatsManager(context: Context): UsageStatsManager? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        } else {
+            null
+        }
     }
 }

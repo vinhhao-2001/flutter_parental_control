@@ -107,7 +107,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
 
             // Gửi thời gian sử dụng thiết bị trong ngày theo phút ra Flutter
             AppConstants.GET_TODAY_USAGE -> {
-                val appUsageInfoList = ManagerApp().getTodayUsage(context)
+                val appUsageInfoList = ManagerApp().getTodayUsageEvents(context)
                 result.success(appUsageInfoList)
             }
 
@@ -133,7 +133,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                         ?: emptyList<Map<String, Any>>()
                 val addNew = call.argument<Boolean>(AppConstants.ADD_NEW) ?: false
                 DBHelper.insertAppBlock(context, blockApps, addNew)
-                result.success()
+                result.success(null)
             }
 
             // Lấy danh sách trang web bị chặn
@@ -142,7 +142,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                     call.argument<List<String>>(AppConstants.BLOCK_WEBSITES) ?: emptyList<String>()
                 val addNew = call.argument<Boolean>(AppConstants.ADD_NEW) ?: false
                 DBHelper.insertWebBlock(blockWebsites, addNew)
-                result.success()
+                result.success(null)
             }
 
             // Gửi lịch sử duyệt web ra Flutter
@@ -161,6 +161,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                 } else {
                     Log.d("LOCK_DEVICE", "Need Device Admin Permission")
                 }
+                result.success(null)
             }
 
             // lấy thông tin của overlay
@@ -172,14 +173,14 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                 if (id != null && overlayView != null && backBtn != null) {
                     DBHelper.insertOverlayView(id, overlayView, backBtn, askParentBtn)
                 }
-                result.success()
+                result.success(null)
             }
 
             // Kích hoạt dịch vụ lắng nghe ứng dụng được cài đặt, gỡ bỏ
             AppConstants.START_SERVICE -> {
                 val serviceIntent = Intent(context, AppInstallService::class.java)
                 context.startService(serviceIntent)
-                result.success()
+                result.success(null)
             }
 
             else -> {

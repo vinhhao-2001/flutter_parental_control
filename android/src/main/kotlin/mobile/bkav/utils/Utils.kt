@@ -55,37 +55,6 @@ class Utils {
         return stream.toByteArray()
     }
 
-    // Lấy thời gian sử dụng của thiết bị
-    fun appUsageTime(context: Context, startTime: Long, endTime: Long): List<UsageStats> {
-        val usageStatsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-        } else {
-            return emptyList()
-        }
-        return usageStatsManager.queryUsageStats(
-            UsageStatsManager.INTERVAL_DAILY,
-            startTime,
-            endTime
-        ) ?: emptyList()
-    }
-
-    // Lấy thời gian sử dụng của ứng dụng
-    fun getAppUsageTimeInMinutes(context: Context, packageName: String): Int {
-        val startTime = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-        }.timeInMillis
-
-        val endTime = System.currentTimeMillis()
-
-        val usageStatsList = appUsageTime(context, startTime, endTime)
-        val appUsageStats = usageStatsList.find { it.packageName == packageName }
-
-        // Trả về thời gian sử dụng của ứng dụng theo đơn vị phút
-        return appUsageStats?.totalTimeInForeground?.div(1000)?.div(60)?.toInt() ?: 0
-    }
-
     //Lấy thời gian hiện tại trong ngày(theo phút)
     fun getCurrentMinutesOfDay(): Long {
         val calendar = Calendar.getInstance()

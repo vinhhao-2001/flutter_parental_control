@@ -17,7 +17,7 @@ class Overlay(private val context: Context) {
     private var windowManager: WindowManager? = null
     private var overlayView: View? = null
 
-    // TODO: xử lý hiển thị màn hình chặn do hết thời gian sử dụng hoặc xoá ứng dụng
+    // xử lý hiển thị màn hình chặn do hết thời gian sử dụng hoặc xoá ứng dụng
     fun showOverlay(isBlock: Boolean, onAskParentClick: (() -> Unit?)? = null) {
         windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager?
         val backButton: View?
