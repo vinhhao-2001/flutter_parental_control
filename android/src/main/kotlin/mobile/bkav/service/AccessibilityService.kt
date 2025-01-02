@@ -27,6 +27,7 @@ class AccessibilityService : AccessibilityService() {
     private var currentBrowserPackageName: String = AppConstants.EMPTY
     private var currentUrl: String = AppConstants.EMPTY
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
+    private lateinit var overlay: Overlay
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -36,7 +37,7 @@ class AccessibilityService : AccessibilityService() {
         intent.addCategory(Intent.CATEGORY_HOME)
         val resolveInfo = pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
         homePackageName = resolveInfo?.activityInfo?.packageName.toString()
-
+        overlay = Overlay(this)
         checkTimeDeviceAllow()
     }
 
@@ -51,7 +52,7 @@ class AccessibilityService : AccessibilityService() {
             when (accessibilityEvent.eventType) {
                 // Giám sát sự kiện trình duyệt
                 AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
-                -> handleBrowserEvent(accessibilityEvent)
+                -> handleWindowChange(accessibilityEvent)
                 // Sự kiện khi ở trong màn hình chính
                 else -> if (packageName == homePackageName) {
                     handleLauncherEvent(accessibilityEvent)
@@ -69,7 +70,7 @@ class AccessibilityService : AccessibilityService() {
             // Lấy tên của ứng dụng của bạn
             val appName = Utils().getApplicationName(applicationContext)
             if (contentDescription.contains(appName)) {
-                Overlay(this).showOverlay(false) {
+                overlay.showOverlay(false) {
                     Utils().openApp(applicationContext)
                     askParent(packageName, appName)
                 }
@@ -78,10 +79,9 @@ class AccessibilityService : AccessibilityService() {
             // Kiểm tra nếu ứng dụng bị chặn
             val appName = contentDescription.substringBefore(",").trim()
             val packageName = DBHelper.getPackageAppBlock(applicationContext, appName)
-            println(accessibilityEvent)
             if (packageName != null) {
                 // Hiển thị màn hình chặn
-                Overlay(this).showOverlay(true) {
+                overlay.showOverlay(true) {
                     Utils().openApp(applicationContext)
                     askParent(packageName, appName)
                 }
@@ -91,14 +91,14 @@ class AccessibilityService : AccessibilityService() {
 
     // Hàm xử lý sự kiện khi người dùng mở trình duyệt
     @Suppress("DEPRECATION")
-    private fun handleBrowserEvent(accessibilityEvent: AccessibilityEvent) {
+    private fun handleWindowChange(accessibilityEvent: AccessibilityEvent) {
         // Kiểm tra khi có sự kiên chuyển màn hình
         val packageName: String = accessibilityEvent.packageName?.toString() ?: return
         val appName = DBHelper.getAppBlock(applicationContext, packageName)
 
         if (appName != null) {
             // khi chuyển màn hình mà vào app bị chặn cũng hiển thị màn hình chặn
-            Overlay(this).showOverlay(true) {
+            overlay.showOverlay(true) {
                 Utils().openApp(applicationContext)
                 askParent(packageName, appName)
             }
@@ -174,7 +174,7 @@ class AccessibilityService : AccessibilityService() {
                     }
                 } else {
                     withContext(Dispatchers.Main) {
-                        Overlay(this@AccessibilityService).showExpiredTimeOverlay(timePeriod.first)
+                        overlay.showExpiredTimeOverlay(timePeriod.first)
                     }
                     break
                 }

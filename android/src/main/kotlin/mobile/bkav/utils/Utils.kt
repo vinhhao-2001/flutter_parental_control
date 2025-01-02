@@ -10,6 +10,8 @@ import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
@@ -140,20 +142,6 @@ class Utils {
                         WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT
             )
-        }
-    }
-
-    // Loại bỏ cửa sổ hiện thị của overlay
-    fun removeBlockScreen(
-        context: Context,
-        windowManager: WindowManager?,
-        view: View?,
-        isOpen: Boolean = false
-    ) {
-        if (!isOpen) (context as AccessibilityService).performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
-        Thread.sleep(500)
-        if (windowManager != null && view != null) {
-            windowManager.removeView(view)
         }
     }
 }
