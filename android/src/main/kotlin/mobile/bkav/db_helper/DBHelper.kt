@@ -30,7 +30,7 @@ object DBHelper {
     }
 
     // Kiểm tra xem ứng dụng bị chặn không
-    fun isAppBlocked(context: Context, appName: String): String? {
+    fun getPackageAppBlock(context: Context, appName: String): String? {
         Realm.getDefaultInstance().use { realm ->
             val app: BlockedApp = realm.where(BlockedApp::class.java)
                 .equalTo(AppConstants.APP_NAME, appName)
@@ -39,6 +39,19 @@ object DBHelper {
             if (timeLimit == 0) return app.packageName
             val timeUse = ManagerApp().getAppUsageTimeInMinutes(context, app.packageName)
             if (timeUse >= timeLimit) return app.packageName
+            return null
+        }
+    }
+
+    fun getAppBlock(context: Context, packageName: String): String? {
+        Realm.getDefaultInstance().use { realm ->
+            val app: BlockedApp = realm.where(BlockedApp::class.java)
+                .equalTo(AppConstants.PACKAGE_NAME, packageName)
+                .findFirst() ?: return null
+            val timeLimit = app.timeLimit
+            if (timeLimit == 0) return app.appName
+            val timeUse = ManagerApp().getAppUsageTimeInMinutes(context, packageName)
+            if (timeUse >= timeLimit) return app.appName
             return null
         }
     }

@@ -50,9 +50,8 @@ class AccessibilityService : AccessibilityService() {
             val packageName = accessibilityEvent.packageName?.toString() ?: return
             when (accessibilityEvent.eventType) {
                 // Giám sát sự kiện trình duyệt
-                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> handleBrowserEvent(
-                    accessibilityEvent
-                )
+                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+                -> handleBrowserEvent(accessibilityEvent)
                 // Sự kiện khi ở trong màn hình chính
                 else -> if (packageName == homePackageName) {
                     handleLauncherEvent(accessibilityEvent)
@@ -68,22 +67,24 @@ class AccessibilityService : AccessibilityService() {
         // Kiểm tra sự kiện người dùng muốn xóa ứng dụng
         if (accessibilityEvent.eventType == AccessibilityEvent.TYPE_VIEW_LONG_CLICKED) {
             // Lấy tên của ứng dụng của bạn
-            val appName = Utils().getApplicationName(context = applicationContext)
+            val appName = Utils().getApplicationName(applicationContext)
             if (contentDescription.contains(appName)) {
                 Overlay(this).showOverlay(false) {
                     Utils().openApp(applicationContext)
                     askParent(packageName, appName)
                 }
             }
-        }
-
-        // Kiểm tra nếu ứng dụng bị chặn
-        val packageName = DBHelper.isAppBlocked(context = applicationContext, contentDescription)
-        if (packageName != null) {
-            // Hiển thị màn hình chặn
-            Overlay(this).showOverlay(true) {
-                Utils().openApp(applicationContext)
-                askParent(packageName, appName = contentDescription)
+        } else {
+            // Kiểm tra nếu ứng dụng bị chặn
+            val appName = contentDescription.substringBefore(",").trim()
+            val packageName = DBHelper.getPackageAppBlock(applicationContext, appName)
+            println(accessibilityEvent)
+            if (packageName != null) {
+                // Hiển thị màn hình chặn
+                Overlay(this).showOverlay(true) {
+                    Utils().openApp(applicationContext)
+                    askParent(packageName, appName)
+                }
             }
         }
     }
@@ -91,27 +92,39 @@ class AccessibilityService : AccessibilityService() {
     // Hàm xử lý sự kiện khi người dùng mở trình duyệt
     @Suppress("DEPRECATION")
     private fun handleBrowserEvent(accessibilityEvent: AccessibilityEvent) {
-        // Kiểm tra sự kiện khi người dùng mở trình duyệt
-        val parentNodeInfo: AccessibilityNodeInfo = accessibilityEvent.source ?: return
+        // Kiểm tra khi có sự kiên chuyển màn hình
         val packageName: String = accessibilityEvent.packageName?.toString() ?: return
-        val browserConfig = getBrowserConfig(packageName) ?: return
+        val appName = DBHelper.getAppBlock(applicationContext, packageName)
 
-        // Url của trình duyệt
-        val capturedUrl: String? = extractUrlFromBrowser(parentNodeInfo, browserConfig)
-        parentNodeInfo.recycle()
+        if (appName != null) {
+            // khi chuyển màn hình mà vào app bị chặn cũng hiển thị màn hình chặn
+            Overlay(this).showOverlay(true) {
+                Utils().openApp(applicationContext)
+                askParent(packageName, appName)
+            }
+        } else {
+            // Kiểm tra sự kiện khi chuyển trang trong các ứng dụng web
+            val parentNodeInfo: AccessibilityNodeInfo = accessibilityEvent.source ?: return
+            val browserConfig = getBrowserConfig(packageName) ?: return
 
-        if (!capturedUrl.isNullOrEmpty() && (packageName != currentBrowserPackageName || capturedUrl != currentUrl)) {
-            currentBrowserPackageName = packageName
-            currentUrl = capturedUrl
+            // Url của trình duyệt
+            val capturedUrl: String? = extractUrlFromBrowser(parentNodeInfo, browserConfig)
+            parentNodeInfo.recycle()
 
-            // Lưu lịch sử duyệt web của trẻ
-            DBHelper.insertWebHistory(capturedUrl)
+            if (!capturedUrl.isNullOrEmpty() && (packageName != currentBrowserPackageName || capturedUrl != currentUrl)) {
+                currentBrowserPackageName = packageName
+                currentUrl = capturedUrl
 
-            // Kiểm tra nếu URL bị chặn
-            if (DBHelper.isUrlBlocked(capturedUrl)) {
-                redirectToBlankPage()
+                // Lưu lịch sử duyệt web của trẻ
+                DBHelper.insertWebHistory(capturedUrl)
+
+                // Kiểm tra nếu URL bị chặn
+                if (DBHelper.isUrlBlocked(capturedUrl)) {
+                    redirectToBlankPage()
+                }
             }
         }
+
     }
 
     // Hàm lấy cấu hình trình duyệt

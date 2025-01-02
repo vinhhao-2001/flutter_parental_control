@@ -1,8 +1,6 @@
 package mobile.bkav.utils
 
 import android.accessibilityservice.AccessibilityService
-import android.app.usage.UsageStats
-import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
