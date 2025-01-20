@@ -14,7 +14,7 @@ part 'src/model/app_usage.dart';
 part 'src/model/device_info.dart';
 part 'src/model/monitor_setting.dart';
 part 'src/model/schedule.dart';
-part 'src/model/screen_time.dart';
+part 'src/model/time_usage_for_app.dart';
 part 'src/model/web_history.dart';
 
 class ParentalControl {
@@ -101,14 +101,14 @@ class ParentalControl {
 
   /// Lấy thời gian sử dụng của các ứng dụng trong 1 khoảng thời gian
   /// Trả về số [millisecond] sử dụng trong mỗi 15 phút
-  static Future<List<ScreenTime>> getUsageTimeQuarterHour(
+  static Future<List<TimeUsageForApp>> getUsageTimeQuarterHour(
       int startTime, int endTime) async {
     try {
       _checkPlatform(false);
       final data = await FlutterParentalControlPlatform.instance
           .getUsageTimeQuarterHour(startTime, endTime);
       return data.entries.map((entry) {
-        return ScreenTime.fromMap(
+        return TimeUsageForApp.fromMap(
           entry.key,
           Map<int, int>.from(entry.value),
         );
