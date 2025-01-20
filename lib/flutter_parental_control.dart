@@ -73,7 +73,7 @@ class ParentalControl {
     }
   }
 
-  /// Lấy danh sách chứa các thông tin cơ bản của các ứng dụng
+  /// Lấy danh sách các thông tin cơ bản của các ứng dụng
   static Future<List<AppDetail>> getListAppDetail() async {
     try {
       _checkPlatform(false);
