@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.provider.Settings
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import kotlinx.coroutines.CoroutineScope
@@ -12,7 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mobile.bkav.db_helper.DBHelper
-import mobile.bkav.manager.ManagerApp
+import mobile.bkav.manager.ManageApp
 import mobile.bkav.models.SupportedBrowserConfig
 import mobile.bkav.overlay.Overlay
 import mobile.bkav.utils.AppConstants
@@ -23,7 +24,8 @@ import mobile.bkav.utils.Utils
 class AccessibilityService : AccessibilityService() {
 
     // Khai báo các biến dùng nhiều trong ứng dụng
-    private var homePackageName: String = AppConstants.EMPTY
+    private lateinit var homePackageName: String
+    private lateinit var settingPackageName: String
     private var currentBrowserPackageName: String = AppConstants.EMPTY
     private var currentUrl: String = AppConstants.EMPTY
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
@@ -32,11 +34,11 @@ class AccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         // Xử lý khi service đươc kết nối
-        val pm = this.packageManager
-        val intent = Intent(Intent.ACTION_MAIN)
-        intent.addCategory(Intent.CATEGORY_HOME)
-        val resolveInfo = pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
-        homePackageName = resolveInfo?.activityInfo?.packageName.toString()
+        homePackageName = getPackageNameForIntent(Intent(Intent.ACTION_MAIN).apply {
+            addCategory(Intent.CATEGORY_HOME)
+        }) ?: AppConstants.EMPTY
+        settingPackageName =
+            getPackageNameForIntent(Intent(Settings.ACTION_SETTINGS)) ?: AppConstants.EMPTY
         overlay = Overlay(this)
         checkTimeDeviceAllow()
     }
@@ -47,6 +49,7 @@ class AccessibilityService : AccessibilityService() {
 
     // Xử lý sự kiện Accessibility
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+        packageName
         event?.let { accessibilityEvent ->
             val packageName = accessibilityEvent.packageName?.toString() ?: return
             when (accessibilityEvent.eventType) {
@@ -54,8 +57,11 @@ class AccessibilityService : AccessibilityService() {
                 AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
                 -> handleWindowChange(accessibilityEvent)
                 // Sự kiện khi ở trong màn hình chính
+
                 else -> if (packageName == homePackageName) {
                     handleLauncherEvent(accessibilityEvent)
+                } else if (packageName == settingPackageName) {
+                    handleSettingEvent(accessibilityEvent)
                 }
             }
         }
@@ -95,15 +101,15 @@ class AccessibilityService : AccessibilityService() {
         // Kiểm tra khi có sự kiên chuyển màn hình
         val packageName: String = accessibilityEvent.packageName?.toString() ?: return
         val appName = DBHelper.getAppBlock(applicationContext, packageName)
-
+        // khi chuyển màn hình mà vào app bị chặn cũng hiển thị màn hình chặn
         if (appName != null) {
-            // khi chuyển màn hình mà vào app bị chặn cũng hiển thị màn hình chặn
             overlay.showOverlay(true) {
                 Utils().openApp(applicationContext)
                 askParent(packageName, appName)
             }
-        } else {
-            // Kiểm tra sự kiện khi chuyển trang trong các ứng dụng web
+        }
+        // Kiểm tra sự kiện khi chuyển trang trong các ứng dụng web
+        else {
             val parentNodeInfo: AccessibilityNodeInfo = accessibilityEvent.source ?: return
             val browserConfig = getBrowserConfig(packageName) ?: return
 
@@ -125,6 +131,19 @@ class AccessibilityService : AccessibilityService() {
             }
         }
 
+    }
+
+    // Lắng nghe ứng dụng trong cài đặt
+    private fun handleSettingEvent(accessibilityEvent: AccessibilityEvent) {
+        if (accessibilityEvent.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED) {
+            println(accessibilityEvent)
+            val appName = Utils().getApplicationName(applicationContext)
+            if (accessibilityEvent.text.any { it.contains(appName) }) {
+                // Thoát ra
+                this.performGlobalAction(GLOBAL_ACTION_BACK)
+                this.performGlobalAction(GLOBAL_ACTION_HOME)
+            }
+        }
     }
 
     // Hàm lấy cấu hình trình duyệt
@@ -162,7 +181,7 @@ class AccessibilityService : AccessibilityService() {
     // Kiểm tra còn thời gian được phép sử dụng không
     private fun checkTimeDeviceAllow() {
         coroutineScope.launch {
-            val timeUsed = ManagerApp().getDeviceUsage(this@AccessibilityService)
+            val timeUsed = ManageApp().getDeviceUsage(this@AccessibilityService)
             val timeAllow = DBHelper.getTimeAllow(timeUsed)
             val timePeriod = DBHelper.timePeriodValid()
             while (true) {
@@ -180,5 +199,11 @@ class AccessibilityService : AccessibilityService() {
                 }
             }
         }
+    }
+
+    private fun getPackageNameForIntent(intent: Intent): String? {
+        val resolveInfo =
+            this.packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        return resolveInfo?.activityInfo?.packageName
     }
 }

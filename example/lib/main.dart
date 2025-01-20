@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_parental_control/flutter_parental_control.dart';
@@ -30,13 +31,13 @@ class LoggingServicePage extends StatefulWidget {
 class _LoggingServicePageState extends State<LoggingServicePage> {
   final TextEditingController _controller = TextEditingController();
   late DeviceInfo deviceInfo;
-  List<AppUsage> a = [];
+  List<AppDetail> a = [];
 
   @override
   void initState() {
     super.initState();
     Platform.isAndroid ? android() : ios();
-    ParentalControl.requestPermission(Permission.overlay);
+    ParentalControl.requestPermission(Permission.accessibility);
     ParentalControl.requestPermission(Permission.usageState);
   }
 
@@ -78,8 +79,10 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             ),
             ElevatedButton(
                 onPressed: () async {
-                  ParentalControl.requestPermission(Permission.accessibility);
-                  ParentalControl.setTimeAllowDevice(timeAllowed: 10);
+                  final a = await ParentalControl.getWebHistory();
+                  a.forEach((b) {
+                    print(b.toMap());
+                  });
                 },
                 child: const Text("Lấy thông tin từ native")),
             a.isNotEmpty
@@ -88,7 +91,7 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
                         itemCount: a.length,
                         itemBuilder: (context, index) => ListTile(
                               title: Text(a[index].packageName),
-                              subtitle: Text(a[index].timeUsed.toString()),
+                              subtitle: Text(a[index].appName),
                             )))
                 : const SizedBox.shrink()
           ],
@@ -140,7 +143,7 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
                           style: TextStyle(fontSize: 16, color: Colors.black),
                         ),
                         Text(
-                          formatTimeDisplay(selectedHour, selectedMinute),
+                          _formatTimeDisplay(selectedHour, selectedMinute),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -254,7 +257,7 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
     );
   }
 
-  String formatTimeDisplay(int hour, int minute) {
+  String _formatTimeDisplay(int hour, int minute) {
     if (hour == 0 && minute == 0) {
       return '0 phút';
     } else if (hour == 0) {

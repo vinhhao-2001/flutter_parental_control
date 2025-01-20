@@ -9,19 +9,20 @@ class LocationInfo extends LatLng {
     required this.timestamp,
   }) : super(latitude, longitude);
 
+  /// Chuyển đối tượng thành map
   Map<String, dynamic> toMap() {
     return {
-      'latitude': latitude,
-      'longitude': longitude,
-      'timestamp': timestamp.toIso8601String(),
+      'lat': latitude,
+      'long': longitude,
+      'tmp': timestamp.millisecondsSinceEpoch,
     };
   }
-
+  /// Chuyển map thành đối tượng
   factory LocationInfo.fromMap(Map<String, dynamic> map) {
     return LocationInfo(
-      latitude: map['latitude'],
-      longitude: map['longitude'],
-      timestamp: map['timestamp'],
+      latitude: map['lat'],
+      longitude: map['long'],
+      timestamp: DateTime.fromMillisecondsSinceEpoch(map['tmp']),
     );
   }
 }

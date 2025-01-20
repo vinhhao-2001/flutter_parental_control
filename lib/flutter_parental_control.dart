@@ -3,10 +3,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_parental_control/src/channel/flutter_parental_control_platform_interface.dart';
 import 'package:flutter_parental_control/src/core/app_constants.dart';
 import 'package:geolocator/geolocator.dart';
-
-import 'src/channel/flutter_parental_control_platform_interface.dart';
 
 part 'src/model/app_block.dart';
 part 'src/model/app_detail.dart';
@@ -15,7 +14,7 @@ part 'src/model/app_usage.dart';
 part 'src/model/device_info.dart';
 part 'src/model/monitor_setting.dart';
 part 'src/model/schedule.dart';
-part 'src/model/today_usage.dart';
+part 'src/model/screen_time.dart';
 part 'src/model/web_history.dart';
 
 class ParentalControl {
@@ -30,6 +29,17 @@ class ParentalControl {
     }
   }
 
+  /// Lấy thông tin lượng pin, độ sáng màn hình và âm lượng
+  static Future<DeviceInfo> getDeviceState() async {
+    try {
+      final data =
+          await FlutterParentalControlPlatform.instance.getDeviceState();
+      return DeviceInfo.fromDeviceState(data);
+    } catch (_) {
+      rethrow;
+    }
+  }
+
   /// Lấy vị trí của trẻ
   static Future<Position> getLocation() async {
     try {
@@ -37,7 +47,7 @@ class ParentalControl {
       if (locationPermission) {
         return await Geolocator.getCurrentPosition(
             locationSettings:
-                const LocationSettings(accuracy: LocationAccuracy.best));
+                const LocationSettings(accuracy: LocationAccuracy.high));
       } else {
         throw AppConstants.locationError;
       }
@@ -48,6 +58,10 @@ class ParentalControl {
 
   /// các phần chỉ dùng được trên [Android]
   /// Kiểm tra và xin các quyền cho ứng dụng
+  /// Permission.accessibility: Quyền trợ năng
+  /// Permission.overlay: Quyền hiển thị trên ứng dụng khác
+  /// Permission.usageState: Quyền lấy thời gian sử dụng
+  /// Permission.deviceAdmin: Quyền quản lý thiết bị, sử dụng cho tắt màn hình
   static Future<bool> requestPermission(Permission type) async {
     try {
       _checkPlatform(false);
@@ -59,7 +73,7 @@ class ParentalControl {
     }
   }
 
-  /// Lấy danh sách chứa thông tin cơ bản của các ứng dụng
+  /// Lấy danh sách chứa các thông tin cơ bản của các ứng dụng
   static Future<List<AppDetail>> getListAppDetail() async {
     try {
       _checkPlatform(false);
@@ -71,7 +85,7 @@ class ParentalControl {
     }
   }
 
-  /// Cần cấp quyền [Permission.usageState] để lấy thời gian sử dụng dưới đây:
+  /// Cần cấp quyền [Permission.usageState] để sử dụng các hàm thời gian sử dụng:
   /// Lấy thời gian sử dụng của thiết bị
   /// Thời gian trả về [millisecond]
   static Future<int> getDeviceUsage() async {
@@ -85,15 +99,16 @@ class ParentalControl {
     }
   }
 
-  /// Lấy thời gian sử dụng trong ngày của thiết bị mỗi 15 phút
-  /// Giá trị trả về [millisecond]
-  static Future<List<TodayUsage>> getTodayUsage() async {
+  /// Lấy thời gian sử dụng của các ứng dụng trong 1 khoảng thời gian
+  /// Trả về số [millisecond] sử dụng trong mỗi 15 phút
+  static Future<List<ScreenTime>> getUsageTimeQuarterHour(
+      int startTime, int endTime) async {
     try {
       _checkPlatform(false);
-      final data =
-          await FlutterParentalControlPlatform.instance.getTodayUsage();
+      final data = await FlutterParentalControlPlatform.instance
+          .getUsageTimeQuarterHour(startTime, endTime);
       return data.entries.map((entry) {
-        return TodayUsage.fromMap(
+        return ScreenTime.fromMap(
           entry.key,
           Map<int, int>.from(entry.value),
         );
@@ -106,7 +121,7 @@ class ParentalControl {
   /// Lấy tổng thời gian sử dụng của các ứng dụng
   /// [day] là số ngày lấy thời gian sử dụng, mặc định là ngày hiện tại
   /// Giá trị trả về [millisecond]
-  static Future<List<AppUsage>> getAppUsageInfo({int? day}) async {
+  static Future<List<AppUsage>> getAppUsageInfoForDay({int? day}) async {
     _checkPlatform(false);
     final data =
         await FlutterParentalControlPlatform.instance.getAppUsageInfo(day: day);
@@ -172,7 +187,7 @@ class ParentalControl {
   /// Lắng nghe khi có có sự kiện nhấn nút hỏi phụ huynh
   /// [askParent] Bị mất kết nối khi chạy ở nền
   /// ParentalControl.askParent((packageName, appName) async {
-  /// function
+  /// function...
   /// });
   static Future<void> askParent(
       Function(String packageName, String appName) function) async {
@@ -184,7 +199,7 @@ class ParentalControl {
     }
   }
 
-  /// Tắt màn hình thiết bị
+  /// Khoá màn hình thiết bị
   /// Cần cấp quyền [Permission.deviceAdmin]
   static Future<void> lockDevice() async {
     try {
@@ -250,7 +265,7 @@ class ParentalControl {
     }
   }
 
-  /// các phần chỉ dùng được trên [Ios]
+  /// các phần chỉ dùng được trên [iOS]
   /// Kiểm tra quyền kiểm soát của phụ huynh
   static Future<void> parentalControlPermission() async {
     try {

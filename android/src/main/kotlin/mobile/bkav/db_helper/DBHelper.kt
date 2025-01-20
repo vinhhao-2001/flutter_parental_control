@@ -6,7 +6,7 @@ import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.Index
 import io.realm.annotations.PrimaryKey
-import mobile.bkav.manager.ManagerApp
+import mobile.bkav.manager.ManageApp
 import mobile.bkav.utils.AppConstants
 import mobile.bkav.utils.Utils
 import org.bson.types.ObjectId
@@ -37,7 +37,7 @@ object DBHelper {
                 .findFirst() ?: return null
             val timeLimit = app.timeLimit
             if (timeLimit == 0) return app.packageName
-            val timeUse = ManagerApp().getAppUsageTimeInMinutes(context, app.packageName)
+            val timeUse = ManageApp().getAppUsageTimeInMinutes(context, app.packageName)
             if (timeUse >= timeLimit) return app.packageName
             return null
         }
@@ -50,7 +50,7 @@ object DBHelper {
                 .findFirst() ?: return null
             val timeLimit = app.timeLimit
             if (timeLimit == 0) return app.appName
-            val timeUse = ManagerApp().getAppUsageTimeInMinutes(context, packageName)
+            val timeUse = ManageApp().getAppUsageTimeInMinutes(context, packageName)
             if (timeUse >= timeLimit) return app.appName
             return null
         }

@@ -1,17 +1,19 @@
 library parental_control;
 
 import 'dart:async';
-import 'dart:typed_data';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_parental_control/src/core/app_constants.dart';
 import 'package:flutter_parental_control/src/core/app_utils.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 part 'src/model/address.dart';
 part 'src/model/child_info.dart';
-part 'src/model/safe_zone_info.dart';
 part 'src/model/location_info.dart';
+part 'src/model/safe_zone_info.dart';
 
 /// Widget là bản đồ hiển thị  vị trí của trẻ
 /// Hiển thị phạm vi an toàn của trẻ
@@ -199,6 +201,11 @@ class _ChildrenMapViewState extends State<ChildrenMapView> {
           /// Điều khiển vị trí toạ độ hiển thị
           onMapCreated: (controller) {
             _mapController = controller;
+          },
+          /// Cho phép google map được ưu tiên các cử chỉ màn hình
+          gestureRecognizers: {
+            Factory<OneSequenceGestureRecognizer>(
+                () => EagerGestureRecognizer())
           },
 
           /// Toạ độ hiển thị đầu tiên

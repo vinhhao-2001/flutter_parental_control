@@ -1,6 +1,7 @@
 library parental_control;
 
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+
 import 'flutter_parental_control_method_channel.dart';
 
 abstract class FlutterParentalControlPlatform extends PlatformInterface {
@@ -20,6 +21,10 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
 
   Future<Map<String, dynamic>> getDeviceInfo() {
     throw UnimplementedError('getDeviceInfo() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> getDeviceState() {
+    throw UnimplementedError('getDeviceState() has not been implemented.');
   }
 
   /// Các phần hiện tại đang chỉ hỗ trợ cho [Android]
@@ -43,8 +48,10 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
     throw UnimplementedError('getAppUsageInfo() has not been implemented.');
   }
 
-  Future<Map<String, dynamic>> getTodayUsage() {
-    throw UnimplementedError('getAppUsageInDay() has not been implemented.');
+  Future<Map<String, dynamic>> getUsageTimeQuarterHour(
+      int startTime, int endTime) {
+    throw UnimplementedError(
+        'getUsageTimeQuarterHour() has not been implemented.');
   }
 
   Future<void> setListAppBlocked(List<Map<String, dynamic>> listApp,

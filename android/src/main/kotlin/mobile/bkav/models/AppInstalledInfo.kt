@@ -19,27 +19,17 @@ data class AppInstalledInfo(
         )
     }
 
-    // các hàm override tự sinh
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
         other as AppInstalledInfo
 
-        if (isInstalled != other.isInstalled) return false
-        if (packageName != other.packageName) return false
-        if (appName != other.appName) return false
-        if (!appIcon.contentEquals(other.appIcon)) return false
-
-        return true
+        return appIcon.contentEquals(other.appIcon)
     }
 
     override fun hashCode(): Int {
-        var result = isInstalled.hashCode()
-        result = 31 * result + packageName.hashCode()
-        result = 31 * result + appName.hashCode()
-        result = 31 * result + appIcon.contentHashCode()
-        return result
+        return appIcon.contentHashCode()
     }
 }
 

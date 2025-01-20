@@ -12,7 +12,7 @@ import mobile.bkav.utils.AppConstants
 import mobile.bkav.utils.Utils
 import java.util.Calendar
 
-class ManagerApp {
+class ManageApp {
     // Lấy thông tin các ứng dụng mặc định
     @Suppress("DEPRECATION")
     fun getAppDetailInfo(context: Context): List<Map<String, Any>> {
@@ -72,26 +72,26 @@ class ManagerApp {
         return totalTime
     }
 
-    // Lấy thời gian sử dụng trong ngày của từng ứng dụng dùng usageEvents
-    // Trả về mỗi 15 phút
-    fun getTodayUsageEvents(context: Context): Map<String, Map<Long, Long>> {
-        val launcherApps = getListPackageName(context)
-        val usageByQuarterHourMap = mutableMapOf<String, MutableMap<Long, Long>>()
-
-        // Tạo khoảng thời gian để lấy thời gian sử dụng
-        val calendar = Calendar.getInstance()
-        val endTime = calendar.timeInMillis
-        var startTime = getStartOfDay(calendar)
-
+    // Lấy thời gian sử dụng của các ứng dụng trong 1 khoảng thời gian
+    // Trả về thời gian sử dụng của mỗi 15 phút
+    // NOTE: Sử dụng UsageEvent
+    fun getUsageTimeQuarterHour(
+        context: Context,
+        startTime: Long,
+        endTime: Long
+    ): Map<String, Map<Long, Long>> {
+        val launcherApps = getListPackageName(context) // danh sách ứng dụng
+        val usageByQuarterHourMap = mutableMapOf<String, MutableMap<Long, Long>>() // dữ liệu trả về
         val usageStatsManager = getUsageStatsManager(context) ?: return emptyMap()
 
-        // Lặp qua từng khoảng thời gian 15 phút trong ngày
-        while (startTime < endTime) {
-            val nextQuarterHour = startTime + 15 * 60 * 1000
-            val usageEvents = usageStatsManager.queryEvents(startTime, nextQuarterHour)
+        var time = startTime
+        while (time < endTime) {
+            // Tính thời gian sử dụng mỗi 15 phút
+            val nextQuarterHour = time + 15 * 60 * 1000
+            val usageEvents = usageStatsManager.queryEvents(time, nextQuarterHour)
 
-            calculateUsageTime(usageEvents, launcherApps, usageByQuarterHourMap, startTime)
-            startTime = nextQuarterHour
+            calculateUsageTime(usageEvents, launcherApps, usageByQuarterHourMap, time)
+            time = nextQuarterHour
         }
         return usageByQuarterHourMap
     }

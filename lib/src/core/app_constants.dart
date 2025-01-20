@@ -4,12 +4,14 @@ class AppConstants {
   /// Method
   static const String methodChannel = 'flutter_parental_control_method';
   static const String eventChannel = 'flutter_parental_control_event';
-  static const String deviceMethod = 'getDeviceInfoMethod';
+  static const String deviceInfoMethod = 'getDeviceInfoMethod';
+  static const String deviceStateMethod = 'getDeviceStateMethod';
   static const String appDetailMethod = 'getAppDetailMethod';
   static const String deviceUsageMethod = 'getDeviceUsageMethod';
   static const String locationMethod = 'getLocationMethod';
   static const String appUsageMethod = 'getAppUsageInfoMethod';
   static const String getToDayUsage = 'getTodayUsageMethod';
+  static const String getUsageTimeQuarterHour = 'getUsageTimeQuarterHourMethod';
   static const String blockAppMethod = 'blockAppMethod';
   static const String blockWebMethod = 'blockWebsiteMethod';
   static const String startServiceMethod = 'startServiceMethod';
@@ -74,6 +76,10 @@ class AppConstants {
   static const String backBtn = 'backButton';
   static const String askParentBtn = 'askParentBtn';
   static const String day = 'day';
+
+  /// time
+  static const String startTime = 'startTime';
+  static const String endTime = 'endTime';
 
   /// cài đặt thời gian hạn chế [ios]
   static const String isMonitoring = 'isMonitoring';

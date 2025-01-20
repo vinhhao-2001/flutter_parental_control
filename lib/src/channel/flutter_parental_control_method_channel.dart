@@ -2,6 +2,7 @@ library parental_control;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+
 import '../core/app_constants.dart';
 import 'flutter_parental_control_platform_interface.dart';
 
@@ -18,7 +19,16 @@ class MethodChannelFlutterParentalControl
   /// Lấy các thông tin thiết bị
   @override
   Future<Map<String, dynamic>> getDeviceInfo() async {
-    final result = await methodChannel.invokeMethod(AppConstants.deviceMethod);
+    final result =
+        await methodChannel.invokeMethod(AppConstants.deviceInfoMethod);
+    return Map<String, dynamic>.from(result);
+  }
+
+  /// Lấy lượng pin, độ sáng và âm lượng của thiết bị
+  @override
+  Future<Map<String, dynamic>> getDeviceState() async {
+    final result =
+        await methodChannel.invokeMethod(AppConstants.deviceStateMethod);
     return Map<String, dynamic>.from(result);
   }
 
@@ -92,10 +102,17 @@ class MethodChannelFlutterParentalControl
     return Map<String, dynamic>.from(result);
   }
 
-  /// Lấy thời gian sử dụng của các ứng dụng trong ngày
+  /// Lấy thời gian sử dụng trong 1 khoảng thời gian mỗi 15 phút
   @override
-  Future<Map<String, dynamic>> getTodayUsage() async {
-    final result = await methodChannel.invokeMethod(AppConstants.getToDayUsage);
+  Future<Map<String, dynamic>> getUsageTimeQuarterHour(
+      int startTime, int endTime) async {
+    final result = await methodChannel.invokeMethod(
+      AppConstants.getUsageTimeQuarterHour,
+      {
+        AppConstants.startTime: startTime,
+        AppConstants.endTime: endTime,
+      },
+    );
     return Map<String, dynamic>.from(result);
   }
 

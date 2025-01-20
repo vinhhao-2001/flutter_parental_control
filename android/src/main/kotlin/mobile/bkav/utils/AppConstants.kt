@@ -5,7 +5,6 @@ class AppConstants {
         const val EMPTY = ""
         const val COLON = ':'
         const val PACKAGE = "package"
-        const val LAUNCHER_PACKAGE = "com.google.android.apps.nexuslauncher"
 
         // trình duyệt
         const val BLANK_PAGE = "about:blank"
@@ -27,9 +26,10 @@ class AppConstants {
         const val METHOD_CHANNEL = "flutter_parental_control_method"
         const val EVENT_CHANNEL = "flutter_parental_control_event"
         const val GET_DEVICE_INFO = "getDeviceInfoMethod"
+        const val GET_DEVICE_STATE = "getDeviceStateMethod"
         const val GET_APP_DETAIL = "getAppDetailMethod"
         const val GET_DEVICE_USAGE = "getDeviceUsageMethod"
-        const val GET_TODAY_USAGE = "getTodayUsageMethod"
+        const val GET_USAGE_TIME_QUARTER_HOUR = "getUsageTimeQuarterHourMethod"
         const val BLOCK_APP_METHOD = "blockAppMethod"
         const val BLOCK_WEBSITE_METHOD = "blockWebsiteMethod"
         const val START_SERVICE = "startServiceMethod"
@@ -83,13 +83,17 @@ class AppConstants {
         const val TIME_INSTALL = "timeInstall"
         const val TIME_UPDATE = "timeUpdate"
 
+        // key time
+        const val START_TIME = "startTime"
+        const val END_TIME = "endTime"
+
         // type view của người dùng
         const val DRAWABLE = "drawable"
         const val LAYOUT = "layout"
         const val ID = "id"
 
         // BroadcastReceiver
-        const val  ACTION_ASK_PARENT = "action_ask_parent"
+        const val ACTION_ASK_PARENT = "action_ask_parent"
 
         // error
         const val ERROR_TYPE_PERMISSION = "INVALID_TYPE"

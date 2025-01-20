@@ -16,7 +16,7 @@ class DeviceInfo {
   final String? deviceId;
 
   DeviceInfo({
-    this.systemName = '',
+    this.systemName,
     this.deviceName,
     this.deviceManufacturer,
     this.deviceVersion,
@@ -44,6 +44,14 @@ class DeviceInfo {
       screenBrightness: map[AppConstants.screenBrightness] as int?,
       volume: map[AppConstants.volume] as int?,
       deviceId: map[AppConstants.deviceId] as String?,
+    );
+  }
+
+  factory DeviceInfo.fromDeviceState(Map<String, dynamic> map) {
+    return DeviceInfo(
+      batteryLevel: map[AppConstants.batteryLevel] as int?,
+      screenBrightness: map[AppConstants.screenBrightness] as int?,
+      volume: map[AppConstants.volume] as int?,
     );
   }
 

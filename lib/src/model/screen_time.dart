@@ -1,22 +1,22 @@
 part of 'package:flutter_parental_control/flutter_parental_control.dart';
 
 /// Thông tin thời gian sử dụng các ứng dụng
-class TodayUsage {
+class ScreenTime {
   final String packageName;
   final List<TimeUsage> usageTime;
 
-  TodayUsage({
+  ScreenTime({
     required this.packageName,
     required this.usageTime,
   });
 
   /// Chuyển đổi dữ liệu nhận được thành đối tượng
-  factory TodayUsage.fromMap(String packageName, Map<int, int> usageMap) {
+  factory ScreenTime.fromMap(String packageName, Map<int, int> usageMap) {
     List<TimeUsage> usageTime = usageMap.entries.map((entry) {
       return TimeUsage(time: entry.key, timeUsed: entry.value);
     }).toList();
 
-    return TodayUsage(
+    return ScreenTime(
       packageName: packageName,
       usageTime: usageTime,
     );

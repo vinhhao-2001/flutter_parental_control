@@ -17,8 +17,8 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import mobile.bkav.db_helper.DBHelper
-import mobile.bkav.manager.ManagerApp
-import mobile.bkav.models.DeviceInfo
+import mobile.bkav.manager.ManageApp
+import mobile.bkav.manager.ManageDevice
 import mobile.bkav.receiver.AdminReceiver
 import mobile.bkav.service.AppInstallService
 import mobile.bkav.utils.AppConstants
@@ -89,32 +89,42 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
 
             // Gửi các thông tin thiết bị cho Flutter
             AppConstants.GET_DEVICE_INFO -> {
-                val deviceInfo = DeviceInfo.getDeviceInfo(context)
+                val deviceInfo = ManageDevice().getDeviceInfo(context)
                 result.success(deviceInfo)
+            }
+
+            AppConstants.GET_DEVICE_STATE -> {
+                val deviceState = ManageDevice().getDeviceState(context)
+                result.success(deviceState)
             }
 
             // Gửi thông tin các ứng dụng được cài đặt ra Flutter
             AppConstants.GET_APP_DETAIL -> {
-                val appDetailInfo = ManagerApp().getAppDetailInfo(context)
+                val appDetailInfo = ManageApp().getAppDetailInfo(context)
                 result.success(appDetailInfo)
             }
 
             // Gửi tổng thời gian sử dụng của thiết bị trong ngày ra Flutter
             AppConstants.GET_DEVICE_USAGE -> {
-                val deviceUsage = ManagerApp().getDeviceUsage(context)
+                val deviceUsage = ManageApp().getDeviceUsage(context)
                 result.success(deviceUsage)
             }
 
-            // Gửi thời gian sử dụng thiết bị trong ngày theo phút ra Flutter
-            AppConstants.GET_TODAY_USAGE -> {
-                val appUsageInfoList = ManagerApp().getTodayUsageEvents(context)
-                result.success(appUsageInfoList)
+            // Gửi thời gian sử dụng thiết bị trong 1 khoảng thời gian theo mỗi 15 phút ra Flutter
+            AppConstants.GET_USAGE_TIME_QUARTER_HOUR -> {
+                val startTime = call.argument<Long>(AppConstants.START_TIME)
+                val endTime = call.argument<Long>(AppConstants.END_TIME)
+                if (startTime != null && endTime != null) {
+                    val appUsageInfoList =
+                        ManageApp().getUsageTimeQuarterHour(context, startTime, endTime)
+                    result.success(appUsageInfoList)
+                }
             }
 
             // Gửi tổng thời gian sử dụng của từng ứng dụng ra Flutter
             AppConstants.GET_APP_USAGE_INFO -> {
                 val day = call.argument<Int>(AppConstants.DAY) ?: 1
-                val appUsageInfoList = ManagerApp().getAppUsageStats(context, day)
+                val appUsageInfoList = ManageApp().getAppUsageStats(context, day)
                 result.success(appUsageInfoList)
             }
 
