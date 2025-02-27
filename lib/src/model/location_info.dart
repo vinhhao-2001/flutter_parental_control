@@ -9,6 +9,11 @@ class LocationInfo extends LatLng {
     required this.timestamp,
   }) : super(latitude, longitude);
 
+  /// Tạo đối tượng từ
+  LocationInfo.fromLatLng(LatLng position, DateTime time)
+      : timestamp = time,
+        super(position.latitude, position.longitude);
+
   /// Chuyển đối tượng thành map
   Map<String, dynamic> toMap() {
     return {
@@ -17,6 +22,7 @@ class LocationInfo extends LatLng {
       'tmp': timestamp.millisecondsSinceEpoch,
     };
   }
+
   /// Chuyển map thành đối tượng
   factory LocationInfo.fromMap(Map<String, dynamic> map) {
     return LocationInfo(

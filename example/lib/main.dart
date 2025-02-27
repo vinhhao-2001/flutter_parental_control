@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_parental_control/flutter_parental_control.dart';
@@ -36,9 +34,10 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
   @override
   void initState() {
     super.initState();
-    Platform.isAndroid ? android() : ios();
-    ParentalControl.requestPermission(Permission.accessibility);
-    ParentalControl.requestPermission(Permission.usageState);
+    // Platform.isAndroid ? android() : ios();
+    // ParentalControl.requestPermission(Permission.accessibility);
+    // ParentalControl.requestPermission(Permission.usageState);
+    // ParentalControl.requestPermission(Permission.overlay);
   }
 
   Future<void> android() async {
@@ -79,10 +78,13 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             ),
             ElevatedButton(
                 onPressed: () async {
-                  final a = await ParentalControl.getWebHistory();
-                  a.forEach((b) {
-                    print(b.toMap());
-                  });
+                  // ParentalControl.setListAppBlocked(
+                  //     [AppBlock(packageName: 'com.android.chrome')]);
+                  // final a = await ParentalControl.getWebHistory();
+                  // a.forEach((b) {
+                  //   print(b.toMap());
+                  // });
+                  ParentalControl.requestPermission(Permission.deviceAdmin);
                 },
                 child: const Text("Lấy thông tin từ native")),
             a.isNotEmpty

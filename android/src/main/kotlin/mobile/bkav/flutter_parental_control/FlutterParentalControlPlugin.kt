@@ -1,5 +1,6 @@
 package mobile.bkav.flutter_parental_control
 
+import android.app.Activity
 import android.app.admin.DevicePolicyManager
 import android.content.BroadcastReceiver
 import android.content.ComponentName
@@ -10,6 +11,8 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -26,8 +29,9 @@ import mobile.bkav.utils.RequestPermissions
 
 
 /** FlutterParentalControlPlugin */
-class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
+class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var methodChannel: MethodChannel
+    private lateinit var activityBinding: Activity
     private lateinit var context: Context
 
 
@@ -82,7 +86,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
                     1 -> result.success(requestPermissions.requestAccessibilityPermission())
                     2 -> result.success(requestPermissions.requestOverlayPermission())
                     3 -> result.success(requestPermissions.requestUsageStatsPermissions())
-                    4 -> result.success(requestPermissions.requestAdminPermission())
+                    4 -> result.success(requestAdminPermission())
                     else -> result.error(AppConstants.ERROR_TYPE_PERMISSION, null, null)
                 }
             }
@@ -199,6 +203,22 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
+    // Của ActivityAware
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        activityBinding = binding.activity
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
+    }
+
+    // Hàm thực hiện khi Activity bị thay đổi cấu hình
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+    }
+
+    // Hàm thực hiện khi Activity bị hủy
+    override fun onDetachedFromActivity() {
+    }
+
     // Khởi tạo realmDB
     private fun initRealm() {
         Realm.init(context)
@@ -209,6 +229,27 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler {
             .allowQueriesOnUiThread(true)
             .build()
         Realm.setDefaultConfiguration(config)
+    }
+
+    // Xin quyền admin
+    private fun requestAdminPermission(): Boolean {
+        val devicePolicyManager =
+            activityBinding.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        val componentName = ComponentName(activityBinding, AdminReceiver::class.java)
+
+        return if (!devicePolicyManager.isAdminActive(componentName)) {
+            val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
+                putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName)
+                putExtra(
+                    DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                    "Device Admin Permission required for this app."
+                )
+            }
+            activityBinding.startActivityForResult(intent, 1000)
+            false
+        } else {
+            true
+        }
     }
 
     // Tạo broadcast để đưa thông tin yêu cầu phụ huynh từ service -> Flutter

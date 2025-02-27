@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.os.IBinder
 import mobile.bkav.flutter_parental_control.FlutterParentalControlPlugin
 import mobile.bkav.models.AppInstalledInfo
@@ -43,6 +45,11 @@ class AppInstallService : Service() {
             val action = intent?.action
             val packageName = intent?.data?.schemeSpecificPart
             if (packageName != null && context != null) {
+                // Nếu là ứng dụng hệ thống thì bỏ qua
+                if (!isUserInstalledApp(context, packageName)) {
+                    return
+                }
+
                 when (action) {
                     Intent.ACTION_PACKAGE_ADDED -> {
                         val appName = context.packageManager.getApplicationLabel(
@@ -63,6 +70,16 @@ class AppInstallService : Service() {
                     }
                 }
             }
+        }
+    }
+
+    // Kiểm tra ứng dụng được cài đặt
+    private fun isUserInstalledApp(context: Context, packageName: String): Boolean {
+        return try {
+            val appInfo = context.packageManager.getApplicationInfo(packageName, 0)
+            (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0
+        } catch (e: PackageManager.NameNotFoundException) {
+            false
         }
     }
 }

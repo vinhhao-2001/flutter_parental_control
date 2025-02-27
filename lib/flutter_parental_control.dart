@@ -1,3 +1,5 @@
+library parental_control;
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -5,7 +7,6 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_parental_control/src/channel/flutter_parental_control_platform_interface.dart';
 import 'package:flutter_parental_control/src/core/app_constants.dart';
-import 'package:geolocator/geolocator.dart';
 
 part 'src/model/app_block.dart';
 part 'src/model/app_detail.dart';
@@ -35,22 +36,6 @@ class ParentalControl {
       final data =
           await FlutterParentalControlPlatform.instance.getDeviceState();
       return DeviceInfo.fromDeviceState(data);
-    } catch (_) {
-      rethrow;
-    }
-  }
-
-  /// Lấy vị trí của trẻ
-  static Future<Position> getLocation() async {
-    try {
-      final locationPermission = await _locationPermission();
-      if (locationPermission) {
-        return await Geolocator.getCurrentPosition(
-            locationSettings:
-                const LocationSettings(accuracy: LocationAccuracy.high));
-      } else {
-        throw AppConstants.locationError;
-      }
     } catch (_) {
       rethrow;
     }
@@ -351,19 +336,6 @@ class ParentalControl {
       case Permission.deviceAdmin:
         return 4;
     }
-  }
-
-  /// Hàm kiểm tra quyền truy cập vị trí
-  static Future<bool> _locationPermission() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    if (permission == LocationPermission.always ||
-        permission == LocationPermission.whileInUse) {
-      return true;
-    }
-    return false;
   }
 }
 

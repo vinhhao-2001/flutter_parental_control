@@ -8,12 +8,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import android.provider.Settings.Secure
 import android.text.TextUtils
 import mobile.bkav.receiver.AdminReceiver
 import mobile.bkav.service.AccessibilityService
 
-class RequestPermissions(val context: Context) {
+class RequestPermissions(private val context: Context) {
 
     // Hàm yêu cầu quyền truy cập trợ năng
     fun requestAccessibilityPermission(): Boolean {
@@ -48,30 +47,6 @@ class RequestPermissions(val context: Context) {
         return if (mode != AppOpsManager.MODE_ALLOWED) {
             openPermissionSettings(Settings.ACTION_USAGE_ACCESS_SETTINGS)
         } else true
-    }
-
-    // Xin quyền admin
-    fun requestAdminPermission(): Boolean {
-        val devicePolicyManager =
-            context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        val componentName = ComponentName(context, AdminReceiver::class.java)
-
-        return if (!devicePolicyManager.isAdminActive(componentName)) {
-//            val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
-//                putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName)
-//                putExtra(
-//                    DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-//                    "Device Admin Permission required for this app."
-//                )
-//                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//            }
-//            context.startActivity(intent)
-
-            openPermissionSettings(Settings.ACTION_SECURITY_SETTINGS)
-            false
-        } else {
-            true
-        }
     }
 
     // Kiểm tra quyền trợ năng

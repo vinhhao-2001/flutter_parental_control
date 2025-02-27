@@ -136,7 +136,6 @@ class AccessibilityService : AccessibilityService() {
     // Lắng nghe ứng dụng trong cài đặt
     private fun handleSettingEvent(accessibilityEvent: AccessibilityEvent) {
         if (accessibilityEvent.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED) {
-            println(accessibilityEvent)
             val appName = Utils().getApplicationName(applicationContext)
             if (accessibilityEvent.text.any { it.contains(appName) }) {
                 // Thoát ra
