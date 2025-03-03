@@ -14,6 +14,7 @@ class Utils {
 
   /// Vẽ đa giác lồi từ các điểm toạ độ
   static List<LatLng> getConvexHull(List<LatLng> points) {
+    // Sắp xếp theo vĩ độ -> kinh độ
     points.sort((a, b) {
       if (a.latitude == b.latitude) return a.longitude.compareTo(b.longitude);
       return a.latitude.compareTo(b.latitude);

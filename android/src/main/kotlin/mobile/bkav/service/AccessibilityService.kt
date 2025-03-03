@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mobile.bkav.db_helper.DBHelper
 import mobile.bkav.manager.ManageApp
-import mobile.bkav.models.SupportedBrowserConfig
+import mobile.bkav.models.BrowserConfig
 import mobile.bkav.overlay.Overlay
 import mobile.bkav.utils.AppConstants
 import mobile.bkav.utils.Utils
@@ -67,10 +67,9 @@ class AccessibilityService : AccessibilityService() {
         }
     }
 
+    // Kiểm tra sự kiện khi người dùng nhấn vào ứng dụng ở màn hình chính
     private fun handleLauncherEvent(accessibilityEvent: AccessibilityEvent) {
-        // Kiểm tra sự kiện khi người dùng nhấn vào ứng dụng ở màn hình chính
         val contentDescription = accessibilityEvent.contentDescription?.toString() ?: return
-
         // Kiểm tra sự kiện người dùng muốn xóa ứng dụng
         if (accessibilityEvent.eventType == AccessibilityEvent.TYPE_VIEW_LONG_CLICKED) {
             // Lấy tên của ứng dụng của bạn
@@ -81,8 +80,9 @@ class AccessibilityService : AccessibilityService() {
                     askParent(packageName, appName)
                 }
             }
-        } else {
-            // Kiểm tra nếu ứng dụng bị chặn
+        }
+        // Kiểm tra nếu ứng dụng bị chặn
+        else {
             val appName = contentDescription.substringBefore(",").trim()
             val packageName = DBHelper.getPackageAppBlock(applicationContext, appName)
             if (packageName != null) {
@@ -95,13 +95,12 @@ class AccessibilityService : AccessibilityService() {
         }
     }
 
-    // Hàm xử lý sự kiện khi người dùng mở trình duyệt
+    // Hàm xử lý khi có sự kiện chuyển màn hình
     @Suppress("DEPRECATION")
     private fun handleWindowChange(accessibilityEvent: AccessibilityEvent) {
-        // Kiểm tra khi có sự kiên chuyển màn hình
         val packageName: String = accessibilityEvent.packageName?.toString() ?: return
         val appName = DBHelper.getAppBlock(applicationContext, packageName)
-        // khi chuyển màn hình mà vào app bị chặn cũng hiển thị màn hình chặn
+        // khi chuyển màn hình mà vào app bị chặn thì hiển thị màn hình chặn
         if (appName != null) {
             overlay.showOverlay(true) {
                 Utils().openApp(applicationContext)
@@ -113,8 +112,8 @@ class AccessibilityService : AccessibilityService() {
             val parentNodeInfo: AccessibilityNodeInfo = accessibilityEvent.source ?: return
             val browserConfig = getBrowserConfig(packageName) ?: return
 
-            // Url của trình duyệt
-            val capturedUrl: String? = extractUrlFromBrowser(parentNodeInfo, browserConfig)
+            // Lấy Url của trình duyệt
+            val capturedUrl: String? = getUrlFromBrowser(parentNodeInfo, browserConfig)
             parentNodeInfo.recycle()
 
             if (!capturedUrl.isNullOrEmpty() && (packageName != currentBrowserPackageName || capturedUrl != currentUrl)) {
@@ -130,15 +129,14 @@ class AccessibilityService : AccessibilityService() {
                 }
             }
         }
-
     }
 
-    // Lắng nghe ứng dụng trong cài đặt
+    // Lắng nghe khi người dùng có thao tác với ứng dụng trong cài đặt
     private fun handleSettingEvent(accessibilityEvent: AccessibilityEvent) {
         if (accessibilityEvent.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED) {
             val appName = Utils().getApplicationName(applicationContext)
+            // Thoát ra khỏi cài đặt khi có cài đặt
             if (accessibilityEvent.text.any { it.contains(appName) }) {
-                // Thoát ra
                 this.performGlobalAction(GLOBAL_ACTION_BACK)
                 this.performGlobalAction(GLOBAL_ACTION_HOME)
             }
@@ -146,13 +144,14 @@ class AccessibilityService : AccessibilityService() {
     }
 
     // Hàm lấy cấu hình trình duyệt
-    private fun getBrowserConfig(packageName: String): SupportedBrowserConfig? {
-        return SupportedBrowserConfig.getSupportedBrowsers().find { it.packageName == packageName }
+    private fun getBrowserConfig(packageName: String): BrowserConfig? {
+        return BrowserConfig.getSupportedBrowsers().find { it.packageName == packageName }
     }
 
     // Hàm trích xuất URL từ trình duyệt
-    private fun extractUrlFromBrowser(
-        nodeInfo: AccessibilityNodeInfo, browserConfig: SupportedBrowserConfig
+    private fun getUrlFromBrowser(
+        nodeInfo: AccessibilityNodeInfo,
+        browserConfig: BrowserConfig
     ): String? {
         // Lấy URL từ thanh địa chỉ của trình duyệt
         return nodeInfo.findAccessibilityNodeInfosByViewId(browserConfig.addressBarId)
@@ -200,6 +199,7 @@ class AccessibilityService : AccessibilityService() {
         }
     }
 
+    // Hàm lấy tên gói ứng dụng từ Intent
     private fun getPackageNameForIntent(intent: Intent): String? {
         val resolveInfo =
             this.packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)

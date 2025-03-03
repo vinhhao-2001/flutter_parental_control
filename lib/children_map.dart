@@ -32,7 +32,7 @@ class ChildrenMapView extends StatefulWidget {
     this.safeZoneVisible = false,
     this.childLocationButtonEnabled = true,
     this.myLocationButtonEnabled = true,
-    this.drawSafeKidButtonEnabled = true,
+    this.drawSafeZoneButtonEnabled = true,
   });
 
   /// Thông tin của trẻ
@@ -67,7 +67,7 @@ class ChildrenMapView extends StatefulWidget {
   final bool childLocationButtonEnabled;
 
   /// Button phạm vi an toàn có hiện không
-  final bool drawSafeKidButtonEnabled;
+  final bool drawSafeZoneButtonEnabled;
 
   /// Button di chuyển đến vị trí của bản thân
   /// Chỉ hiển thị khi đã được cấp quyền vị trí trước đó
@@ -261,6 +261,7 @@ class _ChildrenMapViewState extends State<ChildrenMapView> {
                 ),
               ),
           },
+          mapToolbarEnabled: true, // TODO: Hiển thị điều hướng đến Google Map
           myLocationEnabled: true,
           myLocationButtonEnabled: widget.myLocationButtonEnabled,
           zoomControlsEnabled: false,
@@ -279,19 +280,21 @@ class _ChildrenMapViewState extends State<ChildrenMapView> {
                 _mapController
                     ?.animateCamera(CameraUpdate.newLatLng(_childLocation));
               },
-              icon: Icons.not_listed_location,
+              icon: const Icon(Icons.location_on_outlined),
               tooltip: widget.childLocationButton,
             ),
           ),
 
         /// Button SafeKids
-        if (widget.drawSafeKidButtonEnabled)
+        if (widget.drawSafeZoneButtonEnabled)
           Positioned(
             bottom: 30,
             left: 15,
             child: _buildBlurButton(
               onPressed: _toggleDrawingMode,
-              icon: _isDrawing ? Icons.check : Icons.health_and_safety,
+              icon: _isDrawing
+                  ? const Icon(Icons.check, color: Colors.green)
+                  : const Icon(Icons.health_and_safety),
               tooltip: _isDrawing
                   ? widget.safeZoneButton?.confirmButton
                   : widget.safeZoneButton?.safeZoneBtn,
@@ -309,7 +312,7 @@ class _ChildrenMapViewState extends State<ChildrenMapView> {
                     _isDrawing = !_isDrawing;
                   });
                 },
-                icon: Icons.close,
+                icon: const Icon(Icons.close, color: Colors.red),
                 tooltip: widget.safeZoneButton?.cancelButton),
           ),
       ],
@@ -319,7 +322,7 @@ class _ChildrenMapViewState extends State<ChildrenMapView> {
   /// Các button nằm trên bản đồ
   Widget _buildBlurButton({
     required VoidCallback onPressed,
-    required IconData icon,
+    required Widget icon,
     String? tooltip,
   }) {
     return Container(
@@ -329,7 +332,7 @@ class _ChildrenMapViewState extends State<ChildrenMapView> {
         boxShadow: const [
           BoxShadow(
             color: Colors.black26,
-            blurRadius: 5,
+            blurRadius: 4,
             offset: Offset(0, 3),
           ),
         ],
@@ -344,7 +347,7 @@ class _ChildrenMapViewState extends State<ChildrenMapView> {
         ),
         textStyle: const TextStyle(color: Colors.black),
         child: IconButton(
-          icon: Icon(icon),
+          icon: icon,
           onPressed: onPressed,
         ),
       ),
