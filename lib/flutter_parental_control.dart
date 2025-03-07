@@ -2,9 +2,9 @@ library parental_control;
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_parental_control/src/channel/flutter_parental_control_platform_interface.dart';
 import 'package:flutter_parental_control/src/core/app_constants.dart';
 
@@ -36,6 +36,15 @@ class ParentalControl {
       final data =
           await FlutterParentalControlPlatform.instance.getDeviceState();
       return DeviceInfo.fromDeviceState(data);
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  /// Lấy chuỗi định dạng duy nhất của thiết bị
+  static Future<String> getDeviceIdentify() async {
+    try {
+      return await FlutterParentalControlPlatform.instance.getDeviceIdentify();
     } catch (_) {
       rethrow;
     }
@@ -341,3 +350,16 @@ class ParentalControl {
 
 ///  Tạo enum cho các trường hợp xin quyền trên [Android]
 enum Permission { accessibility, overlay, usageState, deviceAdmin }
+
+/// Hàm chạy dưới nền
+@pragma('vm:entry-point')
+Future<dynamic> listenAppBlock() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  const methodChannel = MethodChannel('background_safekids_channel');
+  methodChannel.setMethodCallHandler((call) async {
+    if (call.method == 'openAppBlock') {
+      return call.arguments;
+    }
+    return null;
+  });
+}

@@ -38,4 +38,28 @@ class DeviceInfo {
         
         return deviceInfo
     }
+
+    static func getDeviceStatus()->[String: Any]{
+        let device = UIDevice.current
+        // Bật theo dõi pin
+        UIDevice.current.isBatteryMonitoringEnabled = true
+        
+        // Các thông tin cần lấy
+        let batteruLevel = device.batteryLevel*100
+        let screenBrightness = UIScreen.main.brightness
+        let volume = AVAudioSession.sharedInstance().outputVolume
+        
+        let deviceStatus: [String: Any] =
+        [
+            AppConstants.BATTERY_LEVEL: batteruLevel,
+            AppConstants.SCREEN_BRIGHTNESS: screenBrightness,
+            AppConstants.VOLUME: volume,
+        ]
+        
+        return deviceStatus
+    }
+    
+    static func getDeviceIdentifier() -> String {
+        return UIDevice.current.identifierForVendor?.uuidString ?? AppConstants.UNKNOWN
+    }
 }

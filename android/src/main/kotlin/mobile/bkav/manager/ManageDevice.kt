@@ -8,6 +8,8 @@ import android.provider.Settings
 import mobile.bkav.utils.AppConstants
 
 class ManageDevice {
+
+    // Thông tin cơ bản của ứng dụng
     fun getDeviceInfo(context: Context): Map<String, Any> {
         val batteryManager =
             context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
@@ -44,6 +46,8 @@ class ManageDevice {
             AppConstants.DEVICE_ID to deviceId
         )
     }
+
+    // Lấy thông tin pin, độ sáng, âm lượng
     fun getDeviceState(context: Context): Map<String, Any> {
         val batteryManager =
             context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
@@ -64,6 +68,14 @@ class ManageDevice {
             AppConstants.BATTERY_LEVEL to batteryLevel,
             AppConstants.SCREEN_BRIGHTNESS to screenBrightness,
             AppConstants.VOLUME to volume
+        )
+    }
+
+    // Lấy id duy nhất của ứng dụng
+    fun getDeviceIdentify(context: Context): String {
+        return Settings.Secure.getString(
+            context.contentResolver,
+            Settings.Secure.ANDROID_ID
         )
     }
 }

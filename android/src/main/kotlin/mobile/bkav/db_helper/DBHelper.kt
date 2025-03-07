@@ -7,6 +7,7 @@ import io.realm.RealmObject
 import io.realm.annotations.Index
 import io.realm.annotations.PrimaryKey
 import mobile.bkav.manager.ManageApp
+import mobile.bkav.models.OverlayInfo
 import mobile.bkav.utils.AppConstants
 import mobile.bkav.utils.Utils
 import org.bson.types.ObjectId
@@ -118,7 +119,7 @@ object DBHelper {
         id: Boolean,
         overlayView: String,
         nameBackButtonId: String,
-        nameAskParentBtnId: String? = null,
+        askParentBtnId: String? = null,
     ) {
         Realm.getDefaultInstance().use { realm ->
             realm.executeTransaction {
@@ -126,19 +127,30 @@ object DBHelper {
                     this.id = if (id) 1 else 0
                     this.overlayView = overlayView
                     this.backBtnId = nameBackButtonId
-                    this.askParentBtn = nameAskParentBtnId
+                    this.askParentBtn = askParentBtnId
                 })
             }
         }
     }
 
-    // Lấy overlay view theo id,
-    fun getOverlayView(isBlock: Boolean): OverlayView? {
+    // Lấy overlay view theo id, 1 là chặn ứng dụng, 0 là chặn xoá
+    fun getOverlayView(isBlock: Boolean): OverlayInfo? {
         val id = if (isBlock) 1 else 0
-        val realm = Realm.getDefaultInstance()
-        return realm.where(OverlayView::class.java).equalTo(AppConstants.ID, id)
-            .findFirst()
+        Realm.getDefaultInstance().use { realm ->
+            val overlay = realm.where(OverlayView::class.java)
+                .equalTo(AppConstants.ID, id)
+                .findFirst()
+
+            return overlay?.let {
+                OverlayInfo(
+                    overlayView = it.overlayView,
+                    backBtnId = it.backBtnId,
+                    askParentBtn = it.askParentBtn
+                )
+            }
+        }
     }
+
 
     // Thêm thời gian cho phép sử dụng thiết bị trong ngày
     fun insertTimeAllowed(
@@ -178,6 +190,19 @@ object DBHelper {
         }
     }
 
+    fun isDeviceAllow(context: Context): Boolean {
+        Realm.getDefaultInstance().use { realm ->
+            // tg duoc phep
+            val device = realm.where(TimeAllowedDevice::class.java)
+                .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW)
+                .findFirst()
+            // tg da dung
+            val timeUsed = ManageApp().getDeviceUsage(context)
+            return (device?.timeAllowed ?: 0) >= timeUsed
+        }
+    }
+
+    // TODO: Không cần quan tâm
     // Kiểm tra hiện tại có trong khoảng thời gian được sử dụng
     fun timePeriodValid(): Pair<Long, Boolean> {
         Realm.getDefaultInstance().use { realm ->
@@ -291,6 +316,16 @@ open class WebHistory : RealmObject() {
         )
     }
 }
+
+open class AppHistory: RealmObject() {
+    @PrimaryKey
+    var id: ObjectId = ObjectId()
+
+    @Index
+    var packageName: String = AppConstants.EMPTY
+    var appName: String = AppConstants.EMPTY
+}
+
 
 open class OverlayView : RealmObject() {
     @PrimaryKey

@@ -17,6 +17,12 @@ public class FlutterParentalControlPlugin: NSObject, FlutterPlugin {
         case AppConstants.GET_DEVICE_INFO:
             result(DeviceInfo.getDeviceInfo())
             break
+        case AppConstants.GET_DEVICE_STATE:
+            result(DeviceInfo.getDeviceStatus())
+            break
+        case AppConstants.GET_DEVICE_IDENTIFY:
+            result(DeviceInfo.getDeviceIdentifier())
+            break
         case AppConstants.GET_LOCATION:
             self.getCurrentLocation(result: result)
             break

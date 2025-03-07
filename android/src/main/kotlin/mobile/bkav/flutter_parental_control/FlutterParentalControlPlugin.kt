@@ -34,7 +34,6 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler, ActivityA
     private lateinit var activityBinding: Activity
     private lateinit var context: Context
 
-
     companion object {
         var eventSink: EventChannel.EventSink? = null
     }
@@ -60,7 +59,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler, ActivityA
             }
         })
 
-        // Khởi tạo broadcast
+        // Khởi tạo broadcast để hỏi phụ huynh
         val filter = IntentFilter(AppConstants.ACTION_ASK_PARENT)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.registerReceiver(broadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
@@ -97,9 +96,15 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                 result.success(deviceInfo)
             }
 
+            // Gửi các thông tin trạng thái thiết bị: pin, độ sáng, âm lượng
             AppConstants.GET_DEVICE_STATE -> {
                 val deviceState = ManageDevice().getDeviceState(context)
                 result.success(deviceState)
+            }
+
+            AppConstants.GET_DEVICE_IDENTIFY -> {
+                val deviceId = ManageDevice().getDeviceIdentify(context)
+                result.success(deviceId)
             }
 
             // Gửi thông tin các ứng dụng được cài đặt ra Flutter
@@ -184,6 +189,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                 val overlayView = call.argument<String>(AppConstants.OVERLAY_VIEW)
                 val backBtn = call.argument<String>(AppConstants.BACK_BTN)
                 val askParentBtn = call.argument<String?>(AppConstants.ASK_PARENT_BTN)
+
                 if (id != null && overlayView != null && backBtn != null) {
                     DBHelper.insertOverlayView(id, overlayView, backBtn, askParentBtn)
                 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_parental_control/flutter_parental_control.dart';
@@ -34,17 +36,21 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
   @override
   void initState() {
     super.initState();
-    // Platform.isAndroid ? android() : ios();
-    // ParentalControl.requestPermission(Permission.accessibility);
-    // ParentalControl.requestPermission(Permission.usageState);
-    // ParentalControl.requestPermission(Permission.overlay);
+
+    // Lắng nghe ứng dụng cài đặt
+    ParentalControl.listenAppInstalledInfo().listen((app) {
+      print(app.packageName);
+    });
+
+    Platform.isAndroid ? android() : ios();
   }
 
   Future<void> android() async {
-    ParentalControl.askParent((packageName, appName) async {
-      print(packageName);
-      _chooseTimeRequest(packageName, appName);
-    });
+    ParentalControl.requestPermission(Permission.accessibility);
+    ParentalControl.requestPermission(Permission.overlay);
+    ParentalControl.setListWebBlocked(['abc.com', 'trò chơi', 'game']);
+    ParentalControl.setListAppBlocked(
+        [AppBlock(packageName: 'com.android.chrome')]);
   }
 
   Future<void> ios() async {
@@ -77,15 +83,7 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
               child: const Text('Bản đồ'),
             ),
             ElevatedButton(
-                onPressed: () async {
-                  // ParentalControl.setListAppBlocked(
-                  //     [AppBlock(packageName: 'com.android.chrome')]);
-                  // final a = await ParentalControl.getWebHistory();
-                  // a.forEach((b) {
-                  //   print(b.toMap());
-                  // });
-                  ParentalControl.requestPermission(Permission.deviceAdmin);
-                },
+                onPressed: () async {},
                 child: const Text("Lấy thông tin từ native")),
             a.isNotEmpty
                 ? Expanded(
@@ -270,4 +268,10 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
       return '$hour giờ $minute phút';
     }
   }
+}
+
+@pragma('vm:entry-point')
+void listenOpenApp() async {
+  final a = await listenAppBlock();
+  print(a);
 }

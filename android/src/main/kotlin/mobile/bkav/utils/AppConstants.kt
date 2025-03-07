@@ -27,6 +27,7 @@ class AppConstants {
         const val EVENT_CHANNEL = "flutter_parental_control_event"
         const val GET_DEVICE_INFO = "getDeviceInfoMethod"
         const val GET_DEVICE_STATE = "getDeviceStateMethod"
+        const val GET_DEVICE_IDENTIFY = "getDeviceIdentifyMethod"
         const val GET_APP_DETAIL = "getAppDetailMethod"
         const val GET_DEVICE_USAGE = "getDeviceUsageMethod"
         const val GET_USAGE_TIME_QUARTER_HOUR = "getUsageTimeQuarterHourMethod"

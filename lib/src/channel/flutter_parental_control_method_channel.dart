@@ -32,6 +32,11 @@ class MethodChannelFlutterParentalControl
     return Map<String, dynamic>.from(result);
   }
 
+  @override
+  Future<String> getDeviceIdentify() async {
+    return await methodChannel.invokeMethod(AppConstants.deviceIdentifyMethod);
+  }
+
   /// Lấy thông tin vị trí của thiết bị
   @override
   Future<Map<String, dynamic>> getLocation() async {

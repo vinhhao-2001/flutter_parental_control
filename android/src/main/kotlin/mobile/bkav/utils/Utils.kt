@@ -1,6 +1,6 @@
 package mobile.bkav.utils
 
-import android.accessibilityservice.AccessibilityService
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -10,8 +10,6 @@ import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
@@ -62,7 +60,7 @@ class Utils {
     }
 
     // Lấy tên ứng dụng của bạn
-    fun getApplicationName(context: Context): String {
+    fun getMyAppName(context: Context): String {
         val applicationInfo = context.applicationInfo
         val stringId = applicationInfo.labelRes
         return if (stringId == 0) applicationInfo.nonLocalizedLabel.toString()
@@ -94,23 +92,16 @@ class Utils {
         }
     }
 
-    // Lấy tài nguyên từ ứng dụng
-    fun getResource(resourceName: String, context: Context): Int {
-        return context.resources.getIdentifier(
-            resourceName,
-            AppConstants.DRAWABLE,
-            context.packageName
-        )
-    }
-
-    // Lấy view từ ứng dụng
+    // Lấy id của view từ id name của nó
+    @SuppressLint("DiscouragedApi")
     fun getView(context: Context, viewName: String): View {
         val layoutId =
             context.resources.getIdentifier(viewName, AppConstants.LAYOUT, context.packageName)
         return LayoutInflater.from(context).inflate(layoutId, null)
     }
 
-    // Lấy id trong view của ứng dụng
+    // Lấy id trong view bằng id name của nó
+    @SuppressLint("DiscouragedApi")
     fun getId(context: Context, idName: String): Int {
         return context.resources.getIdentifier(idName, AppConstants.ID, context.packageName)
     }

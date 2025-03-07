@@ -27,6 +27,10 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
     throw UnimplementedError('getDeviceState() has not been implemented.');
   }
 
+  Future<String> getDeviceIdentify() {
+    throw UnimplementedError('getDeviceIdentify() has not been implemented.');
+  }
+
   /// Các phần hiện tại đang chỉ hỗ trợ cho [Android]
   Future<List<Map<String, dynamic>>> getAppDetailInfo() {
     throw UnimplementedError('getAppDetailInfo() has not been implemented.');

@@ -4,6 +4,8 @@ class AppConstants{
     // method
     public static let METHOD_CHANNEL = "flutter_parental_control_method"
     public static let GET_DEVICE_INFO = "getDeviceInfoMethod"
+    public static let GET_DEVICE_STATE = "getDeviceStateMethod"
+    public static let GET_DEVICE_IDENTIFY = "getDeviceIdentifyMethod"
     public static let GET_LOCATION = "getLocationMethod"
     public static let CHECK_PERMISSION = "permissionMethod"
     public static let SCHEDULE_MONITOR = "scheduleMonitorMethod"

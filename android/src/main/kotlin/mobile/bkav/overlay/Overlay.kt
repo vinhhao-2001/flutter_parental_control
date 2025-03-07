@@ -25,16 +25,16 @@ class Overlay(private val context: Context) {
             val backButton: View?
             val askParentBtn: View?
             val overlay = DBHelper.getOverlayView(isBlock)
-            // Lấy các thông tin của màn hình chặn
+
             if (overlay != null) {
-                // trường hợp có overlay trong db
+                // trường hợp overlay do người dùng thêm vào
                 overlayView = Utils().getView(context, overlay.overlayView)
                 val backId = Utils().getId(context, overlay.backBtnId)
                 backButton = overlayView?.findViewById(backId)
                 val askParentId = overlay.askParentBtn?.let { Utils().getId(context, it) }
                 askParentBtn = askParentId?.let { overlayView?.findViewById(it) }
             } else {
-                // trường hợp không có overlay trong db
+                // trường hợp overlay của plugin
                 overlayView = if (isBlock) View.inflate(context, R.layout.open_app_blocked, null)
                 else View.inflate(context, R.layout.remove_my_app, null)
                 backButton = overlayView?.findViewById(R.id.homeBtn)

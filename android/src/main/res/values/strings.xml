@@ -5,7 +5,7 @@
     <string name="back_home">Trở về</string>
     <string name="off_device">Tắt máy</string>
     <string name="text_app_limit">Ứng dụng đã bị giới hạn</string>
-    <string name="text_ask_parent">Xin thêm thời gian sử dụng</string>
+    <string name="text_ask_parent">Hỏi ý kiến phụ huynh</string>
     <string name="text_remove_app">Chỉ phụ huynh mới có quyền xoá ứng dụng</string>
     <string name="app_image">Bảo vệ trẻ</string>
 </resources>

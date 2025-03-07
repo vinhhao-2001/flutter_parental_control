@@ -6,6 +6,7 @@ class AppConstants {
   static const String eventChannel = 'flutter_parental_control_event';
   static const String deviceInfoMethod = 'getDeviceInfoMethod';
   static const String deviceStateMethod = 'getDeviceStateMethod';
+  static const String deviceIdentifyMethod = 'getDeviceIdentifyMethod';
   static const String appDetailMethod = 'getAppDetailMethod';
   static const String deviceUsageMethod = 'getDeviceUsageMethod';
   static const String locationMethod = 'getLocationMethod';
