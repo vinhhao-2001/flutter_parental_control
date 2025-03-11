@@ -71,7 +71,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler, ActivityA
     // Hàm thực hiện khi plugin bị hủy
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         methodChannel.setMethodCallHandler(null)
-      //  eventSink = null
+        eventSink = null
     }
 
     // Hàm thực hiện khi có yêu cầu từ Flutter
@@ -152,6 +152,14 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                         ?: emptyList<Map<String, Any>>()
                 val addNew = call.argument<Boolean>(AppConstants.ADD_NEW) ?: false
                 DBHelper.insertAppBlock(context, blockApps, addNew)
+                result.success(null)
+            }
+
+            // Lấy danh sách ứng dụng luôn được phép sử dụng
+            AppConstants.ALWAYS_USE_APP_METHOD -> {
+                val alwaysUseApps =
+                    call.argument<List<String>>(AppConstants.ALWAYS_USE_APPS) ?: emptyList<String>()
+                DBHelper.insertAppAlwaysUse(context, alwaysUseApps)
                 result.success(null)
             }
 

@@ -153,6 +153,17 @@ class ParentalControl {
     }
   }
 
+  /// Thiết lập danh sách ứng dụng luôn được sử dụng
+  static Future<void> setListAppAlwaysAllow(List<String> listApp) async {
+    try {
+      _checkPlatform(false);
+      await FlutterParentalControlPlatform.instance
+          .setListAppAlwaysAllow(listApp);
+    } catch (_) {
+      rethrow;
+    }
+  }
+
   /// Thiết lập danh sách nội dung web bị giới hạn
   /// [addNew] cho biết có thêm mới không hay là thay thế
   static Future<void> setListWebBlocked(List<String> listWeb,

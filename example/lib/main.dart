@@ -30,32 +30,32 @@ class LoggingServicePage extends StatefulWidget {
 
 class _LoggingServicePageState extends State<LoggingServicePage> {
   final TextEditingController _controller = TextEditingController();
-  late DeviceInfo deviceInfo;
   List<AppDetail> a = [];
 
   @override
   void initState() {
     super.initState();
-
-    // Lắng nghe ứng dụng cài đặt
-    ParentalControl.listenAppInstalledInfo().listen((app) {
-      print(app.packageName);
-    });
-
     Platform.isAndroid ? android() : ios();
   }
 
   Future<void> android() async {
+    ParentalControl.startService();
     ParentalControl.requestPermission(Permission.accessibility);
     ParentalControl.requestPermission(Permission.overlay);
-    ParentalControl.setListWebBlocked(['abc.com', 'trò chơi', 'game']);
-    ParentalControl.setListAppBlocked(
-        [AppBlock(packageName: 'com.android.chrome')]);
+    ParentalControl.listenAppInstalledInfo().listen((app) {
+      print(app.packageName);
+    });
+
+    ParentalControl.askParent((a,b){
+      print(a);
+    });
   }
 
   Future<void> ios() async {
-    deviceInfo = await ParentalControl.getDeviceInfo();
-    await ParentalControl.scheduleMonitorSettings(Schedule(isMonitoring: true));
+    final deviceInfo = await ParentalControl.getDeviceInfo();
+    print(deviceInfo.toMap());
+    final identify = await ParentalControl.getDeviceIdentify();
+    print('identify: $identify');
   }
 
   @override
@@ -83,7 +83,11 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
               child: const Text('Bản đồ'),
             ),
             ElevatedButton(
-                onPressed: () async {},
+                onPressed: () async {
+                  //com.debug.loggerui
+                 final list = await ParentalControl.getListAppDetail();
+                 print(list.length);
+                },
                 child: const Text("Lấy thông tin từ native")),
             a.isNotEmpty
                 ? Expanded(

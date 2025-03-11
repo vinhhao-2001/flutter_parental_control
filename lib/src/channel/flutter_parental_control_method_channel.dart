@@ -131,6 +131,15 @@ class MethodChannelFlutterParentalControl
     });
   }
 
+  @override
+  Future<void> setListAppAlwaysAllow(List<String> listApp) async {
+    await methodChannel.invokeMethod(AppConstants.alwaysUseAppMethod, {
+      AppConstants.alwaysUseApp: listApp,
+    });
+  }
+
+  /// Tạo danh sách ứng dụng luôn được sử dụng
+
   /// Tạo danh sách các trang web bị chặn
   @override
   Future<void> setListWebBlocked(List<String> listWeb,

@@ -14,6 +14,7 @@ class AppConstants {
   static const String getToDayUsage = 'getTodayUsageMethod';
   static const String getUsageTimeQuarterHour = 'getUsageTimeQuarterHourMethod';
   static const String blockAppMethod = 'blockAppMethod';
+  static const String alwaysUseAppMethod = 'alwaysUseAppMethod';
   static const String blockWebMethod = 'blockWebsiteMethod';
   static const String startServiceMethod = 'startServiceMethod';
   static const String permissionMethod = 'permissionMethod';
@@ -29,6 +30,7 @@ class AppConstants {
   /// key data channel
   static const String blockApps = 'blockApps';
   static const String addNew = 'addNew';
+  static const String alwaysUseApp = 'alwaysUseApps';
   static const String blockWeb = 'blockWebsites';
   static const String typePermission = 'typePermission';
   static const String timeAllow = 'timeAllowed';

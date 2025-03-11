@@ -63,6 +63,11 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
     throw UnimplementedError('setListAppBlocked() has not been implemented.');
   }
 
+  Future<void> setListAppAlwaysAllow(List<String> listApp) {
+    throw UnimplementedError(
+        'setListAppAlwaysAllow() has not been implemented.');
+  }
+
   Future<void> setListWebBlocked(List<String> listWeb, {bool addNew = false}) {
     throw UnimplementedError('setListWebBlocked() has not been implemented.');
   }

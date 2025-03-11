@@ -75,18 +75,18 @@ class AccessibilityService : AccessibilityService() {
 
         // Mỗi khi có sự kiện click thì kiểm tra thời gian sử dụng còn lại
         if (accessibilityEvent.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED) {
-            // Vào ứng dụng quản lý thì không chặn
             val myAppName = Utils().getMyAppName(applicationContext)
-            if (contentDescription.contains(myAppName)) return
+            val appName = contentDescription.substringBefore(",").trim()
+            val checkAppAllow = DBHelper.isAppAlwaysUse(appName)
+
+            // Vào ứng dụng quản lý hoặc ứng dụng luôn được phép thì không chặn
+            if (contentDescription.contains(myAppName)|| checkAppAllow) return
 
             val checkTime = DBHelper.canUseDevice(applicationContext)
             if (!checkTime) {
-                // Kiểm tra thời gian và khoảng thời gian sử dụng
-                // TODO: Chặn và gửi 1 thông báo
                 overlay.showExpiredTimeOverlay()
             } else {
                 // Kiểm tra nếu ứng dụng bị chặn
-                val appName = contentDescription.substringBefore(",").trim()
                 val packageName = DBHelper.getPackageAppBlock(applicationContext, appName)
                 if (packageName != null) {
                     // Hiển thị màn hình chặn
@@ -118,7 +118,6 @@ class AccessibilityService : AccessibilityService() {
 
         // khi vào app bị chặn thì hiển thị màn hình chặn
         if (appName != null) {
-            // TODO: Gửi ra cho flutter
             overlay.showOverlay(true) {
                 Utils().openApp(applicationContext)
                 askParent(packageName, appName)

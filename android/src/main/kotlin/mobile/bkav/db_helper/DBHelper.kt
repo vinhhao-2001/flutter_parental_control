@@ -23,8 +23,7 @@ object DBHelper {
                 appList.forEach { map ->
                     // Chuyển map thành object để lưu vào Realm
                     val app = BlockedApp().fromMap(context, map)
-                    if (app != null)
-                        realm.copyToRealmOrUpdate(app)
+                    if (app != null) realm.copyToRealmOrUpdate(app)
                 }
             }
         }
@@ -33,9 +32,9 @@ object DBHelper {
     // Kiểm tra xem ứng dụng bị chặn, dùng packageName
     fun getPackageAppBlock(context: Context, appName: String): String? {
         Realm.getDefaultInstance().use { realm ->
-            val app: BlockedApp = realm.where(BlockedApp::class.java)
-                .equalTo(AppConstants.APP_NAME, appName)
-                .findFirst() ?: return null
+            val app: BlockedApp =
+                realm.where(BlockedApp::class.java).equalTo(AppConstants.APP_NAME, appName)
+                    .findFirst() ?: return null
             val timeLimit = app.timeLimit
             if (timeLimit == 0) return app.packageName
             val timeUse = ManageApp().getAppUsageTimeInMinutes(context, app.packageName)
@@ -47,9 +46,9 @@ object DBHelper {
     // Kiểm tra ứng dụng bị chặn dùng appName
     fun getAppBlock(context: Context, packageName: String): String? {
         Realm.getDefaultInstance().use { realm ->
-            val app: BlockedApp = realm.where(BlockedApp::class.java)
-                .equalTo(AppConstants.PACKAGE_NAME, packageName)
-                .findFirst() ?: return null
+            val app: BlockedApp =
+                realm.where(BlockedApp::class.java).equalTo(AppConstants.PACKAGE_NAME, packageName)
+                    .findFirst() ?: return null
             val timeLimit = app.timeLimit
             if (timeLimit == 0) return app.appName
             val timeUse = ManageApp().getAppUsageTimeInMinutes(context, packageName)
@@ -58,12 +57,37 @@ object DBHelper {
         }
     }
 
+    // Lưu ứng dụng nằm trong danh sách luôn được sử dụng
+    fun insertAppAlwaysUse(context: Context, appList: List<String>) {
+        Realm.getDefaultInstance().use { realm ->
+            realm.executeTransaction {
+                realm.delete(AppAlwaysAllow::class.java)
+                appList.forEach { packageName ->
+                    val appName = Utils().getAppName(context, packageName)
+                    realm.copyToRealmOrUpdate(AppAlwaysAllow().apply {
+                        this.packageName = packageName
+                        this.appName = appName ?: AppConstants.EMPTY
+                    })
+                }
+            }
+        }
+    }
+
+    // Kiểm tra ứng dụng có nằm trong danh sách luôn được sử dụng không
+    fun isAppAlwaysUse(appName: String): Boolean {
+        Realm.getDefaultInstance().use { realm ->
+            realm.where(AppAlwaysAllow::class.java).equalTo(AppConstants.APP_NAME, appName)
+                .findFirst() ?: return false
+            return true
+        }
+    }
+
     // Lấy thời gian sử dụng giới hạn của ứng dụng
     fun getTimeAppLimit(appName: String): Int {
         Realm.getDefaultInstance().use { realm ->
-            val app: BlockedApp = realm.where(BlockedApp::class.java)
-                .equalTo(AppConstants.APP_NAME, appName)
-                .findFirst() ?: return 0
+            val app: BlockedApp =
+                realm.where(BlockedApp::class.java).equalTo(AppConstants.APP_NAME, appName)
+                    .findFirst() ?: return 0
             return app.timeLimit
         }
     }
@@ -138,9 +162,8 @@ object DBHelper {
     fun getOverlayView(isBlock: Boolean): OverlayInfo? {
         val id = if (isBlock) 1 else 0
         Realm.getDefaultInstance().use { realm ->
-            val overlay = realm.where(OverlayView::class.java)
-                .equalTo(AppConstants.ID, id)
-                .findFirst()
+            val overlay =
+                realm.where(OverlayView::class.java).equalTo(AppConstants.ID, id).findFirst()
 
             return overlay?.let {
                 OverlayInfo(
@@ -155,14 +178,12 @@ object DBHelper {
 
     // Thêm thời gian cho phép sử dụng thiết bị trong ngày
     fun insertTimeAllowed(
-        timeAllowed: Int? = null,
-        timePeriod: List<Map<String, Any>>? = null
+        timeAllowed: Int? = null, timePeriod: List<Map<String, Any>>? = null
     ) {
         Realm.getDefaultInstance().use { realm ->
             realm.executeTransaction { transactionRealm ->
                 val device = transactionRealm.where(TimeAllowedDevice::class.java)
-                    .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW)
-                    .findFirst()
+                    .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW).findFirst()
 
                 val timePeriodList = timePeriod?.map { periodMap ->
                     TimePeriod().apply {
@@ -191,11 +212,11 @@ object DBHelper {
         }
     }
 
+    // Kiểm tra xem còn được sử dụng màn hình không
     fun canUseDevice(context: Context): Boolean {
         Realm.getDefaultInstance().use { realm ->
             val timeAllowedDevice = realm.where(TimeAllowedDevice::class.java)
-                .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW)
-                .findFirst()
+                .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW).findFirst()
 
             // Thời gian sử dụng
             val timeUsed = ManageApp().getDeviceUsage(context)
@@ -234,10 +255,15 @@ open class BlockedApp : RealmObject() {
     }
 }
 
-open class TimePeriod(
+// Danh sách ứng dụng luôn được phép sử dụng
+open class AppAlwaysAllow : RealmObject() {
     @PrimaryKey
-    var id: ObjectId = ObjectId(),
-    var startTime: Int = 0,  // Thời gian bắt đầu
+    var packageName: String = AppConstants.EMPTY
+    var appName: String = AppConstants.EMPTY
+}
+
+open class TimePeriod(
+    @PrimaryKey var id: ObjectId = ObjectId(), var startTime: Int = 0,  // Thời gian bắt đầu
     var endTime: Int = 0     // Thời gian kết thúc
 ) : RealmObject()
 
@@ -272,16 +298,6 @@ open class WebHistory : RealmObject() {
         )
     }
 }
-
-open class AppHistory : RealmObject() {
-    @PrimaryKey
-    var id: ObjectId = ObjectId()
-
-    @Index
-    var packageName: String = AppConstants.EMPTY
-    var appName: String = AppConstants.EMPTY
-}
-
 
 open class OverlayView : RealmObject() {
     @PrimaryKey
