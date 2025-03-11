@@ -42,11 +42,13 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
     ParentalControl.startService();
     ParentalControl.requestPermission(Permission.accessibility);
     ParentalControl.requestPermission(Permission.overlay);
+    ParentalControl.setTimeAllowDevice(listTimePeriod:  [{"startTime":600,"endTime":660}]);
+    ParentalControl.setListAppAlwaysAllow(['com.google.android.youtube']);
     ParentalControl.listenAppInstalledInfo().listen((app) {
       print(app.packageName);
     });
 
-    ParentalControl.askParent((a,b){
+    ParentalControl.askParent((a, b) {
       print(a);
     });
   }
@@ -85,8 +87,8 @@ class _LoggingServicePageState extends State<LoggingServicePage> {
             ElevatedButton(
                 onPressed: () async {
                   //com.debug.loggerui
-                 final list = await ParentalControl.getListAppDetail();
-                 print(list.length);
+                  final list = await ParentalControl.getListAppDetail();
+                  print(list.length);
                 },
                 child: const Text("Lấy thông tin từ native")),
             a.isNotEmpty

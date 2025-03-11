@@ -139,7 +139,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler, ActivityA
 
             // Lấy thời gian và khoảng thời gian được phép sử dụng trong ngày
             AppConstants.SET_DEVICE_TIME_ALLOW -> {
-                val timeAllow = call.argument<Int?>(AppConstants.TIME_ALLOW) ?: null
+                val timeAllow = call.argument<Int>(AppConstants.TIME_ALLOW) ?: null
                 val timePeriod =
                     call.argument<List<Map<String, Any>>>(AppConstants.TIME_PERIOD) ?: null
                 DBHelper.insertTimeAllowed(timeAllow, timePeriod)

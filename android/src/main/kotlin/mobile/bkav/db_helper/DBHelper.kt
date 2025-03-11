@@ -82,6 +82,14 @@ object DBHelper {
         }
     }
 
+    fun checkPackageAlwaysUse(packageName: String): Boolean {
+        Realm.getDefaultInstance().use { realm ->
+            realm.where(AppAlwaysAllow::class.java).equalTo(AppConstants.PACKAGE_NAME, packageName)
+                .findFirst() ?: return false
+            return true
+        }
+    }
+
     // Lấy thời gian sử dụng giới hạn của ứng dụng
     fun getTimeAppLimit(appName: String): Int {
         Realm.getDefaultInstance().use { realm ->
@@ -182,7 +190,7 @@ object DBHelper {
     ) {
         Realm.getDefaultInstance().use { realm ->
             realm.executeTransaction { transactionRealm ->
-                val device = transactionRealm.where(TimeAllowedDevice::class.java)
+                val timeAllowedDevice = transactionRealm.where(TimeAllowedDevice::class.java)
                     .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW).findFirst()
 
                 val timePeriodList = timePeriod?.map { periodMap ->
@@ -192,12 +200,12 @@ object DBHelper {
                     }
                 }
 
-                if (device != null) {
-                    // Cập nhật đối tượng tồn tại
-                    if (timeAllowed != null) device.timeAllowed = timeAllowed
+                if (timeAllowedDevice != null) {
+                    // Cập nhật đối tượng tồn tại nếu có danh sách truyền vào
+                    if (timeAllowed != null) timeAllowedDevice.timeAllowed = timeAllowed
                     if (timePeriodList != null) {
-                        device.timePeriod.clear()
-                        device.timePeriod.addAll(timePeriodList)
+                        timeAllowedDevice.timePeriod.clear()
+                        timeAllowedDevice.timePeriod.addAll(timePeriodList)
                     }
                 } else {
                     // Tạo mới đối tượng nếu không tồn tại
@@ -217,16 +225,19 @@ object DBHelper {
         Realm.getDefaultInstance().use { realm ->
             val timeAllowedDevice = realm.where(TimeAllowedDevice::class.java)
                 .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW).findFirst()
-
             // Thời gian sử dụng
             val timeUsed = ManageApp().getDeviceUsage(context)
-            val isWithinTimeLimit = (timeAllowedDevice?.timeAllowed ?: 0) >= timeUsed
+            val isWithinTimeLimit =
+                timeAllowedDevice?.timeAllowed?.let { it * 60 * 1000 >= timeUsed } ?: true
 
             // Khoảng thời gian sử dụng
             val currentTime = Utils().getCurrentMinutesOfDay()
-            val isWithinAllowedPeriod = timeAllowedDevice?.timePeriod?.any { period ->
-                currentTime in period.startTime..period.endTime
-            } ?: true
+            val isWithinAllowedPeriod =
+                timeAllowedDevice?.timePeriod?.takeIf { it.isNotEmpty() }?.any {
+                    currentTime in it.startTime..it.endTime
+                } ?: true
+
+
 
             return isWithinTimeLimit && isWithinAllowedPeriod
         }
@@ -263,14 +274,17 @@ open class AppAlwaysAllow : RealmObject() {
 }
 
 open class TimePeriod(
-    @PrimaryKey var id: ObjectId = ObjectId(), var startTime: Int = 0,  // Thời gian bắt đầu
-    var endTime: Int = 0     // Thời gian kết thúc
+    @PrimaryKey
+    var id: ObjectId = ObjectId(),
+
+    var startTime: Int = 0, // Thời gian bắt đầu
+    var endTime: Int = 1440    // Thời gian kết thúc
 ) : RealmObject()
 
 open class TimeAllowedDevice : RealmObject() {
     @PrimaryKey
     var id: String = AppConstants.TIME_ALLOW
-    var timeAllowed: Int = 1440
+    var timeAllowed: Int? = null
     var timePeriod: RealmList<TimePeriod> = RealmList()
 }
 

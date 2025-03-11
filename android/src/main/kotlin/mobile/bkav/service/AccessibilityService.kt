@@ -48,7 +48,6 @@ class AccessibilityService : AccessibilityService() {
 
     // Xử lý sự kiện Accessibility
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        packageName
         event?.let { accessibilityEvent ->
             val packageName = accessibilityEvent.packageName?.toString() ?: return
             when (accessibilityEvent.eventType) {
@@ -69,53 +68,22 @@ class AccessibilityService : AccessibilityService() {
         }
     }
 
-    // Kiểm tra sự kiện khi người dùng nhấn vào ứng dụng ở màn hình chính
-    private fun handleLauncherEvent(accessibilityEvent: AccessibilityEvent) {
-        val contentDescription = accessibilityEvent.contentDescription?.toString() ?: return
-
-        // Mỗi khi có sự kiện click thì kiểm tra thời gian sử dụng còn lại
-        if (accessibilityEvent.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED) {
-            val myAppName = Utils().getMyAppName(applicationContext)
-            val appName = contentDescription.substringBefore(",").trim()
-            val checkAppAllow = DBHelper.isAppAlwaysUse(appName)
-
-            // Vào ứng dụng quản lý hoặc ứng dụng luôn được phép thì không chặn
-            if (contentDescription.contains(myAppName)|| checkAppAllow) return
-
-            val checkTime = DBHelper.canUseDevice(applicationContext)
-            if (!checkTime) {
-                overlay.showExpiredTimeOverlay()
-            } else {
-                // Kiểm tra nếu ứng dụng bị chặn
-                val packageName = DBHelper.getPackageAppBlock(applicationContext, appName)
-                if (packageName != null) {
-                    // Hiển thị màn hình chặn
-                    overlay.showOverlay(true) {
-                        Utils().openApp(applicationContext)
-                        askParent(packageName, appName)
-                    }
-                }
-            }
-        } else
-        // Kiểm tra sự kiện người dùng muốn xóa ứng dụng: Sự kiến nhấn vào app
-            if (accessibilityEvent.eventType == AccessibilityEvent.TYPE_VIEW_LONG_CLICKED) {
-                // Lấy tên của ứng dụng của bạn
-                val appName = Utils().getMyAppName(applicationContext)
-                if (contentDescription.contains(appName)) {
-                    overlay.showOverlay(false) {
-                        Utils().openApp(applicationContext)
-                        askParent(packageName, appName)
-                    }
-                }
-            }
-    }
-
     // Hàm xử lý khi có sự kiện chuyển màn hình
     @Suppress("DEPRECATION")
     private fun handleWindowChange(accessibilityEvent: AccessibilityEvent) {
         val packageName: String = accessibilityEvent.packageName?.toString() ?: return
-        val appName = DBHelper.getAppBlock(applicationContext, packageName)
 
+        val checkAppAlwaysAllow = DBHelper.checkPackageAlwaysUse(packageName)
+        val checkTime = DBHelper.canUseDevice(applicationContext)
+
+        if (!checkTime && !checkAppAlwaysAllow && packageName != homePackageName
+            && packageName != applicationContext.packageName
+        ) {
+            overlay.showExpiredTimeOverlay()
+            return
+        }
+
+        val appName = DBHelper.getAppBlock(applicationContext, packageName)
         // khi vào app bị chặn thì hiển thị màn hình chặn
         if (appName != null) {
             overlay.showOverlay(true) {
@@ -146,6 +114,47 @@ class AccessibilityService : AccessibilityService() {
                 }
             }
         }
+    }
+
+    // Kiểm tra sự kiện khi người dùng nhấn vào ứng dụng ở màn hình chính
+    private fun handleLauncherEvent(accessibilityEvent: AccessibilityEvent) {
+        val contentDescription = accessibilityEvent.contentDescription?.toString() ?: return
+
+        // Mỗi khi có sự kiện click thì kiểm tra thời gian sử dụng còn lại
+        if (accessibilityEvent.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED) {
+            val myAppName = Utils().getMyAppName(applicationContext)
+            val appName = contentDescription.substringBefore(",").trim()
+            val checkAppAllow = DBHelper.isAppAlwaysUse(appName)
+
+            // Vào ứng dụng quản lý hoặc ứng dụng luôn được phép thì không chặn
+            if (contentDescription.contains(myAppName) || checkAppAllow) return
+
+            val checkTime = DBHelper.canUseDevice(applicationContext)
+            if (!checkTime) {
+                overlay.showExpiredTimeOverlay()
+            } else {
+                // Kiểm tra nếu ứng dụng bị chặn
+                val packageName = DBHelper.getPackageAppBlock(applicationContext, appName)
+                if (packageName != null) {
+                    // Hiển thị màn hình chặn
+                    overlay.showOverlay(true) {
+                        Utils().openApp(applicationContext)
+                        askParent(packageName, appName)
+                    }
+                }
+            }
+        } else
+        // Kiểm tra sự kiện người dùng muốn xóa ứng dụng: Sự kiến nhấn vào app
+            if (accessibilityEvent.eventType == AccessibilityEvent.TYPE_VIEW_LONG_CLICKED) {
+                // Lấy tên của ứng dụng của bạn
+                val appName = Utils().getMyAppName(applicationContext)
+                if (contentDescription.contains(appName)) {
+                    overlay.showOverlay(false) {
+                        Utils().openApp(applicationContext)
+                        askParent(packageName, appName)
+                    }
+                }
+            }
     }
 
     // Lắng nghe khi người dùng có thao tác với ứng dụng trong cài đặt
