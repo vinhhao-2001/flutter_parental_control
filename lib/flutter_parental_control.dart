@@ -209,7 +209,6 @@ class ParentalControl {
     try {
       _checkPlatform(false);
       await FlutterParentalControlPlatform.instance.startService();
-      debugPrint("Server enabled");
     } catch (_) {
       rethrow;
     }

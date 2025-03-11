@@ -238,14 +238,30 @@ class ManageApp {
 
     // Lấy packageName của các ứng dụng trên thiết bị
     private fun getListPackageName(context: Context): Set<String> {
-        val intent = Intent(Intent.ACTION_MAIN, null)
-        intent.addCategory(Intent.CATEGORY_LAUNCHER)
+        val pm = context.packageManager
+
+        // Lấy packageName của launcher mặc định
+        val defaultLauncher = pm.resolveActivity(
+            Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0
+        )?.activityInfo?.packageName
+
+        // Lấy danh sách ứng dụng có launcher activity, xử lý theo phiên bản Android
         val resolveInfoList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL)
+            pm.queryIntentActivities(
+                Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER),
+                PackageManager.MATCH_ALL
+            )
         } else {
-            context.packageManager.queryIntentActivities(intent, 0)
+            pm.queryIntentActivities(
+                Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER),
+                0
+            )
         }
-        return resolveInfoList.map { it.activityInfo.packageName }.toSet()
+
+        return resolveInfoList
+            .map { it.activityInfo.packageName }
+            .filterNot { it == defaultLauncher }
+            .toSet()
     }
 
     // Hàm lấy UsageStatsManager

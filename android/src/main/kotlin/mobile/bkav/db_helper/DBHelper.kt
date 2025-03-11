@@ -30,7 +30,7 @@ object DBHelper {
         }
     }
 
-    // Kiểm tra xem ứng dụng bị chặn không
+    // Kiểm tra xem ứng dụng bị chặn, dùng packageName
     fun getPackageAppBlock(context: Context, appName: String): String? {
         Realm.getDefaultInstance().use { realm ->
             val app: BlockedApp = realm.where(BlockedApp::class.java)
@@ -44,6 +44,7 @@ object DBHelper {
         }
     }
 
+    // Kiểm tra ứng dụng bị chặn dùng appName
     fun getAppBlock(context: Context, packageName: String): String? {
         Realm.getDefaultInstance().use { realm ->
             val app: BlockedApp = realm.where(BlockedApp::class.java)
@@ -190,71 +191,26 @@ object DBHelper {
         }
     }
 
-    fun isDeviceAllow(context: Context): Boolean {
+    fun canUseDevice(context: Context): Boolean {
         Realm.getDefaultInstance().use { realm ->
-            // tg duoc phep
-            val device = realm.where(TimeAllowedDevice::class.java)
+            val timeAllowedDevice = realm.where(TimeAllowedDevice::class.java)
                 .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW)
                 .findFirst()
-            // tg da dung
+
+            // Thời gian sử dụng
             val timeUsed = ManageApp().getDeviceUsage(context)
-            return (device?.timeAllowed ?: 0) >= timeUsed
-        }
-    }
+            val isWithinTimeLimit = (timeAllowedDevice?.timeAllowed ?: 0) >= timeUsed
 
-    // TODO: Không cần quan tâm
-    // Kiểm tra hiện tại có trong khoảng thời gian được sử dụng
-    fun timePeriodValid(): Pair<Long, Boolean> {
-        Realm.getDefaultInstance().use { realm ->
-            val device = realm.where(TimeAllowedDevice::class.java)
-                .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW)
-                .findFirst()
+            // Khoảng thời gian sử dụng
             val currentTime = Utils().getCurrentMinutesOfDay()
-
-            // Nếu không có khoảng thời gian thì ngày mai kiểm tra
-            if (device?.timePeriod.isNullOrEmpty()) return Pair((1440 - currentTime) * 60000, true)
-
-            // Kiểm tra thời gian hiện tại có nằm trong khoảng thời gian được phép hay không
-            val inPeriod = device?.timePeriod?.any { period ->
+            val isWithinAllowedPeriod = timeAllowedDevice?.timePeriod?.any { period ->
                 currentTime in period.startTime..period.endTime
-            }
+            } ?: true
 
-            if (inPeriod == true) {
-                // TH trong khoảng thời gian được sử dụng
-                val endTime = device.timePeriod.firstOrNull { period ->
-                    currentTime in period.startTime..period.endTime
-                }?.endTime?.toLong() ?: 0L
-                return Pair((endTime - currentTime) * 60000, true)
-            } else {
-                // TH không trong thời gian được sử dụng
-                val nextStartTime = device?.timePeriod
-                    ?.filter { it.startTime > currentTime }
-                    ?.minByOrNull { it.startTime }?.startTime ?: 1440
-                return Pair((nextStartTime - currentTime) * 60000, false)
-            }
+            return isWithinTimeLimit && isWithinAllowedPeriod
         }
     }
 
-    // Kiểm tra tổng thời gian được sử dụng trong ngày
-    fun getTimeAllow(timeUsed: Long): Pair<Long, Boolean> {
-        Realm.getDefaultInstance().use { realm ->
-            val device = realm.where(TimeAllowedDevice::class.java)
-                .equalTo(AppConstants.ID, AppConstants.TIME_ALLOW)
-                .findFirst()
-
-            val currentTime = Utils().getCurrentMinutesOfDay()
-            if (device?.timeAllowed != null) {
-                val remainingTime = device.timeAllowed * 60000 - timeUsed
-                return if (remainingTime > 0) {
-                    Pair(remainingTime, true)
-                } else {
-                    Pair((1440 - currentTime) * 60000, false)
-                }
-            } else {
-                return Pair((1440 - currentTime) * 60000, true)
-            }
-        }
-    }
 }
 
 // Các model tương ứng với các bảng trong DB
@@ -317,7 +273,7 @@ open class WebHistory : RealmObject() {
     }
 }
 
-open class AppHistory: RealmObject() {
+open class AppHistory : RealmObject() {
     @PrimaryKey
     var id: ObjectId = ObjectId()
 

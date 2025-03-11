@@ -71,7 +71,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler, ActivityA
     // Hàm thực hiện khi plugin bị hủy
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         methodChannel.setMethodCallHandler(null)
-        eventSink = null
+      //  eventSink = null
     }
 
     // Hàm thực hiện khi có yêu cầu từ Flutter

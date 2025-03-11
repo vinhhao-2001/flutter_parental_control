@@ -46,11 +46,13 @@ class Overlay(private val context: Context) {
             windowManager?.addView(overlayView, layoutParams)
             (context as AccessibilityService).performGlobalAction(GLOBAL_ACTION_HOME)
 
+            // Xoá màn hình chặn, đã ở home
             backButton?.setOnClickListener {
                 removeBlockScreen()
             }
+
+            // Xử lý khi có sự kiện hỏi ý kiến của phụ huynh
             askParentBtn?.setOnClickListener {
-                // Xử lý khi có sự kiện hỏi ý kiến của phụ huynh
                 onAskParentClick?.invoke()
                 removeBlockScreen()
             }
@@ -58,13 +60,18 @@ class Overlay(private val context: Context) {
     }
 
     // hết thời gian sử dụng màn hình thiết bị
-    fun showExpiredTimeOverlay(delayTime: Long, onAskParentClick: (() -> Unit?)? = null) {
+    fun showExpiredTimeOverlay(onAskParentClick: (() -> Unit?)? = null) {
         if (windowManager == null && overlayView == null) {
             windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             overlayView = View.inflate(context, R.layout.overlay_off_device, null)
 
             val askParentBtn = overlayView?.findViewById<View>(R.id.askParentBtn)
             val offDevice = overlayView?.findViewById<View>(R.id.offDeviceBtn)
+
+            // Hiển thị màn hình chặn
+            val layoutParams = Utils().getLayoutParams()
+            windowManager?.addView(overlayView, layoutParams)
+            (context as AccessibilityService).performGlobalAction(GLOBAL_ACTION_HOME)
 
             askParentBtn?.setOnClickListener {
                 // Xử lý khi có sự kiện hỏi ý kiến của phụ huynh
@@ -81,16 +88,6 @@ class Overlay(private val context: Context) {
                     devicePolicyManager.lockNow()
                 }
             }
-
-            val layoutParams = Utils().getLayoutParams()
-            // Thêm view vào màn hình
-            windowManager?.addView(overlayView, layoutParams)
-            (context as AccessibilityService).performGlobalAction(GLOBAL_ACTION_HOME)
-
-            val handler = Handler(Looper.getMainLooper())
-            handler.postDelayed({
-                removeBlockScreen()
-            }, delayTime)
         }
     }
 

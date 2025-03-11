@@ -89,7 +89,6 @@ class AppConstants {
         const val END_TIME = "endTime"
 
         // type view của người dùng
-        const val DRAWABLE = "drawable"
         const val LAYOUT = "layout"
         const val ID = "id"
 
