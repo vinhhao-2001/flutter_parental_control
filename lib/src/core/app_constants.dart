@@ -25,6 +25,7 @@ class AppConstants {
   static const String overlayMethod = 'overlayMethod';
   static const String askParentMethod = 'askParentMethod';
   static const String lockDevice = 'lockDevice';
+  static const String setRemoveMyApp = 'setRemoveMyApp';
   static const String deviceTimeAllow = 'setDeviceTimeAllowMethod';
 
   /// key data channel

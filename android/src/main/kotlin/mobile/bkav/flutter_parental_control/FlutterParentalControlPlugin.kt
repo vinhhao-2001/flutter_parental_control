@@ -77,6 +77,14 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler, ActivityA
     // Hàm thực hiện khi có yêu cầu từ Flutter
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: MethodChannel.Result) {
         when (call.method) {
+            // Cho phép xoá ứng dụng hay không
+            AppConstants.SET_REMOVE_MY_APP -> {
+                val allowRemoveApp = call.argument<Boolean>(AppConstants.SET_REMOVE_MY_APP) ?: false
+               println(allowRemoveApp)
+                DBHelper.setRemoveApp(context, allowRemoveApp)
+                result.success(null)
+            }
+
             // Yêu cầu các quyền cho ứng dụng
             AppConstants.REQUEST_PERMISSION -> {
                 val type = call.argument<Int>(AppConstants.TYPE_PERMISSION)
@@ -145,8 +153,8 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                 DBHelper.insertTimeAllowed(timeAllow, timePeriod)
             }
 
-            // Lấy danh sách ứng dụng bị chặn
-            AppConstants.BLOCK_APP_METHOD -> {
+            // Tạo danh sách ứng dụng bị chặn
+            AppConstants.SET_BLOCK_APP_METHOD -> {
                 val blockApps =
                     call.argument<List<Map<String, Any>>>(AppConstants.BLOCK_APPS)
                         ?: emptyList<Map<String, Any>>()
@@ -155,16 +163,16 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                 result.success(null)
             }
 
-            // Lấy danh sách ứng dụng luôn được phép sử dụng
-            AppConstants.ALWAYS_USE_APP_METHOD -> {
+            // Tạo danh sách ứng dụng luôn được phép sử dụng
+            AppConstants.SET_ALWAYS_USE_APP_METHOD -> {
                 val alwaysUseApps =
                     call.argument<List<String>>(AppConstants.ALWAYS_USE_APPS) ?: emptyList<String>()
                 DBHelper.insertAppAlwaysUse(context, alwaysUseApps)
                 result.success(null)
             }
 
-            // Lấy danh sách trang web bị chặn
-            AppConstants.BLOCK_WEBSITE_METHOD -> {
+            // Tạo danh sách trang web bị chặn
+            AppConstants.SET_BLOCK_WEBSITE_METHOD -> {
                 val blockWebsites =
                     call.argument<List<String>>(AppConstants.BLOCK_WEBSITES) ?: emptyList<String>()
                 val addNew = call.argument<Boolean>(AppConstants.ADD_NEW) ?: false
@@ -192,7 +200,7 @@ class FlutterParentalControlPlugin : FlutterPlugin, MethodCallHandler, ActivityA
             }
 
             // lấy thông tin của overlay
-            AppConstants.OVERLAY_METHOD -> {
+            AppConstants.SET_OVERLAY_METHOD -> {
                 val id = call.argument<Boolean>(AppConstants.ID)
                 val overlayView = call.argument<String>(AppConstants.OVERLAY_VIEW)
                 val backBtn = call.argument<String>(AppConstants.BACK_BTN)

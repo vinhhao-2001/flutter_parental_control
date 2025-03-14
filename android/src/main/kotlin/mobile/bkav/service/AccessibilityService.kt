@@ -146,12 +146,15 @@ class AccessibilityService : AccessibilityService() {
         } else
         // Kiểm tra sự kiện người dùng muốn xóa ứng dụng: Sự kiến nhấn vào app
             if (accessibilityEvent.eventType == AccessibilityEvent.TYPE_VIEW_LONG_CLICKED) {
-                // Lấy tên của ứng dụng của bạn
+                // Lấy tên của ứng dụng quản lý
                 val appName = Utils().getMyAppName(applicationContext)
                 if (contentDescription.contains(appName)) {
-                    overlay.showOverlay(false) {
-                        Utils().openApp(applicationContext)
-                        askParent(packageName, appName)
+                    // Khi được xoá ứng dụng thì không hiển thị màn hình chặn
+                    if (!DBHelper.checkRemoveApp(applicationContext)) {
+                        overlay.showOverlay(false) {
+                            Utils().openApp(applicationContext)
+                            askParent(packageName, appName)
+                        }
                     }
                 }
             }

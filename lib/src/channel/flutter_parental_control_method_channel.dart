@@ -89,6 +89,13 @@ class MethodChannelFlutterParentalControl
     await methodChannel.invokeMethod(AppConstants.lockDevice);
   }
 
+  /// Xoá ứng dụng quản lý thiết bị
+  @override
+  Future<void> setRemoveApp(bool allowRemoveApp) async {
+    await methodChannel.invokeMethod(AppConstants.setRemoveMyApp,
+        {AppConstants.setRemoveMyApp: allowRemoveApp});
+  }
+
   /// Cài đặt thời gian và khoảng thời gian sử dụng cho thiết bị
   @override
   Future<void> setTimeAllowDevice(

@@ -85,6 +85,10 @@ abstract class FlutterParentalControlPlatform extends PlatformInterface {
     throw UnimplementedError('lockDevice() has not been implemented.');
   }
 
+  Future<void> setRemoveApp(bool allowRemoveApp) {
+    throw UnimplementedError('setRemoveApp() has not been implemented.');
+  }
+
   Future<void> setTimeAllowDevice(
       {int? timeAllowed, List<Map<String, dynamic>>? listTimePeriod}) {
     throw UnimplementedError('setTimeAllowDevice() has not been implemented.');

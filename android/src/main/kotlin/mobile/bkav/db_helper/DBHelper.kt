@@ -82,6 +82,7 @@ object DBHelper {
         }
     }
 
+    // Kiểm tra ứng dụng luôn được sử dụng package
     fun checkPackageAlwaysUse(packageName: String): Boolean {
         Realm.getDefaultInstance().use { realm ->
             realm.where(AppAlwaysAllow::class.java).equalTo(AppConstants.PACKAGE_NAME, packageName)
@@ -90,14 +91,18 @@ object DBHelper {
         }
     }
 
-    // Lấy thời gian sử dụng giới hạn của ứng dụng
-    fun getTimeAppLimit(appName: String): Int {
-        Realm.getDefaultInstance().use { realm ->
-            val app: BlockedApp =
-                realm.where(BlockedApp::class.java).equalTo(AppConstants.APP_NAME, appName)
-                    .findFirst() ?: return 0
-            return app.timeLimit
-        }
+    // Lưu điều kiện xoá ứng dụng
+    fun setRemoveApp(context: Context, allowRemove: Boolean) {
+        val sharedPreferences =
+            context.getSharedPreferences(AppConstants.PREFS_NAME, Context.MODE_PRIVATE)
+        sharedPreferences.edit().putBoolean(AppConstants.SET_REMOVE_MY_APP, allowRemove).apply()
+    }
+
+    // Kiểm tra xem có được xoá app không
+    fun checkRemoveApp(context: Context): Boolean {
+        val sharedPreferences =
+            context.getSharedPreferences(AppConstants.PREFS_NAME, Context.MODE_PRIVATE)
+        return sharedPreferences.getBoolean(AppConstants.SET_REMOVE_MY_APP, false)
     }
 
     // Thêm danh sách tên website bị chặn vào DB
@@ -270,6 +275,8 @@ open class BlockedApp : RealmObject() {
 open class AppAlwaysAllow : RealmObject() {
     @PrimaryKey
     var packageName: String = AppConstants.EMPTY
+
+    @Index
     var appName: String = AppConstants.EMPTY
 }
 
@@ -280,6 +287,7 @@ open class TimePeriod(
     var startTime: Int = 0, // Thời gian bắt đầu
     var endTime: Int = 1440    // Thời gian kết thúc
 ) : RealmObject()
+
 
 open class TimeAllowedDevice : RealmObject() {
     @PrimaryKey

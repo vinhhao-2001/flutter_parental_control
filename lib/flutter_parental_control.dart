@@ -50,7 +50,7 @@ class ParentalControl {
     }
   }
 
-  /// các phần chỉ dùng được trên [Android]
+  /// Các phần chỉ dùng được trên [Android]
   /// Kiểm tra và xin các quyền cho ứng dụng
   /// Permission.accessibility: Quyền trợ năng
   /// Permission.overlay: Quyền hiển thị trên ứng dụng khác
@@ -210,6 +210,18 @@ class ParentalControl {
     try {
       _checkPlatform(false);
       await FlutterParentalControlPlatform.instance.lockDevice();
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  /// Cho phép xoá ứng dụng quản lý
+  /// Khi đặt [allowRemove] là true thì có thể xoá ứng dụng
+  /// Chỉ xoá được trong màn hình chính vì vẫn đang bị chặn xoá trong Cài đặt
+  static Future<void> setRemoveApp(bool allowRemove) async {
+    try {
+      _checkPlatform(false);
+      await FlutterParentalControlPlatform.instance.setRemoveApp(allowRemove);
     } catch (_) {
       rethrow;
     }
